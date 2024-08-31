@@ -10,3 +10,4 @@ Currently, two official plugins are available:
 
 npm install for all node_modules
 npm run dev para ejecutar el proyecto desde la terminal
+npm install -g json-server 

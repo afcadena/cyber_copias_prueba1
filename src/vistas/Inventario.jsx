@@ -8,16 +8,16 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PencilIcon, TrashIcon, PlusIcon, SearchIcon } from 'lucide-react'
 
-// Simulated product data
+// Simulated product data for a stationery store
 const initialProducts = [
-  { id: 1, name: "Laptop", category: "Electronics", price: 999.99, stock: 50, status: "active" },
-  { id: 2, name: "Desk Chair", category: "Furniture", price: 199.99, stock: 30, status: "active" },
-  { id: 3, name: "Coffee Maker", category: "Appliances", price: 79.99, stock: 20, status: "inactive" },
-  { id: 4, name: "Wireless Mouse", category: "Electronics", price: 29.99, stock: 100, status: "active" },
-  { id: 5, name: "Bookshelf", category: "Furniture", price: 149.99, stock: 15, status: "active" },
+  { id: 1, name: "Cuaderno espiral", category: "Cuadernos", price: 3.99, stock: 100, status: "active" },
+  { id: 2, name: "Bolígrafo azul", category: "Escritura", price: 0.99, stock: 500, status: "active" },
+  { id: 3, name: "Goma de borrar", category: "Accesorios", price: 0.50, stock: 200, status: "active" },
+  { id: 4, name: "Carpeta archivadora", category: "Organización", price: 4.99, stock: 50, status: "active" },
+  { id: 5, name: "Papel de impresora", category: "Papel", price: 7.99, stock: 30, status: "low" },
 ]
 
-export default function InventoryManagement() {
+export default function Inventory() {
   const [products, setProducts] = useState(initialProducts)
   const [searchTerm, setSearchTerm] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
@@ -37,7 +37,7 @@ export default function InventoryManagement() {
   const handleStatusToggle = (id) => {
     setProducts(products.map(product => 
       product.id === id 
-        ? { ...product, status: product.status === "active" ? "inactive" : "active" } 
+        ? { ...product, status: product.status === "active" ? "low" : "active" } 
         : product
     ))
   }
@@ -50,13 +50,12 @@ export default function InventoryManagement() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <h1 className="text-3xl font-bold">Inventory Management</h1>
-      
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold mb-4">Inventario</h2>
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-4">
         <div className="flex items-center w-full sm:w-auto">
           <Input 
-            placeholder="Search products..." 
+            placeholder="Buscar productos..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-sm"
@@ -66,37 +65,38 @@ export default function InventoryManagement() {
         <div className="flex gap-2 w-full sm:w-auto">
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Category" />
+              <SelectValue placeholder="Categoría" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="Electronics">Electronics</SelectItem>
-              <SelectItem value="Furniture">Furniture</SelectItem>
-              <SelectItem value="Appliances">Appliances</SelectItem>
+              <SelectItem value="all">Todas las categorías</SelectItem>
+              <SelectItem value="Cuadernos">Cuadernos</SelectItem>
+              <SelectItem value="Escritura">Escritura</SelectItem>
+              <SelectItem value="Accesorios">Accesorios</SelectItem>
+              <SelectItem value="Organización">Organización</SelectItem>
+              <SelectItem value="Papel">Papel</SelectItem>
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="all">Todos los estados</SelectItem>
+              <SelectItem value="active">Activo</SelectItem>
+              <SelectItem value="low">Bajo stock</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
-
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Price</TableHead>
+            <TableHead>Nombre</TableHead>
+            <TableHead>Categoría</TableHead>
+            <TableHead>Precio</TableHead>
             <TableHead>Stock</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Estado</TableHead>
+            <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -107,8 +107,8 @@ export default function InventoryManagement() {
               <TableCell>${product.price.toFixed(2)}</TableCell>
               <TableCell>{product.stock}</TableCell>
               <TableCell>
-                <Badge variant={product.status === "active" ? "success" : "destructive"}>
-                  {product.status}
+                <Badge variant={product.status === "active" ? "success" : "warning"}>
+                  {product.status === "active" ? "Activo" : "Bajo stock"}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -116,16 +116,16 @@ export default function InventoryManagement() {
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm" onClick={() => handleEdit(product)}>
-                        <PencilIcon className="w-4 h-4 mr-1" /> Edit
+                        <PencilIcon className="w-4 h-4 mr-1" /> Editar
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Edit Product</DialogTitle>
+                        <DialogTitle>Editar Producto</DialogTitle>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="name" className="text-right">Name</Label>
+                          <Label htmlFor="name" className="text-right">Nombre</Label>
                           <Input 
                             id="name" 
                             value={editingProduct?.name || ''} 
@@ -134,7 +134,7 @@ export default function InventoryManagement() {
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="price" className="text-right">Price</Label>
+                          <Label htmlFor="price" className="text-right">Precio</Label>
                           <Input 
                             id="price" 
                             type="number"
@@ -154,16 +154,16 @@ export default function InventoryManagement() {
                           />
                         </div>
                       </div>
-                      <Button onClick={() => handleSaveEdit(editingProduct)}>Save Changes</Button>
+                      <Button onClick={() => handleSaveEdit(editingProduct)}>Guardar Cambios</Button>
                     </DialogContent>
                   </Dialog>
                   <Button 
-                    variant={product.status === "active" ? "destructive" : "default"}
+                    variant={product.status === "active" ? "warning" : "default"}
                     size="sm"
                     onClick={() => handleStatusToggle(product.id)}
                   >
                     <TrashIcon className="w-4 h-4 mr-1" /> 
-                    {product.status === "active" ? "Disable" : "Enable"}
+                    {product.status === "active" ? "Marcar bajo stock" : "Marcar activo"}
                   </Button>
                 </div>
               </TableCell>
@@ -171,16 +171,15 @@ export default function InventoryManagement() {
           ))}
         </TableBody>
       </Table>
-
       <Dialog>
         <DialogTrigger asChild>
-          <Button>
-            <PlusIcon className="w-4 h-4 mr-2" /> Add New Product
+          <Button className="mt-4">
+            <PlusIcon className="w-4 h-4 mr-2" /> Agregar Nuevo Producto
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Product</DialogTitle>
+            <DialogTitle>Agregar Nuevo Producto</DialogTitle>
           </DialogHeader>
           {/* Add form fields for new product here */}
         </DialogContent>
