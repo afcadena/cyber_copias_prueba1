@@ -8,6 +8,8 @@ import Cuenta from './vistas/cuenta';
 import ProductDetail from './vistas/producto';  // Importa el componente de detalles del producto
 import { CrudProvider } from './context/CrudContextInventario';  // Importa el proveedor del contexto
 
+
+
 import './App.css';
 
 function App() {
@@ -26,6 +28,7 @@ function App() {
         </Router>
       </Fragment>
     </CrudProvider>
+
   );
 }
 
