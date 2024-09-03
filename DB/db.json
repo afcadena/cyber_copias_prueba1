@@ -1,1 +1,243 @@
-{}
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "Sobres x 5 Fifa Copa América 2024 PANINI 23204",
+      "category": "Accesorios",
+      "price": 3200,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": "90",
+      "status": "active"
+    },
+    {
+      "id": "2",
+      "name": "Resma tamaño carta x500 hojas DISPAPELES",
+      "category": "Papel",
+      "price": 16990,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 50,
+      "status": "active"
+    },
+    {
+      "id": "3",
+      "name": "ALBUM RETAIL COPA AMERICA 2024 PANINI",
+      "category": "Coleccionables",
+      "price": 10300,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 200,
+      "status": "active"
+    },
+    {
+      "id": "4",
+      "name": "Plumígrafos punta media 0.7mm vintage x24 unds PAPER MATE",
+      "category": "Escritura",
+      "price": 70190,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 75,
+      "status": "active"
+    },
+    {
+      "id": "5",
+      "name": "Marcadores Dobles Set De 80 Colores Base De Alcohol",
+      "category": "Arte",
+      "price": 119900,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 60,
+      "status": "active"
+    },
+    {
+      "id": "6",
+      "name": "Cuaderno MICKEY CUERO Rayado 80 hojas Argollado tamaño grande",
+      "category": "Cuadernos",
+      "price": 24900,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 120,
+      "status": "active"
+    },
+    {
+      "id": "7",
+      "name": "Album Jet Colsalpindiente JET 2023-24",
+      "category": "Coleccionables",
+      "price": 12900,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 150,
+      "status": "active"
+    },
+    {
+      "id": "8",
+      "name": "Cuaderno Cuadriculado 100 hojas Multimateria SCRIBE",
+      "category": "Cuadernos",
+      "price": 8900,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 300,
+      "status": "active"
+    },
+    {
+      "id": "9",
+      "name": "Bolígrafo Kilométrico 100 Negro",
+      "category": "Escritura",
+      "price": 1200,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 500,
+      "status": "active"
+    },
+    {
+      "id": "10",
+      "name": "Lápiz Mirado N°2 x12 PAPER MATE",
+      "category": "Escritura",
+      "price": 18900,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 400,
+      "status": "active"
+    },
+    {
+      "id": "11",
+      "name": "Colores Norma Hexagonales x12",
+      "category": "Arte",
+      "price": 14900,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 250,
+      "status": "active"
+    },
+    {
+      "id": "12",
+      "name": "Borrador Nata Grande PELIKAN",
+      "category": "Accesorios",
+      "price": 1100,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 1000,
+      "status": "active"
+    },
+    {
+      "id": "13",
+      "name": "Tijeras Escolares 5'' MAPED",
+      "category": "Accesorios",
+      "price": 4500,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 300,
+      "status": "active"
+    },
+    {
+      "id": "14",
+      "name": "Pegante en Barra 40g PEGASTICK",
+      "category": "Accesorios",
+      "price": 3900,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 800,
+      "status": "active"
+    },
+    {
+      "id": "15",
+      "name": "Cartulina Iris 1/8 50x70cm Surtida x10",
+      "category": "Papel",
+      "price": 9900,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 150,
+      "status": "active"
+    },
+    {
+      "id": "16",
+      "name": "Block Iris Carta Surtido x30",
+      "category": "Papel",
+      "price": 7900,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 200,
+      "status": "active"
+    },
+    {
+      "id": "17",
+      "name": "Cuaderno espiral",
+      "category": "Cuadernos",
+      "price": 3.99,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 100,
+      "status": "active"
+    },
+    {
+      "id": "18",
+      "name": "Bolígrafo azul",
+      "category": "Escritura",
+      "price": 0.99,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 500,
+      "status": "active"
+    },
+    {
+      "id": "19",
+      "name": "Goma de borrar",
+      "category": "Accesorios",
+      "price": 0.5,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 200,
+      "status": "active"
+    },
+    {
+      "id": "20",
+      "name": "Carpeta archivadora",
+      "category": "Organización",
+      "price": 4.99,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 50,
+      "status": "active"
+    },
+    {
+      "id": "21",
+      "name": "Papel de impresora",
+      "category": "Papel",
+      "price": 7.99,
+      "image": "/placeholder.svg?height=200&width=200",
+      "rating": 0,
+      "reviews": 0,
+      "stock": 30,
+      "status": "active"
+    },
+    {
+      "id": "22",
+      "name": "Lapiz norma",
+      "category": "Escritura",
+      "price": 200,
+      "stock": 10,
+      "status": "active"
+    }
+  ]
+}
