@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Logo from "../assets/images/Logo.png";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -102,18 +103,18 @@ export default function CarritoDeCompras() {
           <h1 className="text-xl font-bold">CyberCopias</h1>
         </div>
         <nav className="hidden md:flex space-x-4">
-          <a href="#ofertas" className="text-foreground hover:text-primary">
+          <Link to="#ofertas" className="text-foreground hover:text-primary">
             <Tag className="h-6 w-6" />
-          </a>
-          <a href="/catalogo" className="text-foreground hover:text-primary">
+          </Link>
+          <Link to="/catalogo" className="text-foreground hover:text-primary">
             <Grid className="h-6 w-6" />
-          </a>
-          <a href="#" className="text-foreground hover:text-primary">
+          </Link>
+          <Link to="#" className="text-foreground hover:text-primary">
             <User className="h-6 w-6" />
-          </a>
-          <a href="#" className="text-foreground hover:text-primary">
+          </Link>
+          <Link to="#" className="text-foreground hover:text-primary">
             <ShoppingBag className="h-6 w-6" />
-          </a>
+          </Link>
         </nav>
         <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <SheetTrigger asChild>
