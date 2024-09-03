@@ -1,16 +1,23 @@
 import React from "react";
+import Logo from "../assets/images/Logo.png";
 import { Link } from "react-router-dom";
-import { ArrowLeft, User, MapPin, Package, CreditCard } from "lucide-react";
+import { ArrowLeft, User, MapPin, Package, CreditCard, Tag, Grid, ShoppingCart, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Cuenta() {
   return (
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between p-4 bg-background shadow-md">
-      <Button variant="ghost" size="sm" className="flex items-center text-primary">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          <span className="text-sm">Volver</span>
-        </Button>
+      <Link to="/">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center text-primary"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            <span className="text-sm">Volver</span>
+          </Button>
+        </Link>
         <div className="flex items-center">
           <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
           <h1 className="text-xl font-bold">CyberCopias</h1>

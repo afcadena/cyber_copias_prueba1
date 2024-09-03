@@ -29,8 +29,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu, FileText, Palette, Book } from "lucide-react";
-
+import {
+  ArrowLeft,
+  Tag,
+  Grid,
+  User,
+  ShoppingBag,
+  Menu,
+  FileText,
+  Palette,
+  Book,
+} from "lucide-react";
 // Lista de productos de ejemplo
 const productos = [
   {
@@ -90,14 +99,16 @@ export default function CarritoDeCompras() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex items-center justify-between p-4 bg-background shadow-md">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center text-primary"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          <span className="text-sm">Volver</span>
-        </Button>
+        <Link to="/">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center text-primary"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            <span className="text-sm">Volver</span>
+          </Button>
+        </Link>
         <div className="flex items-center">
           <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
           <h1 className="text-xl font-bold">CyberCopias</h1>
