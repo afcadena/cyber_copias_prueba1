@@ -232,7 +232,7 @@
       "status": "active"
     },
     {
-      "id": 1725476844409,
+      "id": "1725476844409",
       "name": "Pincel",
       "category": "Accesorios",
       "price": 200,
@@ -296,6 +296,13 @@
       "name": "Julian Prieto",
       "email": "Julian@test.com",
       "password": "123456789Se#",
+      "role": "cliente"
+    },
+    {
+      "id": 1725491302910,
+      "name": "Julian Romero",
+      "email": "julian@test11.com",
+      "password": "123456789Pe#",
       "role": "cliente"
     }
   ]
