@@ -4,18 +4,18 @@
       "id": "1",
       "name": "Sobres x 5 Fifa Copa América 2024 PANINI 23204",
       "category": "Accesorios",
-      "price": 3200,
+      "price": "322",
       "image": "/placeholder.svg?height=200&width=200",
       "rating": 0,
       "reviews": 0,
-      "stock": "90",
+      "stock": "60",
       "status": "active"
     },
     {
       "id": "2",
       "name": "Resma tamaño carta x500 hojas DISPAPELES",
       "category": "Papel",
-      "price": 16990,
+      "price": "160",
       "image": "/placeholder.svg?height=200&width=200",
       "rating": 0,
       "reviews": 0,
@@ -232,12 +232,15 @@
       "status": "active"
     },
     {
-      "id": "22",
-      "name": "Lapiz norma",
-      "category": "Escritura",
+      "id": 1725476844409,
+      "name": "Pincel",
+      "category": "Accesorios",
       "price": 200,
-      "stock": 10,
-      "status": "active"
+      "stock": 30,
+      "status": "active",
+      "image": "./placeholder",
+      "ratings": 0,
+      "reviews": 0
     }
   ],
   "users": [
@@ -282,14 +285,14 @@
       "role": "cliente"
     },
     {
-      "id": 1725411403084,
+      "id": "1725411403084",
       "name": "Andres Cadena",
       "email": "afca@test.com",
       "password": "1013112289Fe@",
       "role": "cliente"
     },
     {
-      "id": 1725411693460,
+      "id": "1725411693460",
       "name": "Julian Prieto",
       "email": "Julian@test.com",
       "password": "123456789Se#",

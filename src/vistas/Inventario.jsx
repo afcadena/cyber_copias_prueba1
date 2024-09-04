@@ -16,12 +16,15 @@ export default function Inventory() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [editingProduct, setEditingProduct] = useState(null);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);  // Estado para el modal de éxito
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);  // Estado para el modal de error
+  const [errorMessage, setErrorMessage] = useState("");  // Estado para el mensaje de error
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "",
     price: "",
     stock: "",
-    status: "active"
+    status: "active",
+    image: "",  // Agregamos el campo de imagen
   });
 
   const filteredProducts = products?.filter(product =>
@@ -44,6 +47,13 @@ export default function Inventory() {
 
   const handleSaveEdit = () => {
     if (editingProduct) {
+      // Verificar si todos los campos están completos
+      if (!editingProduct.name || !editingProduct.category || !editingProduct.price || !editingProduct.stock || !editingProduct.image) {
+        setErrorMessage("Todos los campos deben ser completados.");
+        setIsErrorDialogOpen(true);
+        return;
+      }
+
       updateData(editingProduct);  // Guardamos el producto editado usando la función del contexto
       setEditingProduct(null);
       setIsSuccessDialogOpen(true);  // Mostrar el modal de éxito
@@ -56,12 +66,21 @@ export default function Inventory() {
   };
 
   const handleAddProduct = () => {
+    // Verificar si todos los campos están completos
+    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newProduct.image) {
+      setErrorMessage("Todos los campos deben ser completados.");
+      setIsErrorDialogOpen(true);
+      return;
+    }
+
     const productToAdd = {
       ...newProduct,
       id: Date.now(),
       price: parseFloat(newProduct.price),
       stock: parseInt(newProduct.stock),
-      status: "active"
+      status: "active",
+      ratings: 0,  // Valor predeterminado para ratings
+      reviews: 0,  // Valor predeterminado para reviews
     };
     createData(productToAdd);  // Creamos el nuevo producto usando la función del contexto
     setNewProduct({
@@ -69,7 +88,8 @@ export default function Inventory() {
       category: "",
       price: "",
       stock: "",
-      status: "active"
+      status: "active",
+      image: "",  // Reiniciar el campo de imagen
     });
   };
 
@@ -134,6 +154,16 @@ export default function Inventory() {
                   type="number"
                   value={newProduct.stock}
                   onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="image" className="text-right">Imagen (URL)</Label>
+                <Input
+                  id="image"
+                  type="text"
+                  value={newProduct.image}
+                  onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -204,7 +234,7 @@ export default function Inventory() {
               <TableRow key={product.id}>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.category}</TableCell>
-                <TableCell>${product.price.toFixed(2)}</TableCell>
+                <TableCell>${Number(product.price).toFixed(2)}</TableCell>
                 <TableCell>{product.stock}</TableCell>
                 <TableCell>
                   <Badge variant={product.status === "active" ? "success" : "warning"}>
@@ -214,7 +244,7 @@ export default function Inventory() {
                 <TableCell className="text-right">
                   <Button 
                     onClick={() => handleEdit(product)}
-                    className="text-black hover:bg-gray-100"
+                    className="bg-white text-black hover:bg-gray-100"
                     disabled={product.status === "low"}  // Deshabilitar si está en bajo stock
                   >
                     <PencilIcon className="w-4 h-4 mr-2" />
@@ -222,7 +252,7 @@ export default function Inventory() {
                   </Button>
                   <Button 
                     onClick={() => handleStatusToggle(product.id)}
-                    className="text-black hover:bg-gray-100"
+                    className="bg-white text-black hover:bg-gray-100"
                   >
                     {product.status === "active" ? "Marcar como Bajo stock" : "Marcar como Activo"}
                   </Button>
@@ -292,6 +322,16 @@ export default function Inventory() {
                   className="col-span-3"
                 />
               </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-image" className="text-right">Imagen (URL)</Label>
+                <Input
+                  id="edit-image"
+                  type="text"
+                  value={editingProduct.image}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button 
@@ -312,6 +352,17 @@ export default function Inventory() {
               <DialogTitle>Éxito</DialogTitle>
             </DialogHeader>
             <p className="text-green-600">Los cambios se han guardado exitosamente.</p>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {isErrorDialogOpen && (
+        <Dialog open={isErrorDialogOpen} onOpenChange={() => setIsErrorDialogOpen(false)}>
+          <DialogContent className="bg-white p-6 rounded-lg shadow-lg">
+            <DialogHeader>
+              <DialogTitle>Error</DialogTitle>
+            </DialogHeader>
+            <p className="text-red-600">{errorMessage}</p>
           </DialogContent>
         </Dialog>
       )}
