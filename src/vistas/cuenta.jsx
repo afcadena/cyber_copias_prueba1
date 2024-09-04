@@ -1,22 +1,106 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, User, MapPin, Package, CreditCard, Tag, Grid, ShoppingCart, ShoppingBag } from "lucide-react";
+import { ArrowLeft, User, MapPin, Package, CreditCard, Tag, Grid, ShoppingCart, ShoppingBag, Edit } from "lucide-react";
 import Logo from "../assets/images/Logo.png";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-const ProfileContent = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Perfil de Usuario</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p>Nombre: Juan Pérez</p>
-      <p>Email: juan@example.com</p>
-      <p>Teléfono: +1234567890</p>
-    </CardContent>
-  </Card>
-);
+const UpdateProfileModal = ({ email, phone, onUpdate, onClose }) => {
+  const [newEmail, setNewEmail] = useState(email);
+  const [newPhone, setNewPhone] = useState(phone);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onUpdate({ email: newEmail, phone: newPhone });
+    onClose();
+  };
+
+  return (
+    <DialogContent className="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>Actualizar perfil</DialogTitle>
+      </DialogHeader>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="phone">Teléfono</Label>
+          <Input
+            id="phone"
+            value={newPhone}
+            onChange={(e) => setNewPhone(e.target.value)}
+          />
+        </div>
+        <Button type="submit">Guardar cambios</Button>
+      </form>
+    </DialogContent>
+  );
+};
+
+const ProfileContent = () => {
+  const [userData, setUserData] = useState({
+    name: "Juan Pérez",
+    email: "juan@example.com",
+    phone: "+1234567890"
+  });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleUpdate = (newData) => {
+    setUserData({ ...userData, ...newData });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Perfil de Usuario</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Nombre</Label>
+          <p>{userData.name}</p>
+        </div>
+        <div className="space-y-2">
+          <Label>Email</Label>
+          <p>{userData.email}</p>
+        </div>
+        <div className="space-y-2">
+          <Label>Teléfono</Label>
+          <p>{userData.phone}</p>
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline">
+              <Edit className="mr-2 h-4 w-4" /> Editar
+            </Button>
+          </DialogTrigger>
+          <UpdateProfileModal
+            email={userData.email}
+            phone={userData.phone}
+            onUpdate={handleUpdate}
+            onClose={() => setIsDialogOpen(false)}
+          />
+        </Dialog>
+      </CardFooter>
+    </Card>
+  );
+};
 
 const AddressesContent = () => (
   <Card>
@@ -74,7 +158,7 @@ const OrdersContent = () => (
 const CardsContent = () => (
   <Card>
     <CardHeader>
-      <CardTitle>Metodos de pago</CardTitle>
+      <CardTitle>Métodos de pago</CardTitle>
     </CardHeader>
     <CardContent>
       <Card className="mb-4">
@@ -82,7 +166,7 @@ const CardsContent = () => (
           <CardTitle>Visa</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>Número de tarjeta: ************1234</p>
+          <p>Número de tarjeta: •••• •••• •••• 1234</p>
           <p>Fecha de vencimiento: 02/2025</p>
         </CardContent>
       </Card>
@@ -91,7 +175,7 @@ const CardsContent = () => (
           <CardTitle>Mastercard</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>Número de tarjeta: ************5678</p>
+          <p>Número de tarjeta: •••• •••• •••• 5678</p>
           <p>Fecha de vencimiento: 08/2026</p>
         </CardContent>
       </Card>
@@ -101,11 +185,6 @@ const CardsContent = () => (
 
 export default function Cuenta() {
   const [activeSection, setActiveSection] = useState('perfil');
-  const orders = [
-    { id: 1234, status: 'En camino', date: '2023-02-20', total: 100.00 },
-    { id: 5678, status: 'Entregado', date: '2023-02-15', total: 50.00 },
-    { id: 9012, status: 'Procesando', date: '2023-02-10', total: 200.00 },
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -179,7 +258,7 @@ export default function Cuenta() {
               onClick={() => setActiveSection('tarjetas')}
             >
               <CreditCard className="mr-2 h-5 w-5" />
-              Metodos de pago
+              Métodos de pago
             </Button>
           </nav>
         </div>
