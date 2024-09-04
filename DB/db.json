@@ -239,5 +239,61 @@
       "stock": 10,
       "status": "active"
     }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "name": "Juan Pérez",
+      "email": "juan.perez@example.com",
+      "password": "password123",
+      "confirmpassword": "password123",
+      "role": "admin"
+    },
+    {
+      "id": "2",
+      "name": "María Gómez",
+      "email": "maria.gomez@example.com",
+      "password": "password456",
+      "confirmpassword": "password456",
+      "role": "cliente"
+    },
+    {
+      "id": "3",
+      "name": "Luis Martínez",
+      "email": "luis.martinez@example.com",
+      "password": "password789",
+      "confirmpassword": "password789",
+      "role": "cliente"
+    },
+    {
+      "id": "4",
+      "name": "Ana López",
+      "email": "ana.lopez@example.com",
+      "password": "password321",
+      "confirmpassword": "password321",
+      "role": "admin"
+    },
+    {
+      "id": "5",
+      "name": "Pedro Fernández",
+      "email": "pedro.fernandez@example.com",
+      "password": "password654",
+      "confirmpassword": "password654",
+      "role": "cliente"
+    },
+    {
+      "id": 1725411403084,
+      "name": "Andres Cadena",
+      "email": "afca@test.com",
+      "password": "1013112289Fe@",
+      "role": "cliente"
+    },
+    {
+      "id": 1725411693460,
+      "name": "Julian Prieto",
+      "email": "Julian@test.com",
+      "password": "123456789Se#",
+      "role": "cliente"
+    }
   ]
 }
