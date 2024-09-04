@@ -1,8 +1,8 @@
-import React from 'react'
-import { Clock, Truck, CreditCard, Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react'
+import React from 'react';
+import { Clock, Truck, CreditCard, Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-gray-100 text-gray-600 py-12">
@@ -11,73 +11,53 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-lg mb-4">Papelería Creativa</h3>
             <p className="text-sm mb-4">
-              Tu destino para todos los suministros de oficina y escolares. 
-              Inspirando creatividad desde 1995.
+              Nuestra papelería ofrece los mejores productos para todos tus proyectos creativos y necesidades de oficina.
             </p>
+            <p className="text-sm mb-4">
+              <Mail className="inline-block mr-2" /> info@papeleriacreativa.com
+            </p>
+            <p className="text-sm mb-4">
+              <Phone className="inline-block mr-2" /> (123) 456-7890
+            </p>
+            <p className="text-sm">
+              <MapPin className="inline-block mr-2" /> Calle Ficticia 123, Ciudad Creativa
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Horario</h3>
+            <p className="text-sm mb-2">
+              <Clock className="inline-block mr-2" /> Lunes a Viernes: 9:00 AM - 6:00 PM
+            </p>
+            <p className="text-sm">
+              <Clock className="inline-block mr-2" /> Sábados: 10:00 AM - 4:00 PM
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Síguenos</h3>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">
-                <Facebook size={20} />
+              <a href="#" className="text-gray-600 hover:text-blue-600">
+                <Facebook className="h-6 w-6" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-pink-600 transition-colors">
-                <Instagram size={20} />
+              <a href="#" className="text-gray-600 hover:text-pink-600">
+                <Instagram className="h-6 w-6" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-                <Twitter size={20} />
+              <a href="#" className="text-gray-600 hover:text-blue-400">
+                <Twitter className="h-6 w-6" />
               </a>
             </div>
           </div>
           <div>
-            <h3 className="font-semibold text-lg mb-4">Nuestros Servicios</h3>
-            <ul className="text-sm space-y-2">
-              <li>Venta de útiles escolares</li>
-              <li>Materiales de oficina</li>
-              <li>Artículos de arte y manualidades</li>
-              <li>Impresión y fotocopias</li>
-              <li>Encuadernación</li>
-              <li>Personalización de productos</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Información de Compra</h3>
-            <ul className="text-sm space-y-3">
-              <li className="flex items-center">
-                <Clock size={18} className="mr-2 text-primary" />
-                <span>Entrega en 24-48 horas</span>
-              </li>
-              <li className="flex items-center">
-                <Truck size={18} className="mr-2 text-primary" />
-                <span>Envío gratis en compras +$50</span>
-              </li>
-              <li className="flex items-center">
-                <CreditCard size={18} className="mr-2 text-primary" />
-                <span>Pago seguro garantizado</span>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Contáctanos</h3>
-            <ul className="text-sm space-y-3">
-              <li className="flex items-center">
-                <Mail size={18} className="mr-2 text-primary" />
-                <span>info@papeleriacreativa.com</span>
-              </li>
-              <li className="flex items-center">
-                <Phone size={18} className="mr-2 text-primary" />
-                <span>(123) 456-7890</span>
-              </li>
-              <li className="flex items-center">
-                <MapPin size={18} className="mr-2 text-primary" />
-                <span>Calle Principal #123, Ciudad</span>
-              </li>
-            </ul>
+            <h3 className="font-semibold text-lg mb-4">Métodos de Pago</h3>
+            <div className="flex space-x-4">
+              <CreditCard className="h-6 w-6" />
+              <Truck className="h-6 w-6" />
+            </div>
           </div>
         </div>
-        <div className="border-t border-gray-200 pt-8">
-          <p className="text-sm text-center">
-            &copy; {currentYear} CyberCopias Todos los derechos reservados.
-          </p>
+        <div className="text-center text-sm text-gray-500">
+          &copy; {currentYear} Papelería Creativa. Todos los derechos reservados.
         </div>
       </div>
     </footer>
-  )
+  );
 }
