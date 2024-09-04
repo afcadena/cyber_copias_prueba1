@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { CrudContextForm } from "../context/CrudContextForms";
 import { useNavigate } from 'react-router-dom';
+import Header from './header';  // Asegúrate de que la ruta sea correcta
+import Footer from './footer';  // Asegúrate de que la ruta sea correcta
 
 export default function Register() {
   const { registerUser, error } = useContext(CrudContextForm);
@@ -63,98 +65,104 @@ export default function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Crear Cuenta</CardTitle>
-          <CardDescription>Regístrate a CyberCopias</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              {(formError || error) && <p className="text-red-500">{formError || error.statusText}</p>}
-              <div className="space-y-2">
-                <Label htmlFor="name">Nombre Completo</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo Electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <Button type="submit" className="w-full mt-6">Registrarse</Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-600">
-            ¿Ya tienes una cuenta? <a href="./login" className="text-blue-600 hover:underline">Inicia Sesión</a>
-          </p>
-        </CardFooter>
-      </Card>
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <Header />  {/* Añadido Header */}
 
-      {/* Ventana emergente de registro exitoso */}
-      {showSuccess && (
-        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded shadow-lg">
-            <h2 className="text-xl font-semibold">¡Registro Exitoso!</h2>
-            <p>El usuario ha sido registrado con éxito.</p>
+      <main className="flex-grow flex items-center justify-center py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Crear Cuenta</CardTitle>
+            <CardDescription>Regístrate a CyberCopias</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                {(formError || error) && <p className="text-red-500">{formError || error.statusText}</p>}
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nombre Completo</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Correo Electrónico</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="tu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Contraseña</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <Button type="submit" className="w-full mt-6">Registrarse</Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-gray-600">
+              ¿Ya tienes una cuenta? <a href="./login" className="text-blue-600 hover:underline">Inicia Sesión</a>
+            </p>
+          </CardFooter>
+        </Card>
+
+        {/* Ventana emergente de registro exitoso */}
+        {showSuccess && (
+          <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-8 rounded shadow-lg">
+              <h2 className="text-xl font-semibold">¡Registro Exitoso!</h2>
+              <p>El usuario ha sido registrado con éxito.</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </main>
+
+      <Footer />  {/* Añadido Footer */}
     </div>
   );
 }

@@ -1,16 +1,16 @@
-import React, { useState } from 'react'
-import Logo from "../assets/images/Logo.png"
-import { Link } from 'react-router-dom'
-import { Menu, ShoppingCart, FileText, Palette, Book, Tag, Grid, User, ShoppingBag } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import React, { useState } from 'react';
+import Logo from "../assets/images/Logo.png";
+import { Link } from 'react-router-dom';
+import { Menu, ShoppingCart, FileText, Palette, Book, Tag, Grid, User, ShoppingBag } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
+} from "@/components/ui/carousel";
 import {
   Sheet,
   SheetContent,
@@ -18,10 +18,11 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
+import Footer from './footer'; // Importa el componente Footer
 
 export default function Component() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -33,12 +34,12 @@ export default function Component() {
         <nav className="hidden md:flex space-x-4">
           <Link to="#ofertas" className="text-foreground hover:text-primary">
             <Tag className='h-6 w-6' />
-            </Link>
+          </Link>
           <Link to="/catalogo" className="text-foreground hover:text-primary">
-            <Grid  className='h-6 w-6' />
+            <Grid className='h-6 w-6' />
           </Link>
           <Link to="/login" className="text-foreground hover:text-primary">
-            <User  className='h-6 w-6' />
+            <User className='h-6 w-6' />
           </Link>
           <Link to="/carrito" className="text-foreground hover:text-primary">
             <ShoppingCart className='h-6 w-6' />
@@ -127,6 +128,8 @@ export default function Component() {
           </div>
         </section>
       </main>
+
+      <Footer /> {/* Agrega el componente Footer aquí */}
     </div>
-  )
+  );
 }

@@ -10,40 +10,37 @@ import { CrudProvider as CrudProviderInventario } from './context/CrudContextInv
 import { CrudProvider as CrudProviderForm } from './context/CrudContextForms';  
 import Login from './vistas/login';
 import Register from './vistas/register';
+import ProtectedRoute from './context/protectedRoute';  // Importamos el componente ProtectedRoute
 
 import './App.css';
 
 function App() {
   return (
     <Fragment>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          
-          <Route path="/login" element={
-            <CrudProviderForm>
-              <Login />
-            </CrudProviderForm>
-          } />
-          
-          <Route path="/register" element={
-            <CrudProviderForm>
-              <Register />
-            </CrudProviderForm>
-          } />
-          
-          <Route path="/inventario" element={
-            <CrudProviderInventario>
-              <InventoryManagement />
-            </CrudProviderInventario>
-          } />
-          
-          <Route path="/catalogo" element={<Catalog />} />
-          <Route path="/cuenta" element={<Cuenta />} />
-          <Route path="/carrito" element={<CarritoDeCompras />} />
-          <Route path="/producto/:id" element={<ProductDetail />} />  {/* Asegúrate de que la ruta sea la correcta */}
-        </Routes>
-      </Router>
+      {/* Envuelve toda la aplicación con CrudProviderForm para que el contexto esté disponible */}
+      <CrudProviderForm>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            {/* Protege la ruta de inventario */}
+            <Route path="/inventario" element={
+              <CrudProviderInventario>
+                <ProtectedRoute role="admin">
+                  <InventoryManagement />
+                </ProtectedRoute>
+              </CrudProviderInventario>
+            } />
+            
+            <Route path="/catalogo" element={<Catalog />} />
+            <Route path="/cuenta" element={<Cuenta />} />
+            <Route path="/carrito" element={<CarritoDeCompras />} />
+            <Route path="/producto/:id" element={<ProductDetail />} />  {/* Asegúrate de que la ruta sea la correcta */}
+          </Routes>
+        </Router>
+      </CrudProviderForm>
     </Fragment>
   );
 }
