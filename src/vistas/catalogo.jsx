@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -6,27 +7,26 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Checkbox } from "@/components/ui/checkbox";
-import { SearchIcon, ShoppingCartIcon, HeartIcon, StarIcon } from 'lucide-react';
-import ProductDetail from './producto'; // Asegúrate de importar el componente ProductDetail
+import { SearchIcon, ShoppingCartIcon, StarIcon } from 'lucide-react';
 
 const categories = ["Todos", "Escritura", "Cuadernos", "Papel", "Arte", "Accesorios", "Coleccionables"];
 
 export default function Catalog() {
-  const [products, setProducts] = useState([]);  // Estado para los productos
+  const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Todos");
   const [sortOrder, setSortOrder] = useState("recommended");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedProduct, setSelectedProduct] = useState(null);  // Estado para el producto seleccionado
   const productsPerPage = 12;
 
-  // Obtener productos desde la API
+  const navigate = useNavigate(); 
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch("http://localhost:3000/products");
         const data = await response.json();
-        setProducts(data);  // Almacenar los productos en el estado
+        setProducts(data);
       } catch (error) {
         console.error("Error al cargar productos:", error);
       }
@@ -40,7 +40,7 @@ export default function Catalog() {
   ).sort((a, b) => {
     if (sortOrder === "priceLowToHigh") return a.price - b.price;
     if (sortOrder === "priceHighToLow") return b.price - a.price;
-    return 0; // Para "recommended", simplemente usamos el orden original
+    return 0;
   });
 
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -50,12 +50,11 @@ export default function Catalog() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleProductClick = (product) => {
-    setSelectedProduct(product);  // Establecer el producto seleccionado
+    navigate(`/producto/${product.id}`); 
   };
 
   return (
     <div className="flex flex-col md:flex-row gap-8 p-6 bg-gray-100">
-      {/* Category sidebar */}
       <aside className="md:w-64">
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Categorías</h3>
@@ -78,10 +77,8 @@ export default function Catalog() {
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1">
         <div className="bg-white p-6 rounded-lg shadow-sm">
-          {/* Filtering and sorting options */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
             <div className="flex items-center w-full sm:w-auto">
               <Input 
@@ -110,7 +107,7 @@ export default function Catalog() {
               <Card 
                 key={product.id} 
                 className="flex flex-col justify-between cursor-pointer"
-                onClick={() => handleProductClick(product)} // Manejar el clic en el producto
+                onClick={() => handleProductClick(product)} 
               >
                 <CardHeader className="p-4">
                   <img src={product.image} alt={product.name} className="w-full h-48 object-contain" />
@@ -167,13 +164,6 @@ export default function Catalog() {
             </PaginationContent>
           </Pagination>
         </div>
-
-        {/* Mostrar detalles del producto seleccionado */}
-        {selectedProduct && (
-          <div className="mt-8">
-            <ProductDetail product={selectedProduct} />
-          </div>
-        )}
       </main>
     </div>
   );

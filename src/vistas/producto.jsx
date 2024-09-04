@@ -16,7 +16,7 @@ export default function ProductDetail() {
       try {
         const response = await axios.get(`http://localhost:3000/products/${id}`);
         const product = response.data;
-        setProduct(product);  // Almacena los detalles del producto en el estado
+        setProduct(product);
         if (product.images && product.images.length > 0) {
           setMainImage(product.images[0]);
         } else {
@@ -35,7 +35,6 @@ export default function ProductDetail() {
     <div className="container mx-auto px-4 py-8">
       {product ? (
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Imágenes del producto */}
           <div className="md:w-1/2">
             <img src={mainImage} alt={product.name} className="w-full h-auto rounded-lg shadow-md mb-4" />
             <div className="flex gap-4 overflow-x-auto">
@@ -55,7 +54,6 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Información del producto */}
           <div className="md:w-1/2">
             <h1 className="text-3xl font-bold mb-4">{product.name || "Producto sin nombre"}</h1>
             <div className="flex items-center mb-4">
