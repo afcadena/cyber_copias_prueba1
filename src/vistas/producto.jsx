@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StarIcon, HeartIcon, ShareIcon, ShoppingCartIcon } from 'lucide-react';
