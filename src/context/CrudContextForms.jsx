@@ -5,16 +5,13 @@ const CrudContextForm = createContext();
 
 const CrudProvider = ({ children }) => {
   const [db, setDb] = useState(null);
-  const [dataToEdit, setDataToEdit] = useState(null);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null); // Estado para manejar el usuario actual
 
   const api = helpHttp();
   const url = "http://localhost:3000/users"; // Ajusta la URL según tu backend
 
   useEffect(() => {
-    setLoading(true);
     api.get(url).then((res) => {
       if (!res.err) {
         setDb(res);
@@ -23,90 +20,15 @@ const CrudProvider = ({ children }) => {
         setDb(null);
         setError(res);
       }
-      setLoading(false);
     });
   }, [url]);
 
-  const createData = (data) => {
-    data.id = Date.now();
-    const options = {
-      body: data,
-      headers: { "content-type": "application/json" },
-    };
-
-    api.post(url, options).then((res) => {
-      if (!res.err) {
-        setDb([...db, res]);
-      } else {
-        setError(res);
-      }
-    });
-  };
-
-  const updateData = (data) => {
-    const endpoint = `${url}/${data.id}`;
-    const options = {
-      body: data,
-      headers: { "content-type": "application/json" },
-    };
-
-    api.put(endpoint, options).then((res) => {
-      if (!res.err) {
-        const newData = db.map((el) => (el.id === data.id ? data : el));
-        setDb(newData);
-      } else {
-        setError(res);
-      }
-    });
-  };
-
-  const deleteData = (id) => {
-    const isDelete = window.confirm(
-      `¿Estás seguro de eliminar el registro con el id '${id}'?`
-    );
-
-    if (isDelete) {
-      const endpoint = `${url}/${id}`;
-      const options = {
-        headers: { "content-type": "application/json" },
-      };
-
-      api.del(endpoint, options).then((res) => {
-        if (!res.err) {
-          const newData = db.filter((el) => el.id !== id);
-          setDb(newData);
-        } else {
-          setError(res);
-        }
-      });
-    }
-  };
-
-  const registerUser = (userData) => {
-    userData.id = Date.now();
-    userData.role = "cliente"; // Establece el rol predeterminado como "cliente"
-
-    const options = {
-      body: userData,
-      headers: { "content-type": "application/json" },
-    };
-
-    return api.post(url, options).then((res) => {
-      if (!res.err) {
-        setDb([...db, res]);
-        return res;
-      } else {
-        setError(res);
-        return null;
-      }
-    });
-  };
-
-  const loginUser = (email, password) => {
+  // Función para iniciar sesión
+  const loginUser = async (email, password) => {
     const user = db?.find((user) => user.email === email && user.password === password);
 
     if (user) {
-      setCurrentUser(user);
+      setCurrentUser(user);  // Establecer el usuario autenticado
       return user;
     } else {
       setError({ err: true, status: 401, statusText: "Credenciales inválidas" });
@@ -114,23 +36,35 @@ const CrudProvider = ({ children }) => {
     }
   };
 
+  // Función para registrar un nuevo usuario
+  const registerUser = async (userData) => {
+    try {
+      const res = await api.post(url, { body: userData });
+      if (!res.err) {
+        setCurrentUser(res); // Establecer el nuevo usuario como el usuario autenticado
+        return res;
+      } else {
+        setError(res);
+        return null;
+      }
+    } catch (error) {
+      setError(error);
+      return null;
+    }
+  };
+
+  // Función para cerrar sesión
   const logoutUser = () => {
-    setCurrentUser(null);
+    setCurrentUser(null); // Limpiar el usuario autenticado
   };
 
   const data = {
     db,
     error,
-    loading,
-    createData,
-    dataToEdit,
-    setDataToEdit,
-    updateData,
-    deleteData,
-    registerUser,
     loginUser,
-    logoutUser,
-    currentUser, // Usuario actualmente autenticado
+    registerUser,  // Proporcionar la función de registro
+    logoutUser,    // Proporcionar la función de cerrar sesión
+    currentUser,   // Usuario actualmente autenticado
   };
 
   return (

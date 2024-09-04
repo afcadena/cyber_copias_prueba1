@@ -5,26 +5,33 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { CrudContextForm } from "../context/CrudContextForms";
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const { loginUser, error, currentUser } = useContext(CrudContextForm);
+  const { loginUser, error } = useContext(CrudContextForm);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState(null);
-  const [showWelcome, setShowWelcome] = useState(false);  // Estado para mostrar el mensaje de bienvenida
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [userRole, setUserRole] = useState(null);  // Estado para almacenar el rol del usuario
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const user = await loginUser(email, password);
     
     if (user) {
-      console.log("Usuario autenticado:", user);
-      setShowWelcome(true);  // Muestra el mensaje de bienvenida
+      setUserRole(user.role);  // Guarda el rol del usuario
+      setShowWelcome(true);
       setTimeout(() => {
         setShowWelcome(false);
-        // Aquí puedes redirigir o hacer otra acción según sea necesario
-      }, 3000);  // Oculta el mensaje después de 3 segundos
+        if (user.role === 'admin') {
+          navigate('/inventario');
+        } else {
+          navigate('/');
+        }
+      }, 1000);
     } else {
       setFormError("Credenciales incorrectas. Inténtalo de nuevo.");
     }
@@ -85,11 +92,11 @@ export default function Login() {
       </Card>
 
       {/* Ventana emergente de bienvenida */}
-      {showWelcome && currentUser && (
+      {showWelcome && (
         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded shadow-lg">
-            <h2 className="text-xl font-semibold">¡Bienvenido, {currentUser.name}!</h2>
-            <p>Has iniciado sesión con el rol de: <strong>{currentUser.role}</strong></p>
+            <h2 className="text-xl font-semibold">¡Bienvenido!</h2>
+            <p>Te has iniciado sesión con éxito. {userRole === 'admin' ? "Eres un Administrador" : "Eres un Usuario"}</p>
           </div>
         </div>
       )}
