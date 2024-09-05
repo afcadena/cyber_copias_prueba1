@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "./header";
 import Footer from "./footer";
 import { Button } from "@/components/ui/button";
@@ -10,13 +10,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useCart } from "../context/CartContext";  // Importar el contexto del carrito
+import { XIcon } from 'lucide-react';  // Ícono de "X" para eliminar
 
 export default function CarritoDeCompras() {
   const { cart, removeFromCart } = useCart();  // Obtener el carrito y la función para eliminar productos
+  const [quantities, setQuantities] = useState(() => {
+    const initialQuantities = {};
+    cart.forEach(product => {
+      initialQuantities[product.id] = 1;  // Inicialmente, cantidad = 1 para todos los productos
+    });
+    return initialQuantities;
+  });
+
+  const handleQuantityChange = (productId, newQuantity) => {
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: newQuantity < 1 ? 1 : newQuantity  // La cantidad mínima es 1
+    }));
+  };
 
   const totalCompra = cart.reduce((total, producto) => {
     const price = parseFloat(producto.price) || 0;  // Asegurarse de que el precio sea numérico
-    return total + price;
+    const quantity = quantities[producto.id] || 1;
+    return total + price * quantity;
   }, 0);
 
   return (
@@ -28,11 +44,20 @@ export default function CarritoDeCompras() {
           {cart.length > 0 ? (
             cart.map((producto) => {
               const price = parseFloat(producto.price) || 0;  // Asegurarse de que el precio sea numérico
+              const quantity = quantities[producto.id] || 1;
 
               return (
-                <Card key={producto.id}>
+                <Card key={producto.id} className="relative">
                   <CardHeader>
-                    <CardTitle>{producto.name}</CardTitle>
+                    <div className="flex justify-between items-start">
+                      <CardTitle>{producto.name}</CardTitle>
+                      <button
+                        onClick={() => removeFromCart(producto.id)}  // Eliminar producto
+                        className="text-red-500"
+                      >
+                        <XIcon className="w-6 h-6" />  {/* Botón X */}
+                      </button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <img
@@ -41,16 +66,21 @@ export default function CarritoDeCompras() {
                       className="w-full h-40 object-cover mb-4"
                     />
                     <p className="text-2xl font-bold">
-                      ${price.toFixed(2)}  {/* Aplicar toFixed solo si es un número */}
+                      ${price.toFixed(2)}
                     </p>
+                    <div className="mt-2">
+                      <label className="block text-sm font-medium text-gray-700">Cantidad:</label>
+                      <input
+                        type="number"
+                        value={quantity}
+                        min="1"
+                        onChange={(e) => handleQuantityChange(producto.id, parseInt(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                      />
+                    </div>
                   </CardContent>
                   <CardFooter className="flex justify-between items-center">
-                    <Button
-                      variant="outline"
-                      onClick={() => removeFromCart(producto.id)}  // Eliminar producto del carrito
-                    >
-                      Eliminar
-                    </Button>
+                    <p className="text-lg">Subtotal: ${(price * quantity).toFixed(2)}</p>
                   </CardFooter>
                 </Card>
               );
