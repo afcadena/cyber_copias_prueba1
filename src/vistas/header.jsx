@@ -10,7 +10,9 @@ export default function Header() {
     <header className="flex items-center justify-between p-4 bg-background shadow-md">
       <div className="flex items-center">
         <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
-        <h1 className="text-xl font-bold">CyberCopias</h1>
+        <Link to="/home" className="text-xl font-bold">
+          CyberCopias
+        </Link>
       </div>
       <div className="flex-1 max-w-xl mx-4">
         <div className="relative">
