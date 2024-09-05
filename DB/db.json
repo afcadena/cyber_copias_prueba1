@@ -299,10 +299,17 @@
       "role": "cliente"
     },
     {
-      "id": 1725491302910,
+      "id": "1725491302910",
       "name": "Julian Romero",
       "email": "julian@test11.com",
       "password": "123456789Pe#",
+      "role": "cliente"
+    },
+    {
+      "id": 1725492944879,
+      "name": "Luis Alejandro Galicia Novoa",
+      "email": "iglesiag1908@gmail.com",
+      "password": "Alek122334.",
       "role": "cliente"
     }
   ]
