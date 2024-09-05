@@ -23,7 +23,33 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-
+// Lista de productos de ejemplo
+const productos = [
+  {
+    id: 1,
+    nombre: "Camiseta",
+    precio: 19.99,
+    imagen: "/placeholder.svg?height=100&width=100",
+  },
+  {
+    id: 2,
+    nombre: "Pantalón",
+    precio: 39.99,
+    imagen: "/placeholder.svg?height=100&width=100",
+  },
+  {
+    id: 3,
+    nombre: "Zapatos",
+    precio: 59.99,
+    imagen: "/placeholder.svg?height=100&width=100",
+  },
+  {
+    id: 4,
+    nombre: "Gorra",
+    precio: 14.99,
+    imagen: "/placeholder.svg?height=100&width=100",
+  },
+];
 
 export default function CarritoDeCompras() {
   const [productosSeleccionados, setProductosSeleccionados] = useState([]);
