@@ -1,6 +1,7 @@
+// src/pages/CarritoDeCompras.jsx
 import React, { useState } from "react";
-import Logo from "../assets/images/Logo.png";
-import { Link } from "react-router-dom";
+import Header from "./header"; // Asegúrate de que la ruta sea correcta
+import Footer from "./footer"; // Asegúrate de que la ruta sea correcta
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,56 +22,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  ArrowLeft,
-  Tag,
-  Grid,
-  User,
-  ShoppingBag,
-  Menu,
-  FileText,
-  Palette,
-  Book,
-} from "lucide-react";
-// Lista de productos de ejemplo
-const productos = [
-  {
-    id: 1,
-    nombre: "Camiseta",
-    precio: 19.99,
-    imagen: "/placeholder.svg?height=100&width=100",
-  },
-  {
-    id: 2,
-    nombre: "Pantalón",
-    precio: 39.99,
-    imagen: "/placeholder.svg?height=100&width=100",
-  },
-  {
-    id: 3,
-    nombre: "Zapatos",
-    precio: 59.99,
-    imagen: "/placeholder.svg?height=100&width=100",
-  },
-  {
-    id: 4,
-    nombre: "Gorra",
-    precio: 14.99,
-    imagen: "/placeholder.svg?height=100&width=100",
-  },
-];
+
+
 
 export default function CarritoDeCompras() {
   const [productosSeleccionados, setProductosSeleccionados] = useState([]);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const toggleProducto = (id) => {
@@ -98,65 +54,7 @@ export default function CarritoDeCompras() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex items-center justify-between p-4 bg-background shadow-md">
-        <Link to="/">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center text-primary"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            <span className="text-sm">Volver</span>
-          </Button>
-        </Link>
-        <div className="flex items-center">
-          <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
-          <h1 className="text-xl font-bold">CyberCopias</h1>
-        </div>
-        <nav className="hidden md:flex space-x-4">
-          <Link to="#ofertas" className="text-foreground hover:text-primary">
-            <Tag className="h-6 w-6" />
-          </Link>
-          <Link to="/catalogo" className="text-foreground hover:text-primary">
-            <Grid className="h-6 w-6" />
-          </Link>
-          <Link to="#" className="text-foreground hover:text-primary">
-            <User className="h-6 w-6" />
-          </Link>
-          <Link to="#" className="text-foreground hover:text-primary">
-            <ShoppingBag className="h-6 w-6" />
-          </Link>
-        </nav>
-        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="mr-2 md:hidden">
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right">
-            <SheetHeader>
-              <SheetTitle>Menú</SheetTitle>
-              <SheetDescription>Explora nuestras categorías</SheetDescription>
-            </SheetHeader>
-            <div className="grid gap-4 py-4">
-              <Button variant="ghost" className="w-full justify-start">
-                <FileText className="mr-2 h-4 w-4" />
-                Libros de dibujo
-              </Button>
-              <Button variant="ghost" className="w-full justify-start">
-                <Palette className="mr-2 h-4 w-4" />
-                Arte y manualidades
-              </Button>
-              <Button variant="ghost" className="w-full justify-start">
-                <Book className="mr-2 h-4 w-4" />
-                Cuadernos
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </header>
-
+      <Header />
       <main className="flex-1 container py-6">
         <h1 className="text-2xl font-bold mb-6">Carrito de Compras</h1>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -248,6 +146,7 @@ export default function CarritoDeCompras() {
           </Dialog>
         </div>
       </footer>
+      <Footer />
     </div>
   );
 }

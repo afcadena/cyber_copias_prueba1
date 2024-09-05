@@ -1,63 +1,52 @@
 import React from 'react';
-import { Clock, Truck, CreditCard, Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
+import { Facebook, Instagram, Twitter } from 'lucide-react';
 
-export default function Footer() {
-  const currentYear = new Date().getFullYear();
+const Footer = () => {
+  const currentYear = new Date().getFullYear(); // Define currentYear aquí
 
   return (
-    <footer className="bg-gray-100 text-gray-600 py-12">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Papelería Creativa</h3>
-            <p className="text-sm mb-4">
-              Nuestra papelería ofrece los mejores productos para todos tus proyectos creativos y necesidades de oficina.
-            </p>
-            <p className="text-sm mb-4">
-              <Mail className="inline-block mr-2" /> info@papeleriacreativa.com
-            </p>
-            <p className="text-sm mb-4">
-              <Phone className="inline-block mr-2" /> (123) 456-7890
-            </p>
-            <p className="text-sm">
-              <MapPin className="inline-block mr-2" /> Calle Ficticia 123, Ciudad Creativa
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Horario</h3>
-            <p className="text-sm mb-2">
-              <Clock className="inline-block mr-2" /> Lunes a Viernes: 9:00 AM - 6:00 PM
-            </p>
-            <p className="text-sm">
-              <Clock className="inline-block mr-2" /> Sábados: 10:00 AM - 4:00 PM
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Síguenos</h3>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-600 hover:text-blue-600">
-                <Facebook className="h-6 w-6" />
-              </a>
-              <a href="#" className="text-gray-600 hover:text-pink-600">
-                <Instagram className="h-6 w-6" />
-              </a>
-              <a href="#" className="text-gray-600 hover:text-blue-400">
-                <Twitter className="h-6 w-6" />
-              </a>
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Métodos de Pago</h3>
-            <div className="flex space-x-4">
-              <CreditCard className="h-6 w-6" />
-              <Truck className="h-6 w-6" />
-            </div>
+    <footer className="bg-gray-800 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Acerca de CyberCopias</h3>
+          <p className="text-sm">Somos tu tienda de confianza para todas tus necesidades de papelería y material de oficina.</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Enlaces Rápidos</h3>
+          <ul className="space-y-2">
+            <li><a href="#" className="text-sm hover:underline">Inicio</a></li>
+            <li><a href="#" className="text-sm hover:underline">Productos</a></li>
+            <li><a href="#" className="text-sm hover:underline">Ofertas</a></li>
+            <li><a href="#" className="text-sm hover:underline">Contacto</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Contacto</h3>
+          <p className="text-sm">Calle Principal, 123</p>
+          <p className="text-sm">Ciudad, CP 12345</p>
+          <p className="text-sm">Tel: (123) 456-7890</p>
+          <p className="text-sm">Email: info@cybercopias.com</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Síguenos</h3>
+          <div className="flex space-x-4">
+            <a href="#" className="text-white hover:text-gray-300">
+              <Facebook className="h-6 w-6" />
+            </a>
+            <a href="#" className="text-white hover:text-gray-300">
+              <Instagram className="h-6 w-6" />
+            </a>
+            <a href="#" className="text-white hover:text-gray-300">
+              <Twitter className="h-6 w-6" />
+            </a>
           </div>
         </div>
-        <div className="text-center text-sm text-gray-500">
-          &copy; {currentYear} Papelería Creativa. Todos los derechos reservados.
-        </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border-t border-gray-700 text-sm text-center">
+        &copy; {currentYear} CyberCopias. Todos los derechos reservados.
       </div>
     </footer>
   );
 }
+
+export default Footer;

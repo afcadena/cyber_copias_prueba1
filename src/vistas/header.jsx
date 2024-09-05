@@ -1,48 +1,24 @@
-import React, { useState } from "react";
-import Logo from "../assets/images/Logo.png";
+import React from "react";
 import { Link } from "react-router-dom";
-import {
-  Menu,
-  ShoppingCart,
-  FileText,
-  Palette,
-  Book,
-  Tag,
-  Grid,
-  User,
-  ShoppingBag,
-  ArrowLeft
-} from "lucide-react";
+import { ShoppingCart, Tag, Grid, User, ShoppingBag, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import Logo from "../assets/images/Logo.png";
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   return (
     <header className="flex items-center justify-between p-4 bg-background shadow-md">
-      <Link to="/">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center text-primary"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          <span className="text-sm">Volver</span>
-        </Button>
-      </Link>
       <div className="flex items-center">
         <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
         <h1 className="text-xl font-bold">CyberCopias</h1>
       </div>
-      <nav className="hidden md:flex space-x-4">
+      <div className="flex-1 max-w-xl mx-4">
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input type="search" placeholder="Buscar productos..." className="pl-8 w-full" />
+        </div>
+      </div>
+      <nav className="flex items-center space-x-4">
         <Link to="#ofertas" className="text-foreground hover:text-primary">
           <Tag className="h-6 w-6" />
         </Link>
@@ -59,34 +35,6 @@ export default function Header() {
           <ShoppingBag className="h-6 w-6" />
         </Link>
       </nav>
-      <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="mr-2">
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="right">
-          <SheetHeader>
-            <SheetTitle>Menú</SheetTitle>
-            <SheetDescription>Explora nuestras categorías</SheetDescription>
-          </SheetHeader>
-          <div className="grid gap-4 py-4">
-            <Button variant="ghost" className="w-full justify-start">
-              <FileText className="mr-2 h-4 w-4" />
-              Libros de dibujo
-            </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <Palette className="mr-2 h-4 w-4" />
-              Arte y manualidades
-            </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <Book className="mr-2 h-4 w-4" />
-              Cuadernos
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
     </header>
   );
 }
