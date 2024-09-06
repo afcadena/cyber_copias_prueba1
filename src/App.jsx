@@ -11,6 +11,8 @@ import { CrudProvider as CrudProviderForm } from './context/CrudContextForms';
 import Login from './vistas/login';
 import Register from './vistas/register';
 import ProtectedRoute from './context/protectedRoute';  // Importamos el componente ProtectedRoute
+import HomeCliente from  './vistas/homecli';
+
 
 import './App.css';
 
@@ -38,6 +40,8 @@ function App() {
             <Route path="/cuenta" element={<Cuenta />} />
             <Route path="/carrito" element={<CarritoDeCompras />} />
             <Route path="/producto/:id" element={<ProductDetail />} />  {/* Asegúrate de que la ruta sea la correcta */}
+            <Route path="/homecli" element={<HomeCliente />} />
+
           </Routes>
         </Router>
       </CrudProviderForm>

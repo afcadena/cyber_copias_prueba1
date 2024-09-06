@@ -189,7 +189,7 @@ export default function Cuenta() {
   return (
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between p-4 bg-background border-b">
-        <Link to="/">
+        <Link to="/homecli">
           <Button variant="ghost" size="sm" className="flex items-center text-primary">
             <ArrowLeft className="h-4 w-4 mr-2" />
             <span className="text-sm">Volver</span>

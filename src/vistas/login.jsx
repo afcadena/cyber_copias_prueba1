@@ -31,7 +31,7 @@ export default function Login() {
         if (user.role === 'admin') {
           navigate('/inventario');
         } else {
-          navigate('/');
+          navigate('/homecli');
         }
       }, 1000);
     } else {
