@@ -11,14 +11,9 @@ import { CrudProvider as CrudProviderInventario } from './context/CrudContextInv
 import { CrudProvider as CrudProviderForm } from './context/CrudContextForms';
 import Login from './vistas/login';
 import Register from './vistas/register';
-<<<<<<< HEAD
-import ProtectedRoute from './context/protectedRoute';  // Importamos el componente ProtectedRoute
-import HomeCliente from  './vistas/homecli';
-
-=======
 import ProtectedRoute from './context/protectedRoute';
-import { CartProvider } from './context/CartContext';  // Importa el CartProvider
->>>>>>> 38de9a26ee00e0ad0791a7d32fb786f97dc0dc02
+import HomeCliente from './vistas/homecli';
+import { CartProvider } from './context/CartContext';
 
 import './App.css';
 
@@ -36,21 +31,6 @@ function App() {
                 <ProtectedRoute role="admin">
                   <InventoryManagement />
                 </ProtectedRoute>
-<<<<<<< HEAD
-              </CrudProviderInventario>
-            } />
-            
-            <Route path="/catalogo" element={<Catalog />} />
-            <Route path="/cuenta" element={<Cuenta />} />
-            <Route path="/carrito" element={<CarritoDeCompras />} />
-            <Route path="/producto/:id" element={<ProductDetail />} />  {/* Asegúrate de que la ruta sea la correcta */}
-            <Route path="/homecli" element={<HomeCliente />} />
-
-          </Routes>
-        </Router>
-      </CrudProviderForm>
-    </Fragment>
-=======
               } />
               <Route path="/admin/*" element={
                 <ProtectedRoute role="admin">
@@ -68,12 +48,12 @@ function App() {
               <Route path="/cuenta" element={<Cuenta />} />
               <Route path="/carrito" element={<CarritoDeCompras />} />
               <Route path="/producto/:id" element={<ProductDetail />} />
+              <Route path="/homecli" element={<HomeCliente />} />
             </Routes>
           </Router>
         </CartProvider>
       </CrudProviderInventario>
     </CrudProviderForm>
->>>>>>> 38de9a26ee00e0ad0791a7d32fb786f97dc0dc02
   );
 }
 

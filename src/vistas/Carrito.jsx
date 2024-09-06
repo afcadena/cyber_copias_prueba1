@@ -21,6 +21,13 @@ export default function CarritoDeCompras() {
     });
     return initialQuantities;
   });
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Variable de estado para indicar si el usuario ha iniciado sesión
+  const [isOpen, setIsOpen] = useState(false);  // Estado para el modal (removed the Modal component)
+
+  const handleLogin = () => {
+    // Lógica para iniciar sesión
+    setIsAuthenticated(true);
+  };
 
   const handleQuantityChange = (productId, newQuantity) => {
     setQuantities(prev => ({
@@ -34,6 +41,16 @@ export default function CarritoDeCompras() {
     const quantity = quantities[producto.id] || 1;
     return total + price * quantity;
   }, 0);
+
+  const handleFinalizarCompra = () => {
+    if (!user) {
+      // Si no ha iniciado sesión, redirigir a la página de login
+      window.location.href = "/login";
+    } else {
+      // Si ha iniciado sesión, abrir el estado de isOpen (no hay modal)
+      setIsOpen(true);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -92,12 +109,28 @@ export default function CarritoDeCompras() {
       </main>
 
       <footer className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container py-4 flex justify-end">
+      <div className="container py-4 flex justify-end">
           <p className="text-lg font-bold mr-auto">Total: ${totalCompra.toFixed(2)}</p>
-          <Button disabled={cart.length === 0}>Finalizar Compra</Button>
+          <Button onClick={handleFinalizarCompra} disabled={cart.length === 0}>
+            Finalizar Compra
+          </Button>
         </div>
       </footer>
       <Footer />
+
+      {/* Estado de isOpen (no hay modal) */}
+      {isOpen && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-4 rounded-md shadow-md">
+            <h2 className="text-2xl font-bold mb-4">Finalizar Compra</h2>
+            <p className="text-lg mb-4">¿Estás seguro de que deseas finalizar la compra?</p>
+            <div className="flex justify-end">
+              <Button onClick={() => setIsOpen(false)}>Cancelar</Button>
+              <Button onClick={() => console.log("Finalizar compra")}>Finalizar Compra</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Tag, Grid, User, ShoppingBag, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Logo from "../assets/images/Logo.png";
 
@@ -27,7 +26,7 @@ export default function Header() {
         <Link to="/catalogo" className="text-foreground hover:text-primary">
           <Grid className="h-6 w-6" />
         </Link>
-        <Link to="#" className="text-foreground hover:text-primary">
+        <Link to="/login" className="text-foreground hover:text-primary">
           <User className="h-6 w-6" />
         </Link>
         <Link to="/carrito" className="text-foreground hover:text-primary">
