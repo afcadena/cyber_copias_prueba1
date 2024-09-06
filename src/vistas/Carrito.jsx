@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Logo from "../assets/images/Logo.png";
-import { Link } from "react-router-dom";
+import Header from "./header";
+import Footer from "./footer";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,245 +9,95 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  ArrowLeft,
-  Tag,
-  Grid,
-  User,
-  ShoppingBag,
-  Menu,
-  FileText,
-  Palette,
-  Book,
-} from "lucide-react";
-// Lista de productos de ejemplo
-const productos = [
-  {
-    id: 1,
-    nombre: "Camiseta",
-    precio: 19.99,
-    imagen: "/placeholder.svg?height=100&width=100",
-  },
-  {
-    id: 2,
-    nombre: "Pantalón",
-    precio: 39.99,
-    imagen: "/placeholder.svg?height=100&width=100",
-  },
-  {
-    id: 3,
-    nombre: "Zapatos",
-    precio: 59.99,
-    imagen: "/placeholder.svg?height=100&width=100",
-  },
-  {
-    id: 4,
-    nombre: "Gorra",
-    precio: 14.99,
-    imagen: "/placeholder.svg?height=100&width=100",
-  },
-];
+import { useCart } from "../context/CartContext";  // Importar el contexto del carrito
+import { XIcon } from 'lucide-react';  // Ícono de "X" para eliminar
 
 export default function CarritoDeCompras() {
-  const [productosSeleccionados, setProductosSeleccionados] = useState([]);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { cart, removeFromCart } = useCart();  // Obtener el carrito y la función para eliminar productos
+  const [quantities, setQuantities] = useState(() => {
+    const initialQuantities = {};
+    cart.forEach(product => {
+      initialQuantities[product.id] = 1;  // Inicialmente, cantidad = 1 para todos los productos
+    });
+    return initialQuantities;
+  });
 
-  const toggleProducto = (id) => {
-    setProductosSeleccionados((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-    );
+  const handleQuantityChange = (productId, newQuantity) => {
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: newQuantity < 1 ? 1 : newQuantity  // La cantidad mínima es 1
+    }));
   };
 
-  const comprar = () => {
-    setIsDialogOpen(true);
-  };
-
-  const finalizarCompra = (event) => {
-    event.preventDefault();
-    // Aquí iría la lógica para procesar la compra
-    alert("Compra finalizada con éxito!");
-    setIsDialogOpen(false);
-    setProductosSeleccionados([]);
-  };
-
-  const totalCompra = productosSeleccionados.reduce((total, id) => {
-    const producto = productos.find((p) => p.id === id);
-    return total + (producto ? producto.precio : 0);
+  const totalCompra = cart.reduce((total, producto) => {
+    const price = parseFloat(producto.price) || 0;  // Asegurarse de que el precio sea numérico
+    const quantity = quantities[producto.id] || 1;
+    return total + price * quantity;
   }, 0);
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex items-center justify-between p-4 bg-background shadow-md">
-        <Link to="/">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center text-primary"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            <span className="text-sm">Volver</span>
-          </Button>
-        </Link>
-        <div className="flex items-center">
-          <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
-          <h1 className="text-xl font-bold">CyberCopias</h1>
-        </div>
-        <nav className="hidden md:flex space-x-4">
-          <Link to="#ofertas" className="text-foreground hover:text-primary">
-            <Tag className="h-6 w-6" />
-          </Link>
-          <Link to="/catalogo" className="text-foreground hover:text-primary">
-            <Grid className="h-6 w-6" />
-          </Link>
-          <Link to="#" className="text-foreground hover:text-primary">
-            <User className="h-6 w-6" />
-          </Link>
-          <Link to="#" className="text-foreground hover:text-primary">
-            <ShoppingBag className="h-6 w-6" />
-          </Link>
-        </nav>
-        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="mr-2 md:hidden">
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right">
-            <SheetHeader>
-              <SheetTitle>Menú</SheetTitle>
-              <SheetDescription>Explora nuestras categorías</SheetDescription>
-            </SheetHeader>
-            <div className="grid gap-4 py-4">
-              <Button variant="ghost" className="w-full justify-start">
-                <FileText className="mr-2 h-4 w-4" />
-                Libros de dibujo
-              </Button>
-              <Button variant="ghost" className="w-full justify-start">
-                <Palette className="mr-2 h-4 w-4" />
-                Arte y manualidades
-              </Button>
-              <Button variant="ghost" className="w-full justify-start">
-                <Book className="mr-2 h-4 w-4" />
-                Cuadernos
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </header>
-
+      <Header />
       <main className="flex-1 container py-6">
         <h1 className="text-2xl font-bold mb-6">Carrito de Compras</h1>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {productos.map((producto) => (
-            <Card key={producto.id}>
-              <CardHeader>
-                <CardTitle>{producto.nombre}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <img
-                  src={producto.imagen}
-                  alt={producto.nombre}
-                  className="w-full h-40 object-cover mb-4"
-                />
-                <p className="text-2xl font-bold">
-                  ${producto.precio.toFixed(2)}
-                </p>
-              </CardContent>
-              <CardFooter className="flex justify-between items-center">
-                <Checkbox
-                  id={`producto-${producto.id}`}
-                  checked={productosSeleccionados.includes(producto.id)}
-                  onCheckedChange={() => toggleProducto(producto.id)}
-                />
-                <label
-                  htmlFor={`producto-${producto.id}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Seleccionar
-                </label>
-              </CardFooter>
-            </Card>
-          ))}
+          {cart.length > 0 ? (
+            cart.map((producto) => {
+              const price = parseFloat(producto.price) || 0;  // Asegurarse de que el precio sea numérico
+              const quantity = quantities[producto.id] || 1;
+
+              return (
+                <Card key={producto.id} className="relative">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <CardTitle>{producto.name}</CardTitle>
+                      <button
+                        onClick={() => removeFromCart(producto.id)}  // Eliminar producto
+                        className="text-red-500"
+                      >
+                        <XIcon className="w-6 h-6" />  {/* Botón X */}
+                      </button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <img
+                      src={producto.image}
+                      alt={producto.name}
+                      className="w-full h-40 object-cover mb-4"
+                    />
+                    <p className="text-2xl font-bold">
+                      ${price.toFixed(2)}
+                    </p>
+                    <div className="mt-2">
+                      <label className="block text-sm font-medium text-gray-700">Cantidad:</label>
+                      <input
+                        type="number"
+                        value={quantity}
+                        min="1"
+                        onChange={(e) => handleQuantityChange(producto.id, parseInt(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between items-center">
+                    <p className="text-lg">Subtotal: ${(price * quantity).toFixed(2)}</p>
+                  </CardFooter>
+                </Card>
+              );
+            })
+          ) : (
+            <p>No hay productos en el carrito.</p>
+          )}
         </div>
       </main>
 
       <footer className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container py-4 flex justify-end">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                onClick={comprar}
-                disabled={productosSeleccionados.length === 0}
-              >
-                Comprar Seleccionados ({productosSeleccionados.length})
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Finalizar Compra</DialogTitle>
-                <DialogDescription>
-                  Complete los siguientes datos para finalizar su compra.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={finalizarCompra}>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right">
-                      Nombre
-                    </Label>
-                    <Input id="name" className="col-span-3" required />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="email" className="text-right">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      className="col-span-3"
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="address" className="text-right">
-                      Dirección
-                    </Label>
-                    <Input id="address" className="col-span-3" required />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <p className="text-lg font-bold mr-auto">
-                    Total: ${totalCompra.toFixed(2)}
-                  </p>
-                  <Button type="submit">Confirmar Compra</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <p className="text-lg font-bold mr-auto">Total: ${totalCompra.toFixed(2)}</p>
+          <Button disabled={cart.length === 0}>Finalizar Compra</Button>
         </div>
       </footer>
+      <Footer />
     </div>
   );
 }

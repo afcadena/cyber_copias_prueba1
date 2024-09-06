@@ -29,7 +29,8 @@ export default function Login() {
       setTimeout(() => {
         setShowWelcome(false);
         if (user.role === 'admin') {
-          navigate('/inventario');
+          // Redirige al panel de administración si es admin
+          navigate('/admin');
         } else {
           navigate('/homecli');
         }

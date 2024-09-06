@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios'; // Asegúrate de importar axios
+import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StarIcon, HeartIcon, ShareIcon, ShoppingCartIcon } from 'lucide-react';
-import Header from "./header"; // Importa el componente Header
-import Footer from "./footer"; // Importa el componente Footer
+import Header from "./header";
+import Footer from "./footer";
+import { useCart } from '../context/CartContext';  // Importa el useCart
 
 export default function ProductDetail() {
-  const { id } = useParams(); // Obtiene el ID del producto desde la URL
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [error, setError] = useState(null);
+  const { addToCart } = useCart();  // Obtén la función addToCart
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -33,9 +36,17 @@ export default function ProductDetail() {
     fetchProduct();
   }, [id]);
 
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart(product);  // Agrega el producto al carrito
+      setMessage('Producto agregado al carrito');
+      setTimeout(() => setMessage(''), 3000); // Elimina el mensaje después de 3 segundos
+    }
+  };
+
   return (
     <>
-      <Header /> {/* Incluye el Header */}
+      <Header />
       <div className="container mx-auto px-4 py-8">
         {product ? (
           <div className="flex flex-col md:flex-row gap-8">
@@ -69,7 +80,7 @@ export default function ProductDetail() {
               <p className="text-3xl font-bold mb-4">${product.price ? product.price.toLocaleString() : "Precio no disponible"}</p>
               <p className="mb-4">{product.description || "Descripción no disponible."}</p>
               <div className="flex gap-4 mb-6">
-                <Button className="flex-1">
+                <Button className="flex-1" onClick={handleAddToCart}>
                   <ShoppingCartIcon className="w-4 h-4 mr-2" />
                   Agregar al carrito
                 </Button>
@@ -81,30 +92,16 @@ export default function ProductDetail() {
                   <ShareIcon className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="space-y-2 mb-6">
-                {product.details && product.details.length > 0 ? (
-                  product.details.map((detail, index) => (
-                    <div key={index} className="flex justify-between">
-                      <span className="font-semibold">{detail.label}:</span>
-                      <span>{detail.value}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p>No hay detalles disponibles.</p>
-                )}
-              </div>
               <Badge variant="outline" className="mb-4">Envío gratis</Badge>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <img src="/placeholder.svg?height=20&width=20" alt="cybercopias icon" className="w-5 h-5" />
-                <span>Vendido por Cybercopias</span>
-              </div>
             </div>
           </div>
         ) : (
           <p>{error ? error : "Cargando..."}</p>
         )}
+        {message && <div className="mt-4 p-4 bg-green-100 text-green-800 rounded">{message}</div>}
       </div>
-      <Footer /> {/* Incluye el Footer */}
+      <Footer />
     </>
   );
 }
+  
