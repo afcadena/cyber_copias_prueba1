@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -15,6 +15,7 @@ export default function GestionProveedores() {
   const [currentProveedor, setCurrentProveedor] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [proveedorToDelete, setProveedorToDelete] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (dataToEdit) {
@@ -70,6 +71,16 @@ export default function GestionProveedores() {
     setIsOpen(false);
   };
 
+  // Filtrar proveedores según el término de búsqueda
+  const filteredProveedores = proveedores?.filter(proveedor =>
+    proveedor.id.includes(searchTerm) ||
+    proveedor.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    proveedor.contacto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    proveedor.telefono.includes(searchTerm) ||
+    proveedor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    proveedor.direccion.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
@@ -77,7 +88,12 @@ export default function GestionProveedores() {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input className="pl-8" placeholder="Buscar proveedores..." />
+            <Input 
+              className="pl-8" 
+              placeholder="Buscar proveedores..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+            />
           </div>
           <Button onClick={handleNewProveedor}>
             <UserPlus className="mr-2 h-4 w-4" /> Nuevo Proveedor
@@ -86,7 +102,7 @@ export default function GestionProveedores() {
       </div>
 
       <div className="space-y-4">
-        {proveedores?.map((proveedor) => (
+        {filteredProveedores?.map((proveedor) => (
           <div key={proveedor.id} className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
             <div className="flex items-center space-x-4">
               <Avatar className="h-12 w-12">

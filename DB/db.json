@@ -330,5 +330,14 @@
       "email": "norma@norma.com",
       "direccion": "calle12"
     }
+  ],
+  "pedidos": [
+    {
+      "id": "1725731587174",
+      "cliente": "Luis Martínez",
+      "fecha": "2024-09-19",
+      "estado": "En proceso",
+      "total": 3555
+    }
   ]
 }

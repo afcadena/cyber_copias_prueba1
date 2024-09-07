@@ -21,8 +21,9 @@ import GestionProveedores from './vistas/Proveedores';
 import GestionVentas from './vistas/Ventas';
 import GestionCompras from './vistas/Compras';
 
-// Importar el proveedor de contexto para proveedores
+// Importar los proveedores de contexto
 import { CrudProviderProveedores } from './context/CrudContextProveedores';
+import { CrudProviderPedidos } from './context/CrudContextPedidos';
 
 import './App.css';
 
@@ -31,40 +32,41 @@ function App() {
     <Router>
       <CrudProviderForm>
         <CrudProviderInventario>
-          <CartProvider>
-            <Routes>
-              {/* Rutas públicas */}
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/catalogo" element={<Catalog />} />
-              <Route path="/cuenta" element={<Cuenta />} />
-              <Route path="/carrito" element={<CarritoDeCompras />} />
-              <Route path="/producto/:id" element={<ProductDetail />} />
-              <Route path="/homecli" element={<HomeCliente />} />
+          <CrudProviderPedidos> {/* Asegúrate de incluir el proveedor de pedidos aquí */}
+            <CartProvider>
+              <Routes>
+                {/* Rutas públicas */}
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/catalogo" element={<Catalog />} />
+                <Route path="/cuenta" element={<Cuenta />} />
+                <Route path="/carrito" element={<CarritoDeCompras />} />
+                <Route path="/producto/:id" element={<ProductDetail />} />
+                <Route path="/homecli" element={<HomeCliente />} />
 
-              {/* Rutas protegidas del admin */}
-              <Route path="/admin" element={
-                <ProtectedRoute role="admin">
-                  <AdminLayout />  {/* AdminLayout maneja todas las rutas de administración */}
-                </ProtectedRoute>
-              }>
-                <Route path="overview" element={<div>Vista General</div>} />
-                <Route path="inventario" element={<InventoryManagement />} />
+                {/* Rutas protegidas del admin */}
+                <Route path="/admin" element={
+                  <ProtectedRoute role="admin">
+                    <AdminLayout />  {/* AdminLayout maneja todas las rutas de administración */}
+                  </ProtectedRoute>
+                }>
+                  <Route path="inventario" element={<InventoryManagement />} />
 
-                {/* Envolver el componente de proveedores con su proveedor de contexto */}
-                <Route path="providers" element={
-                  <CrudProviderProveedores>
-                    <GestionProveedores />
-                  </CrudProviderProveedores>
-                } />
-                
-                <Route path="orders" element={<GestionPedidos />} />  {/* Pedidos */}
-                <Route path="purchases" element={<GestionCompras />} />  {/* Compras */}
-                <Route path="sales" element={<GestionVentas />} />  {/* Ventas */}
-              </Route>
-            </Routes>
-          </CartProvider>
+                  {/* Envolver el componente de proveedores con su proveedor de contexto */}
+                  <Route path="providers" element={
+                    <CrudProviderProveedores>
+                      <GestionProveedores />
+                    </CrudProviderProveedores>
+                  } />
+                  
+                  <Route path="orders" element={<GestionPedidos />} />  {/* Pedidos */}
+                  <Route path="purchases" element={<GestionCompras />} />  {/* Compras */}
+                  <Route path="sales" element={<GestionVentas />} />  {/* Ventas */}
+                </Route>
+              </Routes>
+            </CartProvider>
+          </CrudProviderPedidos> {/* Cierra el proveedor de pedidos aquí */}
         </CrudProviderInventario>
       </CrudProviderForm>
     </Router>

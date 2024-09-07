@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -6,16 +6,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Package, Edit, Trash2, Plus, Search } from 'lucide-react'
+import CrudContextPedidos from '../context/CrudContextPedidos'
 
 export default function GestionPedidos() {
-  const [pedidos, setPedidos] = useState([
-    { id: 1, cliente: 'Juan Pérez', fecha: '2023-06-01', estado: 'Pendiente', total: 150.00 },
-    { id: 2, cliente: 'María García', fecha: '2023-06-02', estado: 'Entregado', total: 200.50 },
-    { id: 3, cliente: 'Carlos López', fecha: '2023-06-03', estado: 'En proceso', total: 75.25 },
-  ])
+  const { db: pedidos, createData, updateData, deleteData, dataToEdit, setDataToEdit } = useContext(CrudContextPedidos)
 
   const [isOpen, setIsOpen] = useState(false)
   const [currentPedido, setCurrentPedido] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    if (dataToEdit) {
+      setCurrentPedido(dataToEdit)
+      setIsOpen(true)
+    } else {
+      setIsOpen(false)
+    }
+  }, [dataToEdit])
 
   const handleNewPedido = () => {
     setCurrentPedido(null)
@@ -23,13 +30,43 @@ export default function GestionPedidos() {
   }
 
   const handleEditPedido = (pedido) => {
-    setCurrentPedido(pedido)
+    setDataToEdit(pedido)
     setIsOpen(true)
   }
 
   const handleDeletePedido = (id) => {
-    setPedidos(pedidos.filter(pedido => pedido.id !== id))
+    deleteData(id)
   }
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    const form = event.target
+    const total = parseFloat(form.total.value) || 0
+
+    const newPedido = {
+      id: currentPedido?.id || Date.now().toString(),
+      cliente: form.cliente.value,
+      fecha: form.fecha.value,
+      estado: form.estado.value,
+      total,
+    }
+
+    if (currentPedido) {
+      updateData(newPedido)
+    } else {
+      createData(newPedido)
+    }
+    setIsOpen(false)
+    setDataToEdit(null)
+  }
+
+  // Filtrar pedidos según el término de búsqueda
+  const filteredPedidos = pedidos.filter(pedido =>
+    (pedido.id && pedido.id.toString().toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (pedido.cliente && pedido.cliente.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (pedido.fecha && pedido.fecha.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (pedido.estado && pedido.estado.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
 
   return (
     <div className="container mx-auto p-4">
@@ -38,7 +75,12 @@ export default function GestionPedidos() {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input className="pl-8" placeholder="Buscar pedidos..." />
+            <Input 
+              className="pl-8" 
+              placeholder="Buscar pedidos..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+            />
           </div>
           <Button onClick={handleNewPedido}>
             <Plus className="mr-2 h-4 w-4" /> Nuevo Pedido
@@ -46,7 +88,7 @@ export default function GestionPedidos() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {pedidos.map((pedido) => (
+        {filteredPedidos.map((pedido) => (
           <Card key={pedido.id} className="overflow-hidden">
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="flex justify-between items-center">
@@ -58,7 +100,7 @@ export default function GestionPedidos() {
             <CardContent className="pt-6">
               <p><strong>Cliente:</strong> {pedido.cliente}</p>
               <p><strong>Estado:</strong> {pedido.estado}</p>
-              <p><strong>Total:</strong> ${pedido.total.toFixed(2)}</p>
+              <p><strong>Total:</strong> ${isNaN(pedido.total) ? 'N/A' : pedido.total.toFixed(2)}</p>
             </CardContent>
             <CardFooter className="bg-muted">
               <div className="flex justify-between w-full">
@@ -74,23 +116,28 @@ export default function GestionPedidos() {
         ))}
       </div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        if (!open) {
+          setDataToEdit(null)
+        }
+        setIsOpen(open)
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{currentPedido ? 'Editar Pedido' : 'Nuevo Pedido'}</DialogTitle>
           </DialogHeader>
-          <form className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="cliente">Cliente</Label>
-              <Input id="cliente" defaultValue={currentPedido?.cliente} />
+              <Input id="cliente" name="cliente" defaultValue={currentPedido?.cliente || ''} />
             </div>
             <div>
               <Label htmlFor="fecha">Fecha</Label>
-              <Input id="fecha" type="date" defaultValue={currentPedido?.fecha} />
+              <Input id="fecha" name="fecha" type="date" defaultValue={currentPedido?.fecha || ''} />
             </div>
             <div>
               <Label htmlFor="estado">Estado</Label>
-              <Select defaultValue={currentPedido?.estado}>
+              <Select id="estado" name="estado" defaultValue={currentPedido?.estado || 'Pendiente'}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
@@ -103,7 +150,7 @@ export default function GestionPedidos() {
             </div>
             <div>
               <Label htmlFor="total">Total</Label>
-              <Input id="total" type="number" step="0.01" defaultValue={currentPedido?.total} />
+              <Input id="total" name="total" type="number" step="0.01" defaultValue={currentPedido?.total || ''} />
             </div>
             <Button type="submit">Guardar</Button>
           </form>

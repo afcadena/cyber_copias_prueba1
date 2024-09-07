@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   BarChart, 
   Package, 
@@ -15,17 +15,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 const AdminLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // Para obtener la ruta actual
   const { logoutUser } = useContext(CrudContextForm); // Accede a la función logoutUser del contexto
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const menuItems = [
-    { icon: BarChart, label: 'Vista General', path: '/admin/overview' },
     { icon: Package, label: 'Inventario', path: '/admin/inventario' },
     { icon: Users, label: 'Proveedores', path: '/admin/providers' },  // Proveedores
     { icon: ShoppingCart, label: 'Pedidos', path: '/admin/orders' },  // Pedidos
     { icon: DollarSign, label: 'Compras', path: '/admin/purchases' },  // Compras
     { icon: TrendingUp, label: 'Ventas', path: '/admin/sales' },  // Ventas
   ];
+
+  useEffect(() => {
+    // Redirige a la pestaña de Inventario si no estamos en esa ruta ya
+    if (location.pathname === '/admin') {
+      navigate('/admin/inventario');
+    }
+  }, [location.pathname, navigate]);
 
   const handleLogoutClick = () => {
     setIsConfirmOpen(true); // Abre el modal de confirmación
@@ -55,7 +62,7 @@ const AdminLayout = () => {
             <Button
               key={index}
               variant="ghost"
-              className="w-full justify-start px-6 py-3 text-left text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              className={`w-full justify-start px-6 py-3 text-left text-gray-600 hover:bg-gray-100 hover:text-gray-900 ${location.pathname === item.path ? 'bg-gray-200 text-gray-900' : ''}`}
               onClick={() => navigate(item.path)}
             >
               <item.icon className="mr-4 h-5 w-5" />
