@@ -8,7 +8,7 @@
       "image": "/placeholder.svg?height=200&width=200",
       "rating": 0,
       "reviews": 0,
-      "stock": "60",
+      "stock": "40",
       "status": "active"
     },
     {
@@ -311,6 +311,24 @@
       "email": "iglesiag1908@gmail.com",
       "password": "Alek122334.",
       "role": "cliente"
+    }
+  ],
+  "providers": [
+    {
+      "id": "1",
+      "nombre": "Papelería Mayorista",
+      "contacto": "Ana Martínez",
+      "telefono": "555-432",
+      "email": "ana@papeleriamayorista.com",
+      "direccion": "Calle Falsa 123"
+    },
+    {
+      "id": "1725726335236",
+      "nombre": "Hojas Norma",
+      "contacto": "Norma Hojas",
+      "telefono": "30229604106",
+      "email": "norma@norma.com",
+      "direccion": "calle12"
     }
   ]
 }

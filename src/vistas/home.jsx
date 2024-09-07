@@ -73,24 +73,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Ofertas Especiales */}
-        <section className="bg-gray-100 py-8">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-bold mb-4">Ofertas Especiales</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[1, 2, 3].map((_, index) => (
-                <Card key={index}>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2">Oferta {index + 1}</h3>
-                    <p>Descripción de la oferta...</p>
-                    <Button className="mt-2">Ver más</Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Categoría Destacada */}
         <section className="bg-white py-8">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,12 +1,14 @@
 import { createContext, useEffect, useState } from "react";
 import { helpHttp } from "../helpers/helpHttp";
+import { useNavigate } from "react-router-dom"; // Importa useNavigate
 
 const CrudContextForm = createContext();
 
 const CrudProvider = ({ children }) => {
-  const [db, setDb] = useState([]);
+  const [db, setDb] = useState([]);  // Aseguramos que db sea siempre un array inicialmente
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   const api = helpHttp();
   const url = "http://localhost:3000/users";
@@ -14,10 +16,10 @@ const CrudProvider = ({ children }) => {
   useEffect(() => {
     api.get(url).then((res) => {
       if (!res.err) {
-        setDb(res);
+        setDb(Array.isArray(res) ? res : []);  // Aseguramos que 'res' sea un array
         setError(null);
       } else {
-        setDb([]);
+        setDb([]);  // En caso de error, db es un array vacío
         setError(res);
       }
     });
@@ -44,6 +46,11 @@ const CrudProvider = ({ children }) => {
   };
 
   const loginUser = async (email, password) => {
+    if (!Array.isArray(db)) {
+      setError({ err: true, status: 500, statusText: "Error en la base de datos de usuarios" });
+      return null;
+    }
+
     const user = db.find((user) => user.email === email && user.password === password);
 
     if (user) {
@@ -57,6 +64,7 @@ const CrudProvider = ({ children }) => {
 
   const logoutUser = () => {
     setCurrentUser(null); // Limpiar el usuario autenticado
+    navigate("/login"); // Redirigir a la página de inicio de sesión
   };
 
   const data = {
