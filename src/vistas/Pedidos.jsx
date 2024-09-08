@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Package, Edit, Trash2, Plus, Search } from 'lucide-react'
-import CrudContextPedidos from '../context/CrudContextPedidos'
+import CrudContextPedidos from "../context/CrudContextPedidos";
+
 
 export default function GestionPedidos() {
   const { db: pedidos, createData, updateData, deleteData, dataToEdit, setDataToEdit } = useContext(CrudContextPedidos)
@@ -14,10 +15,12 @@ export default function GestionPedidos() {
   const [isOpen, setIsOpen] = useState(false)
   const [currentPedido, setCurrentPedido] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [products, setProducts] = useState([{ name: '', quantity: 0, price: 0 }])
 
   useEffect(() => {
     if (dataToEdit) {
       setCurrentPedido(dataToEdit)
+      setProducts(dataToEdit.products || [{ name: '', quantity: 0, price: 0 }])
       setIsOpen(true)
     } else {
       setIsOpen(false)
@@ -26,6 +29,7 @@ export default function GestionPedidos() {
 
   const handleNewPedido = () => {
     setCurrentPedido(null)
+    setProducts([{ name: '', quantity: 0, price: 0 }])
     setIsOpen(true)
   }
 
@@ -41,7 +45,7 @@ export default function GestionPedidos() {
   const handleSubmit = (event) => {
     event.preventDefault()
     const form = event.target
-    const total = parseFloat(form.total.value) || 0
+    const total = products.reduce((sum, product) => sum + product.quantity * product.price, 0)
 
     const newPedido = {
       id: currentPedido?.id || Date.now().toString(),
@@ -49,6 +53,7 @@ export default function GestionPedidos() {
       fecha: form.fecha.value,
       estado: form.estado.value,
       total,
+      products,
     }
 
     if (currentPedido) {
@@ -58,6 +63,21 @@ export default function GestionPedidos() {
     }
     setIsOpen(false)
     setDataToEdit(null)
+  }
+
+  const handleProductChange = (index, field, value) => {
+    const newProducts = [...products]
+    newProducts[index][field] = field === 'name' ? value : parseFloat(value)
+    setProducts(newProducts)
+  }
+
+  const addProduct = () => {
+    setProducts([...products, { name: '', quantity: 0, price: 0 }])
+  }
+
+  const removeProduct = (index) => {
+    const newProducts = products.filter((_, i) => i !== index)
+    setProducts(newProducts)
   }
 
   // Filtrar pedidos según el término de búsqueda
@@ -100,7 +120,17 @@ export default function GestionPedidos() {
             <CardContent className="pt-6">
               <p><strong>Cliente:</strong> {pedido.cliente}</p>
               <p><strong>Estado:</strong> {pedido.estado}</p>
-              <p><strong>Total:</strong> ${isNaN(pedido.total) ? 'N/A' : pedido.total.toFixed(2)}</p>
+              <p><strong>Total:</strong> ${pedido.total.toFixed(2)}</p>
+              <div className="mt-4">
+                <strong>Productos:</strong>
+                <ul className="list-disc list-inside">
+                  {pedido.products && pedido.products.map((product, index) => (
+                    <li key={index}>
+                      {product.name} - Cantidad: {product.quantity}, Precio: ${product.price.toFixed(2)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </CardContent>
             <CardFooter className="bg-muted">
               <div className="flex justify-between w-full">
@@ -149,8 +179,35 @@ export default function GestionPedidos() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="total">Total</Label>
-              <Input id="total" name="total" type="number" step="0.01" defaultValue={currentPedido?.total || ''} />
+              <Label>Productos</Label>
+              {products.map((product, index) => (
+                <div key={index} className="flex space-x-2 mb-2">
+                  <Input
+                    placeholder="Nombre del producto"
+                    value={product.name}
+                    onChange={(e) => handleProductChange(index, 'name', e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Cantidad"
+                    value={product.quantity}
+                    onChange={(e) => handleProductChange(index, 'quantity', e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="Precio"
+                    value={product.price}
+                    onChange={(e) => handleProductChange(index, 'price', e.target.value)}
+                  />
+                  <Button type="button" variant="destructive" onClick={() => removeProduct(index)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" onClick={addProduct}>
+                <Plus className="mr-2 h-4 w-4" /> Agregar Producto
+              </Button>
             </div>
             <Button type="submit">Guardar</Button>
           </form>

@@ -8,7 +8,7 @@
       "image": "/placeholder.svg?height=200&width=200",
       "rating": 0,
       "reviews": 0,
-      "stock": "40",
+      "stock": "30",
       "status": "active"
     },
     {
@@ -318,7 +318,7 @@
       "id": "1",
       "nombre": "Papelería Mayorista",
       "contacto": "Ana Martínez",
-      "telefono": "555-432",
+      "telefono": "555-433",
       "email": "ana@papeleriamayorista.com",
       "direccion": "Calle Falsa 123"
     },
@@ -329,6 +329,22 @@
       "telefono": "30229604106",
       "email": "norma@norma.com",
       "direccion": "calle12"
+    },
+    {
+      "id": "1725741595540",
+      "nombre": "Lapices",
+      "contacto": "Valentina",
+      "telefono": "30229604105",
+      "email": "valentina@test.co",
+      "direccion": "calle23"
+    },
+    {
+      "id": "1725748630135",
+      "nombre": "Panamericana",
+      "contacto": "Panamericana",
+      "telefono": "12345",
+      "email": "panamericana@test.com",
+      "direccion": "calle 12"
     }
   ],
   "pedidos": [
@@ -337,7 +353,51 @@
       "cliente": "Luis Martínez",
       "fecha": "2024-09-19",
       "estado": "En proceso",
-      "total": 3555
+      "total": 3555,
+      "products": [
+        {
+          "name": "Producto 1",
+          "quantity": 2,
+          "price": 1000
+        },
+        {
+          "name": "Producto 2",
+          "quantity": 1,
+          "price": 1555
+        }
+      ]
+    }
+  ],
+  "compras": [
+    {
+      "id": "1",
+      "proveedor": "Papelería Mayorista",
+      "fecha": "2023-06-01",
+      "total": 1500,
+      "estado": "Recibido",
+      "producto": "Cuadernos",
+      "precio": 5.75,
+      "cantidad": 100
+    },
+    {
+      "id": "2",
+      "proveedor": "Distribuidora de Útiles",
+      "fecha": "2023-06-05",
+      "total": 2000.5,
+      "estado": "Pendiente",
+      "producto": "Lápices",
+      "precio": 1.2,
+      "cantidad": 500
+    },
+    {
+      "id": "3",
+      "proveedor": "Importadora de Artículos",
+      "fecha": "2023-06-10",
+      "total": 750.25,
+      "estado": "En tránsito",
+      "producto": "Borradores",
+      "precio": 0.75,
+      "cantidad": 300
     }
   ]
 }

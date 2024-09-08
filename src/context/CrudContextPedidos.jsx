@@ -39,13 +39,14 @@ const CrudProviderPedidos = ({ children }) => {
     };
 
     let options = {
-      body: newData,
+      body: JSON.stringify(newData), // Convertir el cuerpo a JSON
       headers: { "content-type": "application/json" },
     };
 
     api.post(url, options).then((res) => {
       if (!res.err) {
         setDb([...db, res]);
+        setError(null);
       } else {
         setError(res);
       }
@@ -56,7 +57,7 @@ const CrudProviderPedidos = ({ children }) => {
     let endpoint = `${url}/${data.id}`;
   
     let options = {
-      body: data,
+      body: JSON.stringify(data), // Convertir el cuerpo a JSON
       headers: { "content-type": "application/json" },
     };
 
@@ -64,6 +65,7 @@ const CrudProviderPedidos = ({ children }) => {
       if (!res.err) {
         let newData = db.map((el) => (el.id === data.id ? res : el));
         setDb(newData);
+        setError(null);
       } else {
         setError(res);
       }
@@ -80,6 +82,7 @@ const CrudProviderPedidos = ({ children }) => {
       if (!res.err) {
         let newData = db.filter((el) => el.id !== id);
         setDb(newData);
+        setError(null);
       } else {
         setError(res);
       }
