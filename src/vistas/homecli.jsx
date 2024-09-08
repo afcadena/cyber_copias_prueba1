@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Footer from './footer'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,8 +8,15 @@ import { ChevronRight, LogOut, ShoppingCart, Tag, Grid, User, ShoppingBag, Searc
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import Logo from "../assets/images/Logo.png";
+import { CrudContextForm } from "../context/CrudContextForms";
 
 const HomePage = () => {
+  const { logoutUser } = useContext(CrudContextForm);
+
+  const handleLogout = () => {
+    logoutUser();
+  };
+
   const categories = [
     { name: "Tecnología", icon: "💻", image: "/placeholder.svg?height=200&width=200" },
     { name: "Mundo GZ", icon: "🎮", image: "/placeholder.svg?height=200&width=200" },
@@ -21,39 +28,36 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-x-hidden">
       <header className="flex items-center justify-between p-4 bg-background shadow-md">
-      <div className="flex items-center">
-        <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
-        <Link to="/home" className="text-xl font-bold">
-          CyberCopias
-        </Link>
-      </div>
-      <div className="flex-1 max-w-xl mx-4">
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="Buscar productos..." className="pl-8 w-full" />
+        <div className="flex items-center">
+          <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
+          <Link to="/home" className="text-xl font-bold">
+            CyberCopias
+          </Link>
         </div>
-      </div>
-      <nav className="flex items-center space-x-4">
-        <Link to="#ofertas" className="text-foreground hover:text-primary">
-          <Tag className="h-6 w-6" />
-        </Link>
-        <Link to="/catalogo" className="text-foreground hover:text-primary">
-          <Grid className="h-6 w-6" />
-        </Link>
-        <Link to="/cuenta" className="text-foreground hover:text-primary">
-          <User className="h-6 w-6" />
-        </Link>
-        <Link to="/carrito" className="text-foreground hover:text-primary">
-          <ShoppingCart className="h-6 w-6" />
-        </Link>
-        <Link to="#" className="text-foreground hover:text-primary">
-          <ShoppingBag className="h-6 w-6" />
-        </Link>
-        <Link to="#" className="text-foreground hover:text-primary">
-          <LogOut className="h-6 w-6" />
-        </Link>
-      </nav>
-    </header>
+        <div className="flex-1 max-w-xl mx-4">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input type="search" placeholder="Buscar productos..." className="pl-8 w-full" />
+          </div>
+        </div>
+        <nav className="flex items-center space-x-4">
+          <Link to="#ofertas" className="text-foreground hover:text-primary">
+            <Tag className="h-6 w-6" />
+          </Link>
+          <Link to="/catalogo" className="text-foreground hover:text-primary">
+            <Grid className="h-6 w-6" />
+          </Link>
+          <Link to="/cuenta" className="text-foreground hover:text-primary">
+            <User className="h-6 w-6" />
+          </Link>
+          <Link to="/carrito" className="text-foreground hover:text-primary">
+            <ShoppingCart className="h-6 w-6" />
+          </Link>
+          <Link to="#" onClick={handleLogout} className="text-foreground hover:text-primary">
+            <LogOut className="h-6 w-6" />
+          </Link>
+        </nav>
+      </header>
 
       {/* Hero Carousel */}
       <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-4">

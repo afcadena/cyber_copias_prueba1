@@ -1,14 +1,17 @@
 import { createContext, useEffect, useState } from "react";
 import { helpHttp } from "../helpers/helpHttp";
-import { useNavigate } from "react-router-dom"; // Importa useNavigate
+import { useNavigate } from "react-router-dom";
 
 const CrudContextForm = createContext();
 
 const CrudProvider = ({ children }) => {
-  const [db, setDb] = useState([]);  // Aseguramos que db sea siempre un array inicialmente
+  const [db, setDb] = useState([]);
   const [error, setError] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-  const navigate = useNavigate(); // Inicializa useNavigate
+  const [currentUser, setCurrentUser] = useState(() => {
+    const savedUser = localStorage.getItem("currentUser");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const navigate = useNavigate();
 
   const api = helpHttp();
   const url = "http://localhost:3000/users";
@@ -16,10 +19,10 @@ const CrudProvider = ({ children }) => {
   useEffect(() => {
     api.get(url).then((res) => {
       if (!res.err) {
-        setDb(Array.isArray(res) ? res : []);  // Aseguramos que 'res' sea un array
+        setDb(Array.isArray(res) ? res : []);
         setError(null);
       } else {
-        setDb([]);  // En caso de error, db es un array vacío
+        setDb([]);
         setError(res);
       }
     });
@@ -27,20 +30,23 @@ const CrudProvider = ({ children }) => {
 
   const registerUser = async (userData) => {
     try {
-      userData.id = Date.now(); // Generar un ID único basado en la marca de tiempo
-      userData.role = "cliente"; // Establecer el rol predeterminado como "cliente"
+      userData.id = Date.now();
+      userData.role = "cliente";
       
       const res = await api.post(url, { body: userData, headers: { "content-type": "application/json" } });
       if (!res.err) {
         setDb([...db, res]);
-        setCurrentUser(res); // Establecer el nuevo usuario como el usuario autenticado
+        setCurrentUser(res);
+        localStorage.setItem("currentUser", JSON.stringify(res));
         return res;
       } else {
         setError(res);
+        console.error("Error al registrar el usuario:", res);
         return null;
       }
     } catch (error) {
       setError(error);
+      console.error("Error de red al registrar usuario:", error);
       return null;
     }
   };
@@ -51,10 +57,16 @@ const CrudProvider = ({ children }) => {
       return null;
     }
 
+    if (!email || !password) {
+      setError({ err: true, status: 400, statusText: "Faltan credenciales" });
+      return null;
+    }
+
     const user = db.find((user) => user.email === email && user.password === password);
 
     if (user) {
-      setCurrentUser(user); // Establecer el usuario autenticado
+      setCurrentUser(user);
+      localStorage.setItem("currentUser", JSON.stringify(user));
       return user;
     } else {
       setError({ err: true, status: 401, statusText: "Credenciales inválidas" });
@@ -63,8 +75,9 @@ const CrudProvider = ({ children }) => {
   };
 
   const logoutUser = () => {
-    setCurrentUser(null); // Limpiar el usuario autenticado
-    navigate("/login"); // Redirigir a la página de inicio de sesión
+    setCurrentUser(null);
+    localStorage.removeItem("currentUser");
+    navigate("/login");
   };
 
   const data = {

@@ -1,53 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./header";
 import Footer from "./footer";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { useCart } from "../context/CartContext";  // Importar el contexto del carrito
-import { XIcon } from 'lucide-react';  // Ícono de "X" para eliminar
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCart } from "../context/CartContext"; // Importar el contexto del carrito
+import { XIcon } from 'lucide-react'; // Ícono de "X" para eliminar
+import { useNavigate } from "react-router-dom"; // Usar useNavigate de react-router-dom
 
 export default function CarritoDeCompras() {
-  const { cart, removeFromCart } = useCart();  // Obtener el carrito y la función para eliminar productos
+  const { cart, removeFromCart } = useCart(); // Obtener el carrito y la función para eliminar productos
   const [quantities, setQuantities] = useState(() => {
     const initialQuantities = {};
     cart.forEach(product => {
-      initialQuantities[product.id] = 1;  // Inicialmente, cantidad = 1 para todos los productos
+      initialQuantities[product.id] = 1; // Inicialmente, cantidad = 1 para todos los productos
     });
     return initialQuantities;
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Variable de estado para indicar si el usuario ha iniciado sesión
-  const [isOpen, setIsOpen] = useState(false);  // Estado para el modal (removed the Modal component)
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Estado de autenticación
+  const [isOpen, setIsOpen] = useState(false); // Estado para el modal
+  const navigate = useNavigate(); // Hook de react-router-dom para redireccionar
 
-  const handleLogin = () => {
-    // Lógica para iniciar sesión
-    setIsAuthenticated(true);
-  };
+  // Verificar el estado de autenticación al montar el componente y cuando cambie el carrito
+  useEffect(() => {
+    const userLoggedIn = Boolean(localStorage.getItem("user")); // Verificar si hay usuario en el localStorage
+    setIsAuthenticated(userLoggedIn);
+  }, [cart]); // Añadir 'cart' como dependencia
 
   const handleQuantityChange = (productId, newQuantity) => {
     setQuantities(prev => ({
       ...prev,
-      [productId]: newQuantity < 1 ? 1 : newQuantity  // La cantidad mínima es 1
+      [productId]: newQuantity < 1 ? 1 : newQuantity // La cantidad mínima es 1
     }));
   };
 
+  const handleRemoveFromCart = (productId) => {
+    removeFromCart(productId);
+    setQuantities(prev => {
+      const newQuantities = { ...prev };
+      delete newQuantities[productId]; // Eliminar la cantidad de ese producto
+      return newQuantities;
+    });
+  };
+
   const totalCompra = cart.reduce((total, producto) => {
-    const price = parseFloat(producto.price) || 0;  // Asegurarse de que el precio sea numérico
+    const price = parseFloat(producto.price) || 0; // Asegurarse de que el precio sea numérico
     const quantity = quantities[producto.id] || 1;
     return total + price * quantity;
   }, 0);
 
   const handleFinalizarCompra = () => {
-    if (!user) {
+    if (!isAuthenticated) {
       // Si no ha iniciado sesión, redirigir a la página de login
-      window.location.href = "/login";
+      navigate("/login");
     } else {
-      // Si ha iniciado sesión, abrir el estado de isOpen (no hay modal)
+      // Si ha iniciado sesión, abrir el estado de isOpen
       setIsOpen(true);
     }
   };
@@ -60,7 +66,7 @@ export default function CarritoDeCompras() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {cart.length > 0 ? (
             cart.map((producto) => {
-              const price = parseFloat(producto.price) || 0;  // Asegurarse de que el precio sea numérico
+              const price = parseFloat(producto.price) || 0; // Asegurarse de que el precio sea numérico
               const quantity = quantities[producto.id] || 1;
 
               return (
@@ -69,10 +75,10 @@ export default function CarritoDeCompras() {
                     <div className="flex justify-between items-start">
                       <CardTitle>{producto.name}</CardTitle>
                       <button
-                        onClick={() => removeFromCart(producto.id)}  // Eliminar producto
+                        onClick={() => handleRemoveFromCart(producto.id)} // Eliminar producto
                         className="text-red-500"
                       >
-                        <XIcon className="w-6 h-6" />  {/* Botón X */}
+                        <XIcon className="w-6 h-6" /> {/* Botón X */}
                       </button>
                     </div>
                   </CardHeader>
@@ -109,7 +115,7 @@ export default function CarritoDeCompras() {
       </main>
 
       <footer className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container py-4 flex justify-end">
+        <div className="container py-4 flex justify-end">
           <p className="text-lg font-bold mr-auto">Total: ${totalCompra.toFixed(2)}</p>
           <Button onClick={handleFinalizarCompra} disabled={cart.length === 0}>
             Finalizar Compra
@@ -118,7 +124,7 @@ export default function CarritoDeCompras() {
       </footer>
       <Footer />
 
-      {/* Estado de isOpen (no hay modal) */}
+      {/* Modal */}
       {isOpen && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-4 rounded-md shadow-md">
@@ -126,7 +132,13 @@ export default function CarritoDeCompras() {
             <p className="text-lg mb-4">¿Estás seguro de que deseas finalizar la compra?</p>
             <div className="flex justify-end">
               <Button onClick={() => setIsOpen(false)}>Cancelar</Button>
-              <Button onClick={() => console.log("Finalizar compra")}>Finalizar Compra</Button>
+              <Button onClick={() => {
+                console.log("Finalizar compra"); 
+                // Aquí podrías agregar la lógica para procesar la compra
+                setIsOpen(false); // Cerrar el modal después de finalizar la compra
+              }}>
+                Finalizar Compra
+              </Button>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,7 @@ import Header from './header';
 import Footer from './footer';  
 
 export default function Login() {
-  const { loginUser, error } = useContext(CrudContextForm);
+  const { loginUser, error, currentUser } = useContext(CrudContextForm);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +18,17 @@ export default function Login() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [userRole, setUserRole] = useState(null); 
   const navigate = useNavigate();
+
+  // Redirigir a la página adecuada si el usuario ya está autenticado
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/homecli');
+      }
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +40,6 @@ export default function Login() {
       setTimeout(() => {
         setShowWelcome(false);
         if (user.role === 'admin') {
-          // Redirige al panel de administración si es admin
           navigate('/admin');
         } else {
           navigate('/homecli');
