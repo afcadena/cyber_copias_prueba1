@@ -313,6 +313,14 @@
       "email": "iglesiag1908@gmail.com",
       "password": "Alek122334.",
       "role": "cliente"
+    },
+    {
+      "id": "10",
+      "name": "Luis",
+      "email": "lagalicia4@soy.sena.edu.co",
+      "password": "Luis1212",
+      "confirmpassword": "Luis1212",
+      "role": "admin"
     }
   ],
   "providers": [
