@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Tag, Grid, User, ShoppingBag, Search } from "lucide-react";
+import { ShoppingCart, Grid, User, ShoppingBag, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Logo from "../assets/images/Logo.png";
 
@@ -20,9 +20,6 @@ export default function Header() {
         </div>
       </div>
       <nav className="flex items-center space-x-4">
-        <Link to="#ofertas" className="text-foreground hover:text-primary">
-          <Tag className="h-6 w-6" />
-        </Link>
         <Link to="/catalogo" className="text-foreground hover:text-primary">
           <Grid className="h-6 w-6" />
         </Link>

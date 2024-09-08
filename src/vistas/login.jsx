@@ -102,7 +102,7 @@ export default function Login() {
             <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
               <div className="bg-white p-8 rounded shadow-lg">
                 <h2 className="text-xl font-semibold">¡Bienvenido!</h2>
-                <p>Te has iniciado sesión con éxito. {userRole === 'admin' ? "Eres un Administrador" : "Eres un Usuario"}</p>
+                <p>Te has iniciado sesión con éxito. {userRole === 'admin' ? "Eres un Administrador" : "Eres un Cliente"}</p>
               </div>
             </div>
           )}
