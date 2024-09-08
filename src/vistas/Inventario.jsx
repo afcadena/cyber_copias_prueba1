@@ -48,7 +48,7 @@ export default function Inventory() {
   const handleSaveEdit = () => {
     if (editingProduct) {
       // Verificar si todos los campos están completos
-      if (!editingProduct.name || !editingProduct.category || !editingProduct.price || !editingProduct.stock || !editingProduct.image) {
+      if (!editingProduct.name || !editingProduct.category || !editingProduct.price || !editingProduct.stock || !editingproduct.imageUrl) {
         setErrorMessage("Todos los campos deben ser completados.");
         setIsErrorDialogOpen(true);
         return;
@@ -67,7 +67,7 @@ export default function Inventory() {
 
   const handleAddProduct = () => {
     // Verificar si todos los campos están completos
-    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newProduct.image) {
+    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newproduct.imageUrl) {
       setErrorMessage("Todos los campos deben ser completados.");
       setIsErrorDialogOpen(true);
       return;
@@ -162,7 +162,7 @@ export default function Inventory() {
                 <Input
                   id="image"
                   type="text"
-                  value={newProduct.image}
+                  value={newproduct.imageUrl}
                   onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
                   className="col-span-3"
                 />
@@ -327,7 +327,7 @@ export default function Inventory() {
                 <Input
                   id="edit-image"
                   type="text"
-                  value={editingProduct.image}
+                  value={editingproduct.imageUrl}
                   onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
                   className="col-span-3"
                 />

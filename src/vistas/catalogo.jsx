@@ -116,7 +116,7 @@ export default function Catalog() {
                   onClick={() => handleProductClick(product)} 
                 >
                   <CardHeader className="p-4">
-                    <img src={product.image} alt={product.name} className="w-full h-48 object-contain" />
+                    <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-contain" />
                   </CardHeader>
                   <CardContent className="p-4">
                     <CardTitle className="text-sm font-medium line-clamp-2 mb-2">{product.name}</CardTitle>

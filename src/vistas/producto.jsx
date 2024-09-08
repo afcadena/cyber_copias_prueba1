@@ -22,8 +22,8 @@ export default function ProductDetail() {
         const response = await axios.get(`http://localhost:3000/products/${id}`);
         const product = response.data;
         setProduct(product);
-        if (product.images && product.images.length > 0) {
-          setMainImage(product.images[0]);
+        if (product.imageUrls && product.imageUrls.length > 0) {
+          setMainImage(product.imageUrls[0]);
         } else {
           setMainImage("/placeholder.svg");
         }
@@ -53,8 +53,8 @@ export default function ProductDetail() {
             <div className="md:w-1/2">
               <img src={mainImage} alt={product.name} className="w-full h-auto rounded-lg shadow-md mb-4" />
               <div className="flex gap-4 overflow-x-auto">
-                {product.images && product.images.length > 0 ? (
-                  product.images.map((img, index) => (
+                {product.imageUrls && product.imageUrls.length > 0 ? (
+                  product.imageUrls.map((img, index) => (
                     <img 
                       key={index} 
                       src={img} 
