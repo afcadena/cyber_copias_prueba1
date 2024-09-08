@@ -92,9 +92,9 @@ const HomePage = () => {
                     <Card>
                       <CardContent className="p-4">
                         <div className="aspect-square bg-gray-200 rounded-md mb-2"></div>
-                        <h4 className="font-semibold">Producto {productIndex + 1}</h4>
+                        <h4 className="font-semibold ">Producto {productIndex + 1}</h4>
                         <p className="text-sm text-gray-500">$ 199.900</p>
-                        <Button className="mt-2 w-full">Agregar al carrito</Button>
+                        <Button className="mt-2 w-full bg-gray-800 text-white">Agregar al carrito</Button>
                       </CardContent>
                     </Card>
                   </CarouselItem>
