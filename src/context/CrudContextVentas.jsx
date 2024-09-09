@@ -1,16 +1,18 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { helpHttp } from '../helpers/helpHttp';
 
-const CrudContextCompras = createContext();
+// Crear el contexto
+const CrudContextVentas = createContext();
 
-export function CrudProviderCompras({ children }) {
+// Proveedor del contexto
+export function CrudProviderVentas({ children }) {
   const [db, setDb] = useState([]);
   const [dataToEdit, setDataToEdit] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const api = helpHttp();
-  const url = 'http://localhost:3000/compras';
+  const url = 'http://localhost:3000/ventas'; // URL del endpoint de ventas
 
   useEffect(() => {
     setLoading(true);
@@ -74,13 +76,16 @@ export function CrudProviderCompras({ children }) {
     });
   };
 
+  // Proveer el contexto a los componentes hijos
   return (
-    <CrudContextCompras.Provider value={{ db, createData, updateData, deleteData, dataToEdit, setDataToEdit, error, loading }}>
+    <CrudContextVentas.Provider value={{ db, createData, updateData, deleteData, dataToEdit, setDataToEdit, error, loading }}>
       {children}
-    </CrudContextCompras.Provider>
+    </CrudContextVentas.Provider>
   );
 }
 
-export const useCrudContextCompras = () => useContext(CrudContextCompras);
+// Hook personalizado para usar el contexto
+export const useCrudContextVentas = () => useContext(CrudContextVentas);
 
-export default CrudContextCompras;
+// Exportar el contexto para su uso en otros archivos
+export default CrudContextVentas;

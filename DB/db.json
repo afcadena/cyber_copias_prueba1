@@ -6,18 +6,22 @@
       "category": "Accesorios",
       "price": "325",
       "imageUrl": [
-        "https://http2.mlstatic.com/D_NQ_NP_882563-MCO74943186058_032024-O.webp"],
+        "https://http2.mlstatic.com/D_NQ_NP_882563-MCO74943186058_032024-O.webp"
+      ],
       "rating": 0,
       "reviews": 0,
-      "stock": "30",
-      "status": "active"
+      "stock": "29",
+      "status": "active",
+      "image": "https://exitocol.vteximg.com.br/arquivos/ids/20970023/Resma-Carta-500-Hojas-541782_a.jpg"
     },
     {
       "id": "2",
       "name": "Resma tamaño carta x500 hojas DISPAPELES",
       "category": "Papel",
       "price": "160",
-      "imageUrl": ["https://exitocol.vteximg.com.br/arquivos/ids/20970023/Resma-Carta-500-Hojas-541782_a.jpg"],
+      "imageUrl": [
+        "https://exitocol.vteximg.com.br/arquivos/ids/20970023/Resma-Carta-500-Hojas-541782_a.jpg"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 50,
@@ -28,7 +32,9 @@
       "name": "ALBUM RETAIL COPA AMERICA 2024 PANINI",
       "category": "Coleccionables",
       "price": 10300,
-      "imageUrl": "https://paninitienda.com/cdn/shop/files/8051708011265_1000x1000.jpg?v=1706564920",
+      "imageUrl": [
+        "https://paninitienda.com/cdn/shop/files/8051708011265_1000x1000.jpg?v=1706564920"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 200,
@@ -39,7 +45,9 @@
       "name": "Plumígrafos punta media 0.7mm vintage x24 unds PAPER MATE",
       "category": "Escritura",
       "price": 70190,
-      "imageUrl": "https://panamericana.vtexassets.com/arquivos/ids/444318/plumigrafo-flair-0-7-mm-x-24-unidades-vintage-71641198111.jpg?v=637916869676130000",
+      "imageUrl": [
+        "https://panamericana.vtexassets.com/arquivos/ids/444318/plumigrafo-flair-0-7-mm-x-24-unidades-vintage-71641198111.jpg?v=637916869676130000"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 75,
@@ -242,6 +250,17 @@
       "status": "active",
       "ratings": 0,
       "reviews": 0
+    },
+    {
+      "id": "1725888199149",
+      "name": "Papel iris",
+      "category": "Papel",
+      "price": 2000,
+      "stock": 20,
+      "status": "active",
+      "imageUrl": "https://th.bing.com/th/id/OIP.2E_ktoXZYb3Lkv4vjV5x_QHaHa?rs=1&pid=ImgDetMain",
+      "ratings": 0,
+      "reviews": 0
     }
   ],
   "users": [
@@ -382,11 +401,15 @@
       "id": "1",
       "proveedor": "Papelería Mayorista",
       "fecha": "2023-06-01",
-      "total": 1500,
+      "total": 2000,
       "estado": "Recibido",
-      "producto": "Cuadernos",
-      "precio": 5.75,
-      "cantidad": 100
+      "products": [
+        {
+          "name": "Pencil",
+          "quantity": 100,
+          "price": 20
+        }
+      ]
     },
     {
       "id": "2",
@@ -402,11 +425,89 @@
       "id": "3",
       "proveedor": "Importadora de Artículos",
       "fecha": "2023-06-10",
-      "total": 750.25,
-      "estado": "En tránsito",
-      "producto": "Borradores",
-      "precio": 0.75,
-      "cantidad": 300
+      "total": 0,
+      "estado": "Pendiente",
+      "products": [
+        {
+          "name": "",
+          "quantity": 0,
+          "price": 0
+        },
+        {
+          "name": "",
+          "quantity": 0,
+          "price": 0
+        }
+      ]
+    }
+  ],
+  "ventas": [
+    {
+      "id": "1",
+      "cliente": "Juan Pérez",
+      "fecha": "2024-09-09",
+      "estado": "Completada",
+      "total": 42,
+      "products": [
+        {
+          "id": "1",
+          "name": "Sobres x 5 Fifa Copa América 2024 PANINI 23204",
+          "quantity": 2,
+          "price": 325
+        },
+        {
+          "id": "4",
+          "name": "Plumígrafos punta media 0.7mm vintage x24 unds PAPER MATE",
+          "quantity": 1,
+          "price": 70190
+        }
+      ],
+      "productos": [
+        {
+          "id": "1725895497068",
+          "nombre": "pincel",
+          "cantidad": 1,
+          "precio": 42
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "cliente": "María Gómez",
+      "fecha": "2024-09-10",
+      "estado": "Completada",
+      "total": 301,
+      "products": [
+        {
+          "id": "6",
+          "name": "Cuaderno MICKEY CUERO Rayado 80 hojas Argollado tamaño grande",
+          "quantity": 1,
+          "price": 24900
+        }
+      ],
+      "productos": [
+        {
+          "id": "1725895580213",
+          "nombre": "pincel",
+          "cantidad": 1,
+          "precio": 301
+        }
+      ]
+    },
+    {
+      "id": "5de2",
+      "cliente": "Pepito",
+      "fecha": "2024-09-10",
+      "estado": "Cancelada",
+      "total": 2388,
+      "productos": [
+        {
+          "id": "1725895547309",
+          "nombre": "Lapiz",
+          "cantidad": 12,
+          "precio": 199
+        }
+      ]
     }
   ]
 }

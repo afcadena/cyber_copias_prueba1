@@ -7,24 +7,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PencilIcon, PlusIcon, SearchIcon } from 'lucide-react';
-import CrudContext from '../context/CrudContextInventario';  // Importar el contexto
+import CrudContext from '../context/CrudContextInventario';
 
 export default function Inventory() {
-  const { db: products, createData, updateData } = useContext(CrudContext);  // Usamos el contexto
+  const { db: products, createData, updateData } = useContext(CrudContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [editingProduct, setEditingProduct] = useState(null);
-  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);  // Estado para el modal de éxito
-  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);  // Estado para el modal de error
-  const [errorMessage, setErrorMessage] = useState("");  // Estado para el mensaje de error
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "",
     price: "",
     stock: "",
     status: "active",
-    image: "",  // Agregamos el campo de imagen
+    imageUrl: "",  // Cambiamos a imageUrl
   });
 
   const filteredProducts = products?.filter(product =>
@@ -41,24 +41,22 @@ export default function Inventory() {
     const product = products.find(product => product.id === id);
     if (product) {
       const updatedProduct = { ...product, status: product.status === "active" ? "low" : "active" };
-      updateData(updatedProduct);  // Actualizamos el producto con el nuevo estado
+      updateData(updatedProduct);
     }
   };
 
   const handleSaveEdit = () => {
     if (editingProduct) {
-      // Verificar si todos los campos están completos
-      if (!editingProduct.name || !editingProduct.category || !editingProduct.price || !editingProduct.stock || !editingProduct.image) {
+      if (!editingProduct.name || !editingProduct.category || !editingProduct.price || !editingProduct.stock || !editingProduct.imageUrl) {
         setErrorMessage("Todos los campos deben ser completados.");
         setIsErrorDialogOpen(true);
         return;
       }
 
-      updateData(editingProduct);  // Guardamos el producto editado usando la función del contexto
+      updateData(editingProduct);
       setEditingProduct(null);
-      setIsSuccessDialogOpen(true);  // Mostrar el modal de éxito
+      setIsSuccessDialogOpen(true);
 
-      // Cerrar el modal de éxito automáticamente después de 2 segundos
       setTimeout(() => {
         setIsSuccessDialogOpen(false);
       }, 2000);
@@ -66,8 +64,7 @@ export default function Inventory() {
   };
 
   const handleAddProduct = () => {
-    // Verificar si todos los campos están completos
-    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newProduct.image) {
+    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newProduct.imageUrl) {
       setErrorMessage("Todos los campos deben ser completados.");
       setIsErrorDialogOpen(true);
       return;
@@ -79,17 +76,17 @@ export default function Inventory() {
       price: parseFloat(newProduct.price),
       stock: parseInt(newProduct.stock),
       status: "active",
-      ratings: 0,  // Valor predeterminado para ratings
-      reviews: 0,  // Valor predeterminado para reviews
+      ratings: 0,
+      reviews: 0,
     };
-    createData(productToAdd);  // Creamos el nuevo producto usando la función del contexto
+    createData(productToAdd);
     setNewProduct({
       name: "",
       category: "",
       price: "",
       stock: "",
       status: "active",
-      image: "",  // Reiniciar el campo de imagen
+      imageUrl: "",  // Reiniciar imageUrl
     });
   };
 
@@ -108,6 +105,7 @@ export default function Inventory() {
               <DialogTitle>Agregar Nuevo Producto</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              {/* Campos del formulario */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">Nombre</Label>
                 <Input
@@ -158,12 +156,12 @@ export default function Inventory() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="image" className="text-right">Imagen (URL)</Label>
+                <Label htmlFor="imageUrl" className="text-right">Imagen (URL)</Label>
                 <Input
-                  id="image"
+                  id="imageUrl"
                   type="text"
-                  value={newProduct.image}
-                  onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
+                  value={newProduct.imageUrl}
+                  onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -179,7 +177,7 @@ export default function Inventory() {
           </DialogContent>
         </Dialog>
       </div>
-
+      
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-4">
         <div className="flex items-center w-full sm:w-auto">
           <Input 

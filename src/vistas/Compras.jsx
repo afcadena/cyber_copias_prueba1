@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Plus, Edit, Trash2, Search } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import useCrudContextCompras from "../context/CrudContextCompras";
+import { useCrudContextCompras } from '../context/CrudContextCompras';
 
 export default function GestionCompras() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,12 +15,10 @@ export default function GestionCompras() {
   const [products, setProducts] = useState([{ name: '', quantity: 0, price: 0 }]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Usar el contexto de compras
   const { db: comprasData, createData, updateData, deleteData, error, loading } = useCrudContextCompras();
 
-  // No es necesario usar setCompras, solo usamos comprasData directamente
   useEffect(() => {
-    // Cualquier lógica adicional si es necesaria para el uso de comprasData
+    // Lógica adicional si es necesaria para el uso de comprasData
   }, [comprasData]);
 
   const handleNewCompra = () => {
@@ -45,14 +43,16 @@ export default function GestionCompras() {
     event.preventDefault();
     const formData = new FormData(event.target);
     const total = products.reduce((sum, product) => sum + product.quantity * product.price, 0);
+
     const newCompra = {
       id: currentCompra ? currentCompra.id : Date.now().toString(),
       proveedor: formData.get('proveedor'),
       fecha: formData.get('fecha'),
       total: total,
       estado: formData.get('estado'),
-      products: products
+      products: products,
     };
+
     if (currentCompra) {
       updateData(newCompra);
     } else {
@@ -80,16 +80,15 @@ export default function GestionCompras() {
     const statusStyles = {
       'Recibido': 'bg-green-100 text-green-800',
       'Pendiente': 'bg-yellow-100 text-yellow-800',
-      'En tránsito': 'bg-blue-100 text-blue-800'
+      'En tránsito': 'bg-blue-100 text-blue-800',
     };
-    return <Badge className={statusStyles[status]}>{status}</Badge>;
+    return <Badge className={statusStyles[status] || 'bg-gray-100 text-gray-800'}>{status}</Badge>;
   };
 
   const filteredCompras = comprasData.filter(compra =>
-    compra.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     compra.proveedor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    compra.fecha.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    compra.estado.toLowerCase().includes(searchTerm.toLowerCase())
+    compra.estado.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    compra.fecha.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) return <div>Cargando...</div>;
@@ -105,9 +104,9 @@ export default function GestionCompras() {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input 
-              className="pl-8" 
-              placeholder="Buscar compras..." 
+            <Input
+              className="pl-8"
+              placeholder="Buscar compras..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -130,12 +129,12 @@ export default function GestionCompras() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredCompras.map(compra => (
+          {filteredCompras.map((compra) => (
             <TableRow key={compra.id}>
               <TableCell>{compra.id}</TableCell>
               <TableCell>{compra.proveedor}</TableCell>
               <TableCell>{compra.fecha}</TableCell>
-              <TableCell>{compra.total.toFixed(2)}</TableCell> {/* Aseguramos que el total esté en formato numérico */}
+              <TableCell>${compra.total.toFixed(2)}</TableCell>
               <TableCell>{getStatusBadge(compra.estado)}</TableCell>
               <TableCell>
                 <Button onClick={() => handleEditCompra(compra)} className="mr-2">
@@ -160,30 +159,30 @@ export default function GestionCompras() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="proveedor">Proveedor</Label>
-                  <Input 
-                    id="proveedor" 
-                    name="proveedor" 
-                    defaultValue={currentCompra?.proveedor || ''} 
-                    required 
+                  <Input
+                    id="proveedor"
+                    name="proveedor"
+                    defaultValue={currentCompra?.proveedor || ''}
+                    required
                   />
                 </div>
                 <div>
                   <Label htmlFor="fecha">Fecha</Label>
-                  <Input 
-                    id="fecha" 
-                    name="fecha" 
-                    type="date" 
-                    defaultValue={currentCompra?.fecha || ''} 
-                    required 
+                  <Input
+                    id="fecha"
+                    name="fecha"
+                    type="date"
+                    defaultValue={currentCompra?.fecha || ''}
+                    required
                   />
                 </div>
                 <div>
                   <Label htmlFor="estado">Estado</Label>
-                  <Select 
-                    id="estado" 
-                    name="estado" 
-                    defaultValue={currentCompra?.estado || 'Pendiente'} 
-                    required 
+                  <Select
+                    id="estado"
+                    name="estado"
+                    defaultValue={currentCompra?.estado || 'Pendiente'}
+                    required
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar estado" />
@@ -200,30 +199,39 @@ export default function GestionCompras() {
                 <Label>Productos</Label>
                 {products.map((product, index) => (
                   <div key={index} className="flex items-center space-x-4 mb-4">
-                    <Input 
-                      placeholder="Nombre" 
+                    <Input
+                      placeholder="Nombre del producto"
                       value={product.name}
                       onChange={(e) => handleProductChange(index, 'name', e.target.value)}
                     />
-                    <Input 
-                      type="number" 
-                      placeholder="Cantidad" 
+                    <Input
+                      type="number"
+                      placeholder="Cantidad"
                       value={product.quantity}
                       onChange={(e) => handleProductChange(index, 'quantity', e.target.value)}
                     />
-                    <Input 
-                      type="number" 
-                      placeholder="Precio" 
+                    <Input
+                      type="number"
+                      placeholder="Precio"
                       value={product.price}
                       onChange={(e) => handleProductChange(index, 'price', e.target.value)}
                     />
-                    <Button type="button" onClick={() => removeProduct(index)} variant="destructive">Eliminar</Button>
+                    <Button onClick={() => removeProduct(index)} variant="destructive">
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
                   </div>
                 ))}
-                <Button type="button" onClick={addProduct}>Agregar Producto</Button>
+                <Button onClick={addProduct}>
+                  <Plus className="mr-2 h-5 w-5" /> Agregar Producto
+                </Button>
               </div>
             </div>
-            <Button type="submit" className="mt-4">Guardar</Button>
+            <div className="flex justify-end mt-4">
+              <Button type="submit">Guardar</Button>
+              <Button type="button" onClick={() => setIsOpen(false)} variant="outline" className="ml-2">
+                Cancelar
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

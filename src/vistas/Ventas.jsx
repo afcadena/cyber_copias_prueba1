@@ -1,57 +1,75 @@
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { DollarSign, CalendarDays, TrendingUp, Plus, Edit, Trash2, Search, BarChart2 } from 'lucide-react'
+import { useContext, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DollarSign, CalendarDays, TrendingUp, Plus, Edit, Trash2, Search, BarChart2 } from 'lucide-react';
+import { useCrudContextVentas } from '../context/CrudContextVentas'; // Asegúrate de que la ruta sea correcta
 
 export default function GestionVentas() {
-  const [ventas, setVentas] = useState([
-    { id: 1, cliente: 'Juan Pérez', fecha: '2023-06-01', total: 150.00, estado: 'Completada' },
-    { id: 2, cliente: 'María García', fecha: '2023-06-02', total: 200.50, estado: 'Pendiente' },
-    { id: 3, cliente: 'Carlos López', fecha: '2023-06-03', total: 75.25, estado: 'Anulada' },
-    { id: 4, cliente: 'Ana Martínez', fecha: '2023-06-04', total: 300.00, estado: 'Completada' },
-    { id: 5, cliente: 'Pedro Rodríguez', fecha: '2023-06-05', total: 180.75, estado: 'Completada' },
-  ])
-
-  const [isOpen, setIsOpen] = useState(false)
-  const [currentVenta, setCurrentVenta] = useState(null)
-  const [productos, setProductos] = useState([])
+  const { db: ventas, createData, updateData, deleteData, loading, error } = useCrudContextVentas();
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentVenta, setCurrentVenta] = useState(null);
+  const [productos, setProductos] = useState([]);
 
   const handleNewVenta = () => {
-    setCurrentVenta(null)
-    setProductos([])
-    setIsOpen(true)
-  }
+    setCurrentVenta(null);
+    setProductos([]);
+    setIsOpen(true);
+  };
 
   const handleEditVenta = (venta) => {
-    setCurrentVenta(venta)
-    setProductos([]) // Aquí deberías cargar los productos de la venta
-    setIsOpen(true)
-  }
+    setCurrentVenta(venta);
+    setProductos(venta.productos || []);
+    setIsOpen(true);
+  };
 
   const handleDeleteVenta = (id) => {
-    setVentas(ventas.filter(venta => venta.id !== id))
-  }
+    if (window.confirm(`¿Estás seguro de eliminar el registro con el id '${id}'?`)) {
+      deleteData(id);
+    }
+  };
 
   const handleAddProduct = () => {
-    setProductos([...productos, { id: Date.now(), nombre: '', cantidad: 1, precio: 0 }])
-  }
+    setProductos([...productos, { id: Date.now().toString(), nombre: '', cantidad: 1, precio: 0 }]);
+  };
 
   const handleProductChange = (id, field, value) => {
-    setProductos(productos.map(producto => 
+    setProductos(productos.map(producto =>
       producto.id === id ? { ...producto, [field]: value } : producto
-    ))
-  }
+    ));
+  };
 
-  const totalVentas = ventas.reduce((sum, venta) => sum + venta.total, 0)
-  const ventasCompletadas = ventas.filter(venta => venta.estado === 'Completada')
-  const promedioVentas = ventasCompletadas.length > 0 
-    ? ventasCompletadas.reduce((sum, venta) => sum + venta.total, 0) / ventasCompletadas.length 
-    : 0
+  const totalVentas = ventas.reduce((sum, venta) => sum + venta.total, 0);
+  const ventasCompletadas = ventas.filter(venta => venta.estado === 'Completada');
+  const promedioVentas = ventasCompletadas.length > 0
+    ? ventasCompletadas.reduce((sum, venta) => sum + venta.total, 0) / ventasCompletadas.length
+    : 0;
+
+  // Nuevo handleSubmit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const cliente = formData.get('cliente');
+    const fecha = formData.get('fecha');
+    const estado = formData.get('estado');
+    const total = productos.reduce((sum, p) => sum + p.cantidad * p.precio, 0);
+
+    if (cliente && fecha && estado) {
+      const ventaData = { cliente, fecha, estado, total, productos };
+      if (currentVenta) {
+        updateData({ ...currentVenta, ...ventaData });
+      } else {
+        createData(ventaData);
+      }
+      setIsOpen(false);
+    } else {
+      alert('Por favor, complete todos los campos.');
+    }
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -151,79 +169,83 @@ export default function GestionVentas() {
           <DialogHeader>
             <DialogTitle>{currentVenta ? 'Editar Venta' : 'Nueva Venta'}</DialogTitle>
           </DialogHeader>
-          <form className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4">
               <div>
                 <Label htmlFor="cliente">Cliente</Label>
-                <Input id="cliente" defaultValue={currentVenta?.cliente} />
+                <Input
+                  id="cliente"
+                  name="cliente"
+                  defaultValue={currentVenta?.cliente || ''}
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="fecha">Fecha</Label>
-                <Input id="fecha" type="date" defaultValue={currentVenta?.fecha} />
+                <Input
+                  id="fecha"
+                  name="fecha"
+                  type="date"
+                  defaultValue={currentVenta?.fecha || ''}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="estado">Estado</Label>
+                <Select
+                  name="estado"
+                  defaultValue={currentVenta?.estado || 'Pendiente'}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pendiente">Pendiente</SelectItem>
+                    <SelectItem value="Completada">Completada</SelectItem>
+                    <SelectItem value="Cancelada">Cancelada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Productos</h3>
+                {productos.map(producto => (
+                  <div key={producto.id} className="flex gap-2 mb-2">
+                    <Input
+                      placeholder="Nombre del producto"
+                      value={producto.nombre}
+                      onChange={(e) => handleProductChange(producto.id, 'nombre', e.target.value)}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Cantidad"
+                      value={producto.cantidad}
+                      onChange={(e) => handleProductChange(producto.id, 'cantidad', Number(e.target.value))}
+                      className="w-24"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Precio"
+                      value={producto.precio}
+                      onChange={(e) => handleProductChange(producto.id, 'precio', Number(e.target.value))}
+                      className="w-24"
+                    />
+                  </div>
+                ))}
+                <Button type="button" onClick={handleAddProduct}>
+                  Añadir Producto
+                </Button>
+              </div>
+              <div className="flex justify-end mt-4">
+                <Button type="submit" variant="primary">
+                  {currentVenta ? 'Actualizar Venta' : 'Crear Venta'}
+                </Button>
               </div>
             </div>
-            <div>
-              <Label>Productos</Label>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Precio</TableHead>
-                    <TableHead>Subtotal</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {productos.map((producto) => (
-                    <TableRow key={producto.id}>
-                      <TableCell>
-                        <Input 
-                          value={producto.nombre} 
-                          onChange={(e) => handleProductChange(producto.id, 'nombre', e.target.value)}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input 
-                          type="number" 
-                          value={producto.cantidad} 
-                          onChange={(e) => handleProductChange(producto.id, 'cantidad', parseInt(e.target.value))}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input 
-                          type="number" 
-                          value={producto.precio} 
-                          onChange={(e) => handleProductChange(producto.id, 'precio', parseFloat(e.target.value))}
-                        />
-                      </TableCell>
-                      <TableCell>${(producto.cantidad * producto.precio).toFixed(2)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <Button type="button" onClick={handleAddProduct} className="mt-2">Agregar Producto</Button>
-            </div>
-            <div>
-              <Label htmlFor="total">Total</Label>
-              <Input id="total" type="number" step="0.01" value={productos.reduce((sum, p) => sum + p.cantidad * p.precio, 0).toFixed(2)} readOnly />
-            </div>
-            <div>
-              <Label htmlFor="estado">Estado</Label>
-              <Select defaultValue={currentVenta?.estado}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pendiente">Pendiente</SelectItem>
-                  <SelectItem value="Completada">Completada</SelectItem>
-                  <SelectItem value="Anulada">Anulada</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="submit">Guardar</Button>
           </form>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

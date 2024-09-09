@@ -25,6 +25,7 @@ import GestionCompras from './vistas/Compras'; // Nueva vista
 import { CrudProviderProveedores } from './context/CrudContextProveedores';
 import { CrudProviderPedidos } from './context/CrudContextPedidos';
 import { CrudProviderCompras } from './context/CrudContextCompras'; // Importar el proveedor de compras
+import { CrudProviderVentas } from './context/CrudContextVentas'; // Importar el proveedor de ventas
 
 import './App.css';
 
@@ -37,30 +38,32 @@ function App() {
             <CartProvider>
               <CrudProviderProveedores>
                 <CrudProviderCompras>
-                  <Routes>
-                    {/* Rutas públicas */}
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/catalogo" element={<Catalog />} />
-                    <Route path="/cuenta" element={<Cuenta />} />
-                    <Route path="/carrito" element={<CarritoDeCompras />} />
-                    <Route path="/producto/:id" element={<ProductDetail />} />
-                    <Route path="/homecli" element={<HomeCliente />} />
+                  <CrudProviderVentas> {/* Agregar el proveedor de ventas aquí */}
+                    <Routes>
+                      {/* Rutas públicas */}
+                      <Route path="/" element={<Home />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/catalogo" element={<Catalog />} />
+                      <Route path="/cuenta" element={<Cuenta />} />
+                      <Route path="/carrito" element={<CarritoDeCompras />} />
+                      <Route path="/producto/:id" element={<ProductDetail />} />
+                      <Route path="/homecli" element={<HomeCliente />} />
 
-                    {/* Rutas protegidas del admin */}
-                    <Route path="/admin" element={
-                      <ProtectedRoute role="admin">
-                        <AdminLayout /> {/* AdminLayout maneja todas las rutas de administración */}
-                      </ProtectedRoute>
-                    }>
-                      <Route path="inventario" element={<InventoryManagement />} />
-                      <Route path="providers" element={<GestionProveedores />} />
-                      <Route path="orders" element={<GestionPedidos />} />  {/* Pedidos */}
-                      <Route path="purchases" element={<GestionCompras />} /> {/* Compras */}
-                      <Route path="sales" element={<GestionVentas />} />  {/* Ventas */}
-                    </Route>
-                  </Routes>
+                      {/* Rutas protegidas del admin */}
+                      <Route path="/admin" element={
+                        <ProtectedRoute role="admin">
+                          <AdminLayout /> {/* AdminLayout maneja todas las rutas de administración */}
+                        </ProtectedRoute>
+                      }>
+                        <Route path="inventario" element={<InventoryManagement />} />
+                        <Route path="providers" element={<GestionProveedores />} />
+                        <Route path="orders" element={<GestionPedidos />} />  {/* Pedidos */}
+                        <Route path="purchases" element={<GestionCompras />} /> {/* Compras */}
+                        <Route path="sales" element={<GestionVentas />} />  {/* Ventas */}
+                      </Route>
+                    </Routes>
+                  </CrudProviderVentas>
                 </CrudProviderCompras>
               </CrudProviderProveedores>
             </CartProvider>
