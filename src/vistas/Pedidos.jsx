@@ -1,51 +1,61 @@
-import React, { useContext, useState, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Package, Edit, Trash2, Plus, Search } from 'lucide-react'
-import CrudContextPedidos from "../context/CrudContextPedidos";
-
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Package, Edit, Trash2, Plus, Search } from 'lucide-react';
+import { useCrudContextPedidos } from "../context/CrudContextPedidos";
 
 export default function GestionPedidos() {
-  const { db: pedidos, createData, updateData, deleteData, dataToEdit, setDataToEdit } = useContext(CrudContextPedidos)
+  const { db: pedidos, createData, updateData, deleteData, dataToEdit, setDataToEdit, error, loading } = useCrudContextPedidos();
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [currentPedido, setCurrentPedido] = useState(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [products, setProducts] = useState([{ name: '', quantity: 0, price: 0 }])
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentPedido, setCurrentPedido] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [products, setProducts] = useState([{ id: Date.now(), name: '', quantity: 0, price: 0 }]);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [pedidoToDelete, setPedidoToDelete] = useState(null);
 
   useEffect(() => {
     if (dataToEdit) {
-      setCurrentPedido(dataToEdit)
-      setProducts(dataToEdit.products || [{ name: '', quantity: 0, price: 0 }])
-      setIsOpen(true)
+      setCurrentPedido(dataToEdit);
+      setProducts(dataToEdit.products || [{ id: Date.now(), name: '', quantity: 0, price: 0 }]);
+      setIsOpen(true);
     } else {
-      setIsOpen(false)
+      setIsOpen(false);
     }
-  }, [dataToEdit])
+  }, [dataToEdit]);
 
   const handleNewPedido = () => {
-    setCurrentPedido(null)
-    setProducts([{ name: '', quantity: 0, price: 0 }])
-    setIsOpen(true)
-  }
+    setCurrentPedido(null);
+    setProducts([{ id: Date.now(), name: '', quantity: 0, price: 0 }]);
+    setIsOpen(true);
+  };
 
   const handleEditPedido = (pedido) => {
-    setDataToEdit(pedido)
-    setIsOpen(true)
-  }
+    setDataToEdit(pedido);
+    setIsOpen(true);
+  };
 
-  const handleDeletePedido = (id) => {
-    deleteData(id)
-  }
+  const handleDeletePedido = (pedido) => {
+    setPedidoToDelete(pedido);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (pedidoToDelete) {
+      deleteData(pedidoToDelete.id);
+    }
+    setIsConfirmDeleteOpen(false);
+    setPedidoToDelete(null);
+  };
 
   const handleSubmit = (event) => {
-    event.preventDefault()
-    const form = event.target
-    const total = products.reduce((sum, product) => sum + product.quantity * product.price, 0)
+    event.preventDefault();
+    const form = event.target;
+    const total = products.reduce((sum, product) => sum + product.quantity * product.price, 0);
 
     const newPedido = {
       id: currentPedido?.id || Date.now().toString(),
@@ -54,39 +64,40 @@ export default function GestionPedidos() {
       estado: form.estado.value,
       total,
       products,
-    }
+    };
 
     if (currentPedido) {
-      updateData(newPedido)
+      updateData(newPedido);
     } else {
-      createData(newPedido)
+      createData(newPedido);
     }
-    setIsOpen(false)
-    setDataToEdit(null)
-  }
+    setIsOpen(false);
+    setDataToEdit(null);
+  };
 
   const handleProductChange = (index, field, value) => {
-    const newProducts = [...products]
-    newProducts[index][field] = field === 'name' ? value : parseFloat(value)
-    setProducts(newProducts)
-  }
+    const newProducts = [...products];
+    newProducts[index][field] = field === 'name' ? value : parseFloat(value);
+    setProducts(newProducts);
+  };
 
   const addProduct = () => {
-    setProducts([...products, { name: '', quantity: 0, price: 0 }])
-  }
+    setProducts([...products, { id: Date.now(), name: '', quantity: 0, price: 0 }]);
+  };
 
   const removeProduct = (index) => {
-    const newProducts = products.filter((_, i) => i !== index)
-    setProducts(newProducts)
-  }
+    const newProducts = products.filter((_, i) => i !== index);
+    setProducts(newProducts);
+  };
 
-  // Filtrar pedidos según el término de búsqueda
-  const filteredPedidos = pedidos.filter(pedido =>
-    (pedido.id && pedido.id.toString().toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (pedido.cliente && pedido.cliente.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (pedido.fecha && pedido.fecha.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (pedido.estado && pedido.estado.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  const filterPedidos = (pedido) => {
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+    return Object.values(pedido).some(value =>
+      typeof value === 'string' && value.toLowerCase().includes(lowercasedSearchTerm)
+    );
+  };
+
+  const filteredPedidos = pedidos.filter(filterPedidos);
 
   return (
     <div className="container mx-auto p-4">
@@ -107,9 +118,12 @@ export default function GestionPedidos() {
           </Button>
         </div>
       </div>
+
+      {error && <p className="text-red-500">Hubo un error: {error.statusText}</p>}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredPedidos.map((pedido) => (
-          <Card key={pedido.id} className="overflow-hidden">
+          <Card key={pedido.id} className="overflow-hidden flex flex-col">
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="flex justify-between items-center">
                 <span>Pedido #{pedido.id}</span>
@@ -117,7 +131,7 @@ export default function GestionPedidos() {
               </CardTitle>
               <CardDescription className="text-primary-foreground/80">{pedido.fecha}</CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="flex-1 pt-6">
               <p><strong>Cliente:</strong> {pedido.cliente}</p>
               <p><strong>Estado:</strong> {pedido.estado}</p>
               <p><strong>Total:</strong> ${pedido.total.toFixed(2)}</p>
@@ -132,12 +146,12 @@ export default function GestionPedidos() {
                 </ul>
               </div>
             </CardContent>
-            <CardFooter className="bg-muted">
+            <CardFooter className="bg-muted mt-auto">
               <div className="flex justify-between w-full">
                 <Button variant="outline" size="sm" onClick={() => handleEditPedido(pedido)}>
                   <Edit className="mr-2 h-4 w-4" /> Editar
                 </Button>
-                <Button variant="destructive" size="sm" onClick={() => handleDeletePedido(pedido.id)}>
+                <Button variant="destructive" size="sm" onClick={() => handleDeletePedido(pedido)}>
                   <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                 </Button>
               </div>
@@ -148,9 +162,9 @@ export default function GestionPedidos() {
 
       <Dialog open={isOpen} onOpenChange={(open) => {
         if (!open) {
-          setDataToEdit(null)
+          setDataToEdit(null);
         }
-        setIsOpen(open)
+        setIsOpen(open);
       }}>
         <DialogContent>
           <DialogHeader>
@@ -159,11 +173,11 @@ export default function GestionPedidos() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="cliente">Cliente</Label>
-              <Input id="cliente" name="cliente" defaultValue={currentPedido?.cliente || ''} />
+              <Input id="cliente" name="cliente" defaultValue={currentPedido?.cliente || ''} required />
             </div>
             <div>
               <Label htmlFor="fecha">Fecha</Label>
-              <Input id="fecha" name="fecha" type="date" defaultValue={currentPedido?.fecha || ''} />
+              <Input id="fecha" name="fecha" type="date" defaultValue={currentPedido?.fecha || ''} required />
             </div>
             <div>
               <Label htmlFor="estado">Estado</Label>
@@ -195,24 +209,32 @@ export default function GestionPedidos() {
                   />
                   <Input
                     type="number"
-                    step="0.01"
                     placeholder="Precio"
                     value={product.price}
                     onChange={(e) => handleProductChange(index, 'price', e.target.value)}
                   />
-                  <Button type="button" variant="destructive" onClick={() => removeProduct(index)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <Button type="button" variant="destructive" onClick={() => removeProduct(index)}>Eliminar</Button>
                 </div>
               ))}
-              <Button type="button" onClick={addProduct}>
-                <Plus className="mr-2 h-4 w-4" /> Agregar Producto
-              </Button>
+              <Button type="button" onClick={addProduct}>Añadir Producto</Button>
             </div>
-            <Button type="submit">Guardar</Button>
+            <Button type="submit" className="w-full">Guardar</Button>
           </form>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isConfirmDeleteOpen} onOpenChange={(open) => setIsConfirmDeleteOpen(open)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Eliminación</DialogTitle>
+          </DialogHeader>
+          <p>¿Estás seguro de que deseas eliminar este pedido?</p>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Eliminar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }

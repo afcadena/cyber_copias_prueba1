@@ -362,7 +362,7 @@
       "id": "1725741595540",
       "nombre": "Lapices",
       "contacto": "Valentina",
-      "telefono": "30229604105",
+      "telefono": "30229604106",
       "email": "valentina@test.co",
       "direccion": "calle23"
     },
@@ -380,37 +380,38 @@
       "id": "1725731587174",
       "cliente": "Luis Martínez",
       "fecha": "2024-09-19",
-      "estado": "En proceso",
+      "estado": "Entregado",
       "total": 3555,
       "products": [
         {
-          "name": "Producto 1",
+          "name": "Pincel",
           "quantity": 2,
           "price": 1000
         },
         {
-          "name": "Producto 2",
+          "name": "Album",
           "quantity": 1,
           "price": 1555
+        }
+      ]
+    },
+    {
+      "id": "1725976257183",
+      "cliente": "Gimenez",
+      "fecha": "2024-09-18",
+      "estado": "En proceso",
+      "total": 200,
+      "products": [
+        {
+          "id": 1725976240709,
+          "name": "pincel",
+          "quantity": 1,
+          "price": 200
         }
       ]
     }
   ],
   "compras": [
-    {
-      "id": "1",
-      "proveedor": "Papelería Mayorista",
-      "fecha": "2023-06-01",
-      "total": 2000,
-      "estado": "Recibido",
-      "products": [
-        {
-          "name": "Pencil",
-          "quantity": 100,
-          "price": 20
-        }
-      ]
-    },
     {
       "id": "2",
       "proveedor": "Distribuidora de Útiles",
@@ -491,21 +492,6 @@
           "nombre": "pincel",
           "cantidad": 1,
           "precio": 302
-        }
-      ]
-    },
-    {
-      "id": "5de2",
-      "cliente": "Pepito",
-      "fecha": "2024-09-10",
-      "estado": "Cancelada",
-      "total": 2388,
-      "productos": [
-        {
-          "id": "1725895547309",
-          "nombre": "Lapiz",
-          "cantidad": 12,
-          "precio": 199
         }
       ]
     }

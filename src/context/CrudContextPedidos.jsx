@@ -1,27 +1,24 @@
-import { createContext, useEffect, useState } from "react";
-import { helpHttp } from "../helpers/helpHttp";
+import { createContext, useState, useEffect, useContext } from 'react';
+import { helpHttp } from '../helpers/helpHttp';
 
+// Crear el contexto
 const CrudContextPedidos = createContext();
 
-const CrudProviderPedidos = ({ children }) => {
-  const [db, setDb] = useState([]); // Base de datos inicial
+// Proveedor del contexto
+export function CrudProviderPedidos({ children }) {
+  const [db, setDb] = useState([]);
   const [dataToEdit, setDataToEdit] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  let api = helpHttp();
-  let url = "http://localhost:3000/pedidos"; // URL de la API de pedidos
+  const api = helpHttp();
+  const url = 'http://localhost:3000/pedidos'; // URL del endpoint de pedidos
 
   useEffect(() => {
     setLoading(true);
     api.get(url).then((res) => {
       if (!res.err) {
-        // Asegúrate de que los IDs estén en formato de cadena
-        const updatedData = res.map((item) => ({
-          ...item,
-          id: item.id.toString(), // Convertir el ID a cadena
-        }));
-        setDb(updatedData);
+        setDb(res);
         setError(null);
       } else {
         setDb([]);
@@ -29,24 +26,17 @@ const CrudProviderPedidos = ({ children }) => {
       }
       setLoading(false);
     });
-  }, [url]);
+  }, [api, url]); // Solo dependencias necesarias
 
   const createData = (data) => {
-    // Asegúrate de que el ID sea una cadena al crear el nuevo registro
-    const newData = {
-      ...data,
-      id: Date.now().toString(), // Convertir el ID a cadena
-    };
-
-    let options = {
-      body: JSON.stringify(newData), // Convertir el cuerpo a JSON
-      headers: { "content-type": "application/json" },
+    const options = {
+      body: data, // No es necesario usar JSON.stringify aquí, helpHttp lo maneja
+      headers: { 'Content-Type': 'application/json' },
     };
 
     api.post(url, options).then((res) => {
       if (!res.err) {
-        setDb([...db, res]);
-        setError(null);
+        setDb((prevDb) => [...prevDb, res]);
       } else {
         setError(res);
       }
@@ -54,18 +44,16 @@ const CrudProviderPedidos = ({ children }) => {
   };
 
   const updateData = (data) => {
-    let endpoint = `${url}/${data.id}`;
-  
-    let options = {
-      body: JSON.stringify(data), // Convertir el cuerpo a JSON
-      headers: { "content-type": "application/json" },
+    const endpoint = `${url}/${data.id}`;
+    const options = {
+      body: data, // No es necesario usar JSON.stringify aquí, helpHttp lo maneja
+      headers: { 'Content-Type': 'application/json' },
     };
 
     api.put(endpoint, options).then((res) => {
       if (!res.err) {
-        let newData = db.map((el) => (el.id === data.id ? res : el));
-        setDb(newData);
-        setError(null);
+        const updatedDb = db.map((el) => (el.id === data.id ? res : el));
+        setDb(updatedDb);
       } else {
         setError(res);
       }
@@ -73,39 +61,31 @@ const CrudProviderPedidos = ({ children }) => {
   };
 
   const deleteData = (id) => {
-    let endpoint = `${url}/${id}`;
-    let options = {
-      headers: { "content-type": "application/json" },
+    const endpoint = `${url}/${id}`;
+    const options = {
+      headers: { 'Content-Type': 'application/json' },
     };
 
     api.del(endpoint, options).then((res) => {
       if (!res.err) {
-        let newData = db.filter((el) => el.id !== id);
-        setDb(newData);
-        setError(null);
+        const updatedDb = db.filter((el) => el.id !== id);
+        setDb(updatedDb);
       } else {
         setError(res);
       }
     });
   };
 
-  const data = {
-    db,
-    error,
-    loading,
-    createData,
-    dataToEdit,
-    setDataToEdit,
-    updateData,
-    deleteData,
-  };
-
+  // Proveer el contexto a los componentes hijos
   return (
-    <CrudContextPedidos.Provider value={data}>
+    <CrudContextPedidos.Provider value={{ db, createData, updateData, deleteData, dataToEdit, setDataToEdit, error, loading }}>
       {children}
     </CrudContextPedidos.Provider>
   );
-};
+}
 
-export { CrudProviderPedidos };
+// Hook personalizado para usar el contexto
+export const useCrudContextPedidos = () => useContext(CrudContextPedidos);
+
+// Exportar el contexto para su uso en otros archivos
 export default CrudContextPedidos;
