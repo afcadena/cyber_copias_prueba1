@@ -53,8 +53,8 @@ export default function ProductDetail() {
             <div className="md:w-1/2">
               <img src={mainImage} alt={product.name} className="w-full h-auto rounded-lg shadow-md mb-4" />
               <div className="flex gap-4 overflow-x-auto">
-                {product.imageUrls && product.imageUrls.length > 0 ? (
-                  product.imageUrls.map((img, index) => (
+                {product.imageUrl && product.imageUrl.length > 0 ? (
+                  product.imageUrl.map((img, index) => (
                     <img 
                       key={index} 
                       src={img} 

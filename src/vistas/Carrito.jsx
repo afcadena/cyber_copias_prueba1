@@ -94,7 +94,7 @@ export default function CarritoDeCompras() {
                   </CardHeader>
                   <CardContent>
                     <img
-                      src={producto.image}
+                      src={producto.imageUrl}
                       alt={producto.name}
                       className="w-full h-40 object-cover mb-4"
                     />

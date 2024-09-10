@@ -11,8 +11,10 @@
       "rating": 0,
       "reviews": 0,
       "stock": "33",
-      "status": "active",
-      "image": "https://exitocol.vteximg.com.br/arquivos/ids/20970023/Resma-Carta-500-Hojas-541782_a.jpg"
+      "status": "low",
+      "image": [
+        "https://exitocol.vteximg.com.br/arquivos/ids/20970023/Resma-Carta-500-Hojas-541782_a.jpg"
+      ]
     },
     {
       "id": "2",
@@ -58,7 +60,9 @@
       "name": "Marcadores Dobles Set De 80 Colores Base De Alcohol",
       "category": "Arte",
       "price": 119900,
-      "imageUrl": "https://exitocol.vtexassets.com/arquivos/ids/17258365/marcadores-dobles-set-de-80-colores-base-de-alcohol.jpg?v=638157295875630000",
+      "imageUrl": [
+        "https://exitocol.vtexassets.com/arquivos/ids/17258365/marcadores-dobles-set-de-80-colores-base-de-alcohol.jpg?v=638157295875630000"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 60,
@@ -69,7 +73,9 @@
       "name": "Cuaderno MICKEY CUERO Rayado 80 hojas Argollado tamaño grande",
       "category": "Cuadernos",
       "price": 24900,
-      "imageUrl": "https://jumbocolombiaio.vtexassets.com/arquivos/ids/166439-800-800?v=637810778479470000&width=800&height=800&aspect=true",
+      "imageUrl": [
+        "https://jumbocolombiaio.vtexassets.com/arquivos/ids/166439-800-800?v=637810778479470000&width=800&height=800&aspect=true"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 120,
@@ -80,7 +86,9 @@
       "name": "Album Jet Colsalpindiente JET 2023-24",
       "category": "Coleccionables",
       "price": 12900,
-      "imageUrl": "https://http2.mlstatic.com/D_NQ_NP_826364-MCO74569952550_022024-O.webp",
+      "imageUrl": [
+        "https://http2.mlstatic.com/D_NQ_NP_826364-MCO74569952550_022024-O.webp"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 150,
@@ -91,7 +99,9 @@
       "name": "Cuaderno Cuadriculado 100 hojas Multimateria SCRIBE",
       "category": "Cuadernos",
       "price": 8900,
-      "imageUrl": "https://elchiquitindelospreciosbajos.com/wp-content/uploads/2021/12/CUADERNO-CUADRICULADO-SCRIBE-MARVEL-3-min-1.jpg",
+      "imageUrl": [
+        "https://elchiquitindelospreciosbajos.com/wp-content/uploads/2021/12/CUADERNO-CUADRICULADO-SCRIBE-MARVEL-3-min-1.jpg"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 300,
@@ -102,7 +112,9 @@
       "name": "Bolígrafo Kilométrico 100 Negro",
       "category": "Escritura",
       "price": 1200,
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTgpn0GPKWEb4Vy3hqoB70bOJ2jih-LTFXWg&s",
+      "imageUrl": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTgpn0GPKWEb4Vy3hqoB70bOJ2jih-LTFXWg&s"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 500,
@@ -113,7 +125,9 @@
       "name": "Lápiz Mirado N°2 x12 PAPER MATE",
       "category": "Escritura",
       "price": 18900,
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT45-VdoE3YeIDFobmNAgwQJt6ZxjDhHK7XOQ&s",
+      "imageUrl": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT45-VdoE3YeIDFobmNAgwQJt6ZxjDhHK7XOQ&s"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 400,
@@ -124,7 +138,9 @@
       "name": "Colores Norma Hexagonales x12",
       "category": "Arte",
       "price": 14900,
-      "imageUrl": "https://www.librerianorma.com/images/Caratula/Responsive/7702111209947.jpg",
+      "imageUrl": [
+        "https://www.librerianorma.com/images/Caratula/Responsive/7702111209947.jpg"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 250,
@@ -135,7 +151,9 @@
       "name": "Borrador Nata Grande PELIKAN",
       "category": "Accesorios",
       "price": 1100,
-      "imageUrl": "https://lh5.googleusercontent.com/proxy/UbeqJy-fgsFxe4xHjMHEug9FVZ50vi_nv2uRS5EReuHpFf9z6fueKZJ3-Cdf7piJqpJewRk4uluskx0qHvF9aEL9_zhLNiC0Kq32pFMw8ypZmDq9zpR7I7pnSoQjgLVxaq-2H4Hpn3F7zJALVZN8_eCWjhAGkYkvF7zthGrHaSAaTpORjCPGGoLh",
+      "imageUrl": [
+        "https://lh5.googleusercontent.com/proxy/UbeqJy-fgsFxe4xHjMHEug9FVZ50vi_nv2uRS5EReuHpFf9z6fueKZJ3-Cdf7piJqpJewRk4uluskx0qHvF9aEL9_zhLNiC0Kq32pFMw8ypZmDq9zpR7I7pnSoQjgLVxaq-2H4Hpn3F7zJALVZN8_eCWjhAGkYkvF7zthGrHaSAaTpORjCPGGoLh"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 1000,
@@ -146,7 +164,9 @@
       "name": "Tijeras Escolares 5 MAPED",
       "category": "Accesorios",
       "price": 4500,
-      "imageUrl": "https://www.adosa.com.mx/media/catalog/product/cache/4db89bde2062a3745aaded91f69a9032/0/4/049644_2_1.jpg",
+      "imageUrl": [
+        "https://www.adosa.com.mx/media/catalog/product/cache/4db89bde2062a3745aaded91f69a9032/0/4/049644_2_1.jpg"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 300,
@@ -157,7 +177,9 @@
       "name": "Pegante en Barra 40g PEGASTICK",
       "category": "Accesorios",
       "price": 3900,
-      "imageUrl": "https://panamericana.vtexassets.com/arquivos/ids/311111-800-auto?v=636828340575900000&width=800&height=auto&aspect=true",
+      "imageUrl": [
+        "https://panamericana.vtexassets.com/arquivos/ids/311111-800-auto?v=636828340575900000&width=800&height=auto&aspect=true"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 800,
@@ -168,7 +190,9 @@
       "name": "Cartulina Iris 1/8 50x70cm Surtida x10",
       "category": "Papel",
       "price": 9900,
-      "imageUrl": "https://acdn.mitiendanube.com/stores/399/204/products/cartulina-iris1-cc782faee6977b908915476884277848-640-0.png",
+      "imageUrl": [
+        "https://acdn.mitiendanube.com/stores/399/204/products/cartulina-iris1-cc782faee6977b908915476884277848-640-0.png"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 150,
@@ -179,7 +203,9 @@
       "name": "Block Iris Carta Surtido x30",
       "category": "Papel",
       "price": 7900,
-      "imageUrl": "https://papelesprimavera.vteximg.com.br/arquivos/ids/178554-1000-1000/block-iris.jpg?v=637801038489970000",
+      "imageUrl": [
+        "https://papelesprimavera.vteximg.com.br/arquivos/ids/178554-1000-1000/block-iris.jpg?v=637801038489970000"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 200,
@@ -190,7 +216,9 @@
       "name": "Cuaderno espiral",
       "category": "Cuadernos",
       "price": 3.99,
-      "imageUrl": "https://walmarthn.vtexassets.com/arquivos/ids/208506/Cuaderno-Espiral-100-Hojas-Dibujo-Solidos-Verde-1-20882.jpg?v=637793389687930000",
+      "imageUrl": [
+        "https://walmarthn.vtexassets.com/arquivos/ids/208506/Cuaderno-Espiral-100-Hojas-Dibujo-Solidos-Verde-1-20882.jpg?v=637793389687930000"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 100,
@@ -201,7 +229,9 @@
       "name": "Bolígrafo azul",
       "category": "Escritura",
       "price": 0.99,
-      "imageUrl": "https://www.papyser.com/catalogo/6813122.jpg",
+      "imageUrl": [
+        "https://www.papyser.com/catalogo/6813122.jpg"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 500,
@@ -212,7 +242,9 @@
       "name": "Goma de borrar",
       "category": "Accesorios",
       "price": 0.5,
-      "imageUrl": "https://dhb3yazwboecu.cloudfront.net/270/gomas/52650_m.jpg",
+      "imageUrl": [
+        "https://dhb3yazwboecu.cloudfront.net/270/gomas/52650_m.jpg"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 200,
@@ -223,7 +255,9 @@
       "name": "Carpeta archivadora",
       "category": "Organización",
       "price": 4.99,
-      "imageUrl": "https://sumicaz.com.co/wp-content/uploads/2023/01/D_NQ_NP_2X_738979-MCO44632269201_012021-F-1.webp",
+      "imageUrl": [
+        "https://sumicaz.com.co/wp-content/uploads/2023/01/D_NQ_NP_2X_738979-MCO44632269201_012021-F-1.webp"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 50,
@@ -234,7 +268,9 @@
       "name": "Papel de impresora",
       "category": "Papel",
       "price": 7.99,
-      "imageUrl": "https://basevirtual.com.co/wp-content/uploads/2019/10/80-x-60-rollos-pos-1.png",
+      "imageUrl": [
+        "https://basevirtual.com.co/wp-content/uploads/2019/10/80-x-60-rollos-pos-1.png"
+      ],
       "rating": 0,
       "reviews": 0,
       "stock": 30,
@@ -245,7 +281,9 @@
       "name": "Pincel",
       "category": "Accesorios",
       "price": 200,
-      "imageUrl": "https://www.artel.cl/wp-content/uploads/2020/11/20660416-Pincel-Artel-serie-577-N-16.jpg",
+      "imageUrl": [
+        "https://www.artel.cl/wp-content/uploads/2020/11/20660416-Pincel-Artel-serie-577-N-16.jpg"
+      ],
       "stock": "20",
       "status": "active",
       "ratings": 0,
@@ -258,7 +296,9 @@
       "price": 2000,
       "stock": 20,
       "status": "active",
-      "imageUrl": "https://th.bing.com/th/id/OIP.2E_ktoXZYb3Lkv4vjV5x_QHaHa?rs=1&pid=ImgDetMain",
+      "imageUrl": [
+        "https://th.bing.com/th/id/OIP.2E_ktoXZYb3Lkv4vjV5x_QHaHa?rs=1&pid=ImgDetMain"
+      ],
       "ratings": 0,
       "reviews": 0
     }
