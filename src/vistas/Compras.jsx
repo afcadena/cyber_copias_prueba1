@@ -14,6 +14,8 @@ export default function GestionCompras() {
   const [currentCompra, setCurrentCompra] = useState(null);
   const [products, setProducts] = useState([{ name: '', quantity: 0, price: 0 }]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [compraToDelete, setCompraToDelete] = useState(null);
 
   const { db: comprasData, createData, updateData, deleteData, error, loading } = useCrudContextCompras();
 
@@ -33,10 +35,17 @@ export default function GestionCompras() {
     setIsOpen(true);
   };
 
-  const handleDeleteCompra = (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta compra?')) {
-      deleteData(id);
+  const handleDeleteCompra = (compra) => {
+    setCompraToDelete(compra);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (compraToDelete) {
+      deleteData(compraToDelete.id);
     }
+    setIsConfirmDeleteOpen(false);
+    setCompraToDelete(null);
   };
 
   const handleSubmit = (event) => {
@@ -59,6 +68,7 @@ export default function GestionCompras() {
       createData(newCompra);
     }
     setIsOpen(false);
+    setCurrentCompra(null);
   };
 
   const handleProductChange = (index, field, value) => {
@@ -140,7 +150,7 @@ export default function GestionCompras() {
                 <Button onClick={() => handleEditCompra(compra)} className="mr-2">
                   <Edit className="h-5 w-5" />
                 </Button>
-                <Button onClick={() => handleDeleteCompra(compra.id)} variant="destructive">
+                <Button onClick={() => handleDeleteCompra(compra)} variant="destructive">
                   <Trash2 className="h-5 w-5" />
                 </Button>
               </TableCell>
@@ -198,7 +208,7 @@ export default function GestionCompras() {
               <div>
                 <Label>Productos</Label>
                 {products.map((product, index) => (
-                  <div key={index} className="flex items-center space-x-4 mb-4">
+                  <div key={index} className="flex space-x-2 mb-2">
                     <Input
                       placeholder="Nombre del producto"
                       value={product.name}
@@ -216,23 +226,29 @@ export default function GestionCompras() {
                       value={product.price}
                       onChange={(e) => handleProductChange(index, 'price', e.target.value)}
                     />
-                    <Button onClick={() => removeProduct(index)} variant="destructive">
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
+                    <Button type="button" variant="destructive" onClick={() => removeProduct(index)}>Eliminar</Button>
                   </div>
                 ))}
-                <Button onClick={addProduct}>
-                  <Plus className="mr-2 h-5 w-5" /> Agregar Producto
-                </Button>
+                <Button type="button" onClick={addProduct}>Agregar Producto</Button>
               </div>
             </div>
-            <div className="flex justify-end mt-4">
-              <Button type="submit">Guardar</Button>
-              <Button type="button" onClick={() => setIsOpen(false)} variant="outline" className="ml-2">
-                Cancelar
-              </Button>
+            <div className="mt-4 flex justify-end">
+              <Button type="submit" variant="primary">Guardar</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Eliminación</DialogTitle>
+          </DialogHeader>
+          <p>¿Estás seguro de que deseas eliminar esta compra?</p>
+          <div className="mt-4 flex justify-end space-x-2">
+            <Button onClick={() => setIsConfirmDeleteOpen(false)}>Cancelar</Button>
+            <Button onClick={confirmDelete} variant="destructive">Eliminar</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

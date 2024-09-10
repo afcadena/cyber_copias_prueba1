@@ -10,7 +10,7 @@
       ],
       "rating": 0,
       "reviews": 0,
-      "stock": "29",
+      "stock": "33",
       "status": "active",
       "image": "https://exitocol.vteximg.com.br/arquivos/ids/20970023/Resma-Carta-500-Hojas-541782_a.jpg"
     },
@@ -246,7 +246,7 @@
       "category": "Accesorios",
       "price": 200,
       "imageUrl": "https://www.artel.cl/wp-content/uploads/2020/11/20660416-Pincel-Artel-serie-577-N-16.jpg",
-      "stock": 30,
+      "stock": "20",
       "status": "active",
       "ratings": 0,
       "reviews": 0
@@ -413,31 +413,35 @@
   ],
   "compras": [
     {
-      "id": "2",
-      "proveedor": "Distribuidora de Útiles",
-      "fecha": "2023-06-05",
-      "total": 2000.5,
-      "estado": "Pendiente",
-      "producto": "Lápices",
-      "precio": 1.2,
-      "cantidad": 500
-    },
-    {
       "id": "3",
       "proveedor": "Importadora de Artículos",
       "fecha": "2023-06-10",
-      "total": 0,
+      "total": 1260,
       "estado": "Pendiente",
       "products": [
         {
-          "name": "",
-          "quantity": 0,
-          "price": 0
+          "name": "Pincel",
+          "quantity": 3,
+          "price": 420
         },
         {
           "name": "",
           "quantity": 0,
           "price": 0
+        }
+      ]
+    },
+    {
+      "id": "1725977571796",
+      "proveedor": "Panamericana",
+      "fecha": "2024-09-11",
+      "total": 978,
+      "estado": "Recibido",
+      "products": [
+        {
+          "name": "Sobres x 5 Fifa Copa América 2024 PANINI 23204",
+          "quantity": 3,
+          "price": 326
         }
       ]
     }
@@ -448,7 +452,7 @@
       "cliente": "Juan Pérez",
       "fecha": "2024-09-09",
       "estado": "Completada",
-      "total": 42,
+      "total": 43,
       "products": [
         {
           "id": "1",
@@ -468,7 +472,7 @@
           "id": "1725895497068",
           "nombre": "pincel",
           "cantidad": 1,
-          "precio": 42
+          "precio": 43
         }
       ]
     },
@@ -477,7 +481,7 @@
       "cliente": "María Gómez",
       "fecha": "2024-09-10",
       "estado": "Completada",
-      "total": 301,
+      "total": 302,
       "products": [
         {
           "id": "6",

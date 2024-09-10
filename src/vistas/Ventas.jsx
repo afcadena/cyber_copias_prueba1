@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,8 +12,10 @@ import { useCrudContextVentas } from '../context/CrudContextVentas'; // Asegúra
 export default function GestionVentas() {
   const { db: ventas, createData, updateData, deleteData, loading, error } = useCrudContextVentas();
   const [isOpen, setIsOpen] = useState(false);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [currentVenta, setCurrentVenta] = useState(null);
   const [productos, setProductos] = useState([]);
+  const [ventaToDelete, setVentaToDelete] = useState(null);
 
   const handleNewVenta = () => {
     setCurrentVenta(null);
@@ -27,14 +29,24 @@ export default function GestionVentas() {
     setIsOpen(true);
   };
 
-  const handleDeleteVenta = (id) => {
-    if (window.confirm(`¿Estás seguro de eliminar el registro con el id '${id}'?`)) {
-      deleteData(id);
+  const handleDeleteVenta = (venta) => {
+    setVentaToDelete(venta);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (ventaToDelete) {
+      deleteData(ventaToDelete.id);
+      setIsConfirmDeleteOpen(false);
     }
   };
 
   const handleAddProduct = () => {
     setProductos([...productos, { id: Date.now().toString(), nombre: '', cantidad: 1, precio: 0 }]);
+  };
+
+  const handleRemoveProduct = (id) => {
+    setProductos(productos.filter(producto => producto.id !== id));
   };
 
   const handleProductChange = (id, field, value) => {
@@ -49,7 +61,6 @@ export default function GestionVentas() {
     ? ventasCompletadas.reduce((sum, venta) => sum + venta.total, 0) / ventasCompletadas.length
     : 0;
 
-  // Nuevo handleSubmit
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -142,19 +153,19 @@ export default function GestionVentas() {
                 <TableCell>{venta.fecha}</TableCell>
                 <TableCell>${venta.total.toFixed(2)}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    venta.estado === 'Completada' ? 'bg-green-100 text-green-800' :
-                    venta.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {venta.estado}
-                  </span>
-                </TableCell>
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  venta.estado === 'Completada' ? 'bg-blue-100 text-blue-800' : 
+                  venta.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {venta.estado}
+                </span>
+              </TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleEditVenta(venta)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteVenta(venta.id)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteVenta(venta)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </TableCell>
@@ -193,12 +204,13 @@ export default function GestionVentas() {
               <div>
                 <Label htmlFor="estado">Estado</Label>
                 <Select
+                  id="estado"
                   name="estado"
                   defaultValue={currentVenta?.estado || 'Pendiente'}
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar estado" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Pendiente">Pendiente</SelectItem>
@@ -207,43 +219,69 @@ export default function GestionVentas() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold">Productos</h3>
+              <div className="space-y-2">
+                <Label>Productos</Label>
                 {productos.map(producto => (
-                  <div key={producto.id} className="flex gap-2 mb-2">
+                  <div key={producto.id} className="flex items-center space-x-4">
                     <Input
-                      placeholder="Nombre del producto"
+                      placeholder="Nombre"
                       value={producto.nombre}
                       onChange={(e) => handleProductChange(producto.id, 'nombre', e.target.value)}
-                      className="flex-1"
                     />
                     <Input
                       type="number"
                       placeholder="Cantidad"
                       value={producto.cantidad}
                       onChange={(e) => handleProductChange(producto.id, 'cantidad', Number(e.target.value))}
-                      className="w-24"
                     />
                     <Input
                       type="number"
                       placeholder="Precio"
                       value={producto.precio}
                       onChange={(e) => handleProductChange(producto.id, 'precio', Number(e.target.value))}
-                      className="w-24"
                     />
+                    <Button
+                      variant="destructive"
+                      className="mt-1"
+                      onClick={() => handleRemoveProduct(producto.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
-                <Button type="button" onClick={handleAddProduct}>
-                  Añadir Producto
-                </Button>
-              </div>
-              <div className="flex justify-end mt-4">
-                <Button type="submit" variant="primary">
-                  {currentVenta ? 'Actualizar Venta' : 'Crear Venta'}
+                <Button
+                  type="button"
+                  onClick={handleAddProduct}
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Agregar Producto
                 </Button>
               </div>
             </div>
+            <div className="flex justify-end mt-4">
+              <Button type="submit">
+                {currentVenta ? 'Actualizar Venta' : 'Crear Venta'}
+              </Button>
+            </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Eliminación</DialogTitle>
+          </DialogHeader>
+          <div className="p-4">
+            <p>¿Estás seguro de que deseas eliminar esta venta?</p>
+            <div className="flex justify-end mt-4 space-x-2">
+              <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={confirmDelete}>
+                Confirmar
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
