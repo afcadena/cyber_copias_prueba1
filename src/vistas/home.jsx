@@ -9,11 +9,12 @@ import { ChevronRight } from 'lucide-react'
 
 const HomePage = () => {
   const categories = [
-    { name: "Tecnología", icon: "💻", image: "/placeholder.svg?height=200&width=200" },
-    { name: "Mundo GZ", icon: "🎮", image: "/placeholder.svg?height=200&width=200" },
-    { name: "Libros", icon: "📚", image: "/placeholder.svg?height=200&width=200" },
-    { name: "Hogar", icon: "🏠", image: "/placeholder.svg?height=200&width=200" },
-    { name: "Juguetería", icon: "🧸", image: "/placeholder.svg?height=200&width=200" }
+    { name: "Escritura", icon: "✏️", image: "/placeholder.svg?height=200&width=200" },
+    { name: "Arte", icon: "🎨", image: "/placeholder.svg?height=200&width=200" },
+    { name: "Accesorios", icon: "👜", image: "/placeholder.svg?height=200&width=200" },
+    { name: "Cuadernos", icon: "📓", image: "/placeholder.svg?height=200&width=200" },
+    { name: "Papel", icon: "📃", image: "/placeholder.svg?height=200&width=200" },
+    { name: "Coleccionables", icon: "🧸", image: "/placeholder.svg?height=200&width=200" }
   ];
 
   return (
@@ -77,7 +78,7 @@ const HomePage = () => {
         <section className="bg-white py-8">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-3xl font-bold text-primary">TECNOLOGÍA</h2>
+              <h2 className="text-3xl font-bold text-primary">Escritura</h2>
               <Button variant="link" className="text-primary">
                 Ver todo <ChevronRight className="ml-1 h-4 w-4" />
               </Button>

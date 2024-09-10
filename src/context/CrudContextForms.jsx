@@ -1,4 +1,6 @@
-import { createContext, useEffect, useState } from "react";
+// CrudContextForms.jsx
+
+import { createContext, useContext, useEffect, useState } from "react";
 import { helpHttp } from "../helpers/helpHttp";
 import { useNavigate } from "react-router-dom";
 
@@ -96,4 +98,13 @@ const CrudProvider = ({ children }) => {
   );
 };
 
-export { CrudProvider, CrudContextForm };
+// Renombrar el hook a `useCrudContextForms`
+const useCrudContextForms = () => {
+  const context = useContext(CrudContextForm);
+  if (!context) {
+    throw new Error('useCrudContextForms must be used within a CrudProvider');
+  }
+  return context;
+};
+
+export { CrudProvider, useCrudContextForms };

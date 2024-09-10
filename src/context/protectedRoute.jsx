@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { CrudContextForm } from './CrudContextForms'; // Asegúrate de importar correctamente el contexto
+import { useCrudContextForms } from "../context/CrudContextForms"; // Importar el hook correctamente
 
 const ProtectedRoute = ({ children, role }) => {
-  const { currentUser } = useContext(CrudContextForm);
+  const { currentUser } = useCrudContextForms(); // Usar el hook para obtener el contexto
 
   if (!currentUser) {
     return <Navigate to="/login" />;

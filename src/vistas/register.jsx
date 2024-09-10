@@ -1,16 +1,16 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import { CrudContextForm } from "../context/CrudContextForms";
+import { useCrudContextForms } from "../context/CrudContextForms";
 import { useNavigate } from 'react-router-dom';
 import Header from './header';  // Asegúrate de que la ruta sea correcta
 import Footer from './footer';  // Asegúrate de que la ruta sea correcta
 
 export default function Register() {
-  const { registerUser, error } = useContext(CrudContextForm);
+  const { registerUser, error } = useCrudContextForms();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

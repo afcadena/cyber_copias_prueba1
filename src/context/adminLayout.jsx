@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   BarChart, 
@@ -10,42 +10,41 @@ import {
   LogOut
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { CrudContextForm } from './CrudContextForms'; // Asegúrate de importar el contexto
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"; // Ajusta la importación según tu estructura de componentes
+import { useCrudContextForms } from './CrudContextForms'; // Asegúrate de que esta ruta sea correcta
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Para obtener la ruta actual
-  const { logoutUser } = useContext(CrudContextForm); // Accede a la función logoutUser del contexto
+  const location = useLocation();
+  const { logoutUser } = useCrudContextForms(); // Usa el hook correcto
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const menuItems = [
     { icon: Package, label: 'Inventario', path: '/admin/inventario' },
-    { icon: Users, label: 'Proveedores', path: '/admin/providers' },  // Proveedores
-    { icon: ShoppingCart, label: 'Pedidos', path: '/admin/orders' },  // Pedidos
-    { icon: DollarSign, label: 'Compras', path: '/admin/purchases' },  // Compras
-    { icon: TrendingUp, label: 'Ventas', path: '/admin/sales' },  // Ventas
+    { icon: Users, label: 'Proveedores', path: '/admin/providers' },
+    { icon: ShoppingCart, label: 'Pedidos', path: '/admin/orders' },
+    { icon: DollarSign, label: 'Compras', path: '/admin/purchases' },
+    { icon: TrendingUp, label: 'Ventas', path: '/admin/sales' },
   ];
 
   useEffect(() => {
-    // Redirige a la pestaña de Inventario si no estamos en esa ruta ya
     if (location.pathname === '/admin') {
       navigate('/admin/inventario');
     }
   }, [location.pathname, navigate]);
 
   const handleLogoutClick = () => {
-    setIsConfirmOpen(true); // Abre el modal de confirmación
+    setIsConfirmOpen(true);
   };
 
   const handleLogoutConfirm = () => {
     logoutUser(); // Llama a la función logoutUser para cerrar sesión
-    navigate('/login'); // Redirige al usuario a la página de inicio de sesión
-    setIsConfirmOpen(false); // Cierra el modal de confirmación
+    navigate('/login');
+    setIsConfirmOpen(false);
   };
 
   const handleLogoutCancel = () => {
-    setIsConfirmOpen(false); // Cierra el modal de confirmación sin hacer logout
+    setIsConfirmOpen(false);
   };
 
   return (
@@ -75,7 +74,7 @@ const AdminLayout = () => {
           <Button 
             variant="outline" 
             className="w-full justify-start" 
-            onClick={handleLogoutClick} // Usa la función handleLogoutClick para abrir el modal
+            onClick={handleLogoutClick}
           >
             <LogOut className="mr-4 h-5 w-5" />
             Cerrar Sesión
@@ -91,7 +90,6 @@ const AdminLayout = () => {
           </div>
         </header>
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {/* Aquí se renderizarán las diferentes secciones del dashboard */}
           <Outlet />
         </main>
       </div>

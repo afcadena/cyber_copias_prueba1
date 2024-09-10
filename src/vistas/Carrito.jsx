@@ -3,33 +3,39 @@ import Header from "./header";
 import Footer from "./footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCart } from "../context/CartContext"; // Importar el contexto del carrito
-import { XIcon } from 'lucide-react'; // Ícono de "X" para eliminar
-import { useNavigate } from "react-router-dom"; // Usar useNavigate de react-router-dom
+import { useCart } from "../context/CartContext";
+import { XIcon } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+import { useCrudContextForms } from "../context/CrudContextForms"; // Asegúrate de importar el contexto
 
 export default function CarritoDeCompras() {
-  const { cart, removeFromCart } = useCart(); // Obtener el carrito y la función para eliminar productos
+  const { cart, removeFromCart } = useCart();
+  const { currentUser } = useCrudContextForms(); // Usamos el contexto para obtener el usuario actual
   const [quantities, setQuantities] = useState(() => {
     const initialQuantities = {};
     cart.forEach(product => {
-      initialQuantities[product.id] = 1; // Inicialmente, cantidad = 1 para todos los productos
+      initialQuantities[product.id] = 1;
     });
     return initialQuantities;
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Estado de autenticación
-  const [isOpen, setIsOpen] = useState(false); // Estado para el modal
-  const navigate = useNavigate(); // Hook de react-router-dom para redireccionar
+  const [isOpen, setIsOpen] = useState(false);
+  const [showMessage, setShowMessage] = useState(false); // Estado para mostrar el mensaje
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
-  // Verificar el estado de autenticación al montar el componente y cuando cambie el carrito
   useEffect(() => {
-    const userLoggedIn = Boolean(localStorage.getItem("user")); // Verificar si hay usuario en el localStorage
-    setIsAuthenticated(userLoggedIn);
-  }, [cart]); // Añadir 'cart' como dependencia
+    // Verificar la autenticación del usuario actual
+    if (currentUser && currentUser.role === "cliente") {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, [currentUser, cart]);
 
   const handleQuantityChange = (productId, newQuantity) => {
     setQuantities(prev => ({
       ...prev,
-      [productId]: newQuantity < 1 ? 1 : newQuantity // La cantidad mínima es 1
+      [productId]: newQuantity < 1 ? 1 : newQuantity
     }));
   };
 
@@ -37,25 +43,29 @@ export default function CarritoDeCompras() {
     removeFromCart(productId);
     setQuantities(prev => {
       const newQuantities = { ...prev };
-      delete newQuantities[productId]; // Eliminar la cantidad de ese producto
+      delete newQuantities[productId];
       return newQuantities;
     });
   };
 
   const totalCompra = cart.reduce((total, producto) => {
-    const price = parseFloat(producto.price) || 0; // Asegurarse de que el precio sea numérico
+    const price = parseFloat(producto.price) || 0;
     const quantity = quantities[producto.id] || 1;
     return total + price * quantity;
   }, 0);
 
   const handleFinalizarCompra = () => {
     if (!isAuthenticated) {
-      // Si no ha iniciado sesión, redirigir a la página de login
-      navigate("/login");
+      setShowMessage(true); // Mostrar mensaje si no está autenticado
     } else {
-      // Si ha iniciado sesión, abrir el estado de isOpen
-      setIsOpen(true);
+      setIsOpen(true); // Abrir el modal para confirmar la compra
     }
+  };
+
+  const handleConfirmPurchase = () => {
+    console.log("Finalizar compra");
+    // Aquí podrías agregar la lógica para procesar la compra
+    setIsOpen(false);
   };
 
   return (
@@ -66,7 +76,7 @@ export default function CarritoDeCompras() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {cart.length > 0 ? (
             cart.map((producto) => {
-              const price = parseFloat(producto.price) || 0; // Asegurarse de que el precio sea numérico
+              const price = parseFloat(producto.price) || 0;
               const quantity = quantities[producto.id] || 1;
 
               return (
@@ -75,10 +85,10 @@ export default function CarritoDeCompras() {
                     <div className="flex justify-between items-start">
                       <CardTitle>{producto.name}</CardTitle>
                       <button
-                        onClick={() => handleRemoveFromCart(producto.id)} // Eliminar producto
+                        onClick={() => handleRemoveFromCart(producto.id)}
                         className="text-red-500"
                       >
-                        <XIcon className="w-6 h-6" /> {/* Botón X */}
+                        <XIcon className="w-6 h-6" />
                       </button>
                     </div>
                   </CardHeader>
@@ -124,21 +134,30 @@ export default function CarritoDeCompras() {
       </footer>
       <Footer />
 
-      {/* Modal */}
+      {/* Modal de confirmación de compra */}
       {isOpen && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-4 rounded-md shadow-md">
             <h2 className="text-2xl font-bold mb-4">Finalizar Compra</h2>
             <p className="text-lg mb-4">¿Estás seguro de que deseas finalizar la compra?</p>
-            <div className="flex justify-end">
+            <div className="flex justify-end space-x-4">
               <Button onClick={() => setIsOpen(false)}>Cancelar</Button>
-              <Button onClick={() => {
-                console.log("Finalizar compra"); 
-                // Aquí podrías agregar la lógica para procesar la compra
-                setIsOpen(false); // Cerrar el modal después de finalizar la compra
-              }}>
-                Finalizar Compra
+              <Button onClick={handleConfirmPurchase}>
+                Confirmar Compra
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mensaje de error de autenticación */}
+      {showMessage && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-4 rounded-md shadow-md">
+            <h2 className="text-2xl font-bold mb-4">Acceso Denegado</h2>
+            <p className="text-lg mb-4">Debes estar autenticado para realizar una compra.</p>
+            <div className="flex justify-end space-x-4">
+              <Button onClick={() => setShowMessage(false)}>Cerrar</Button>
             </div>
           </div>
         </div>

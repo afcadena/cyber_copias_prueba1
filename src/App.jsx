@@ -13,7 +13,6 @@ import Register from './vistas/register';
 import ProtectedRoute from './context/protectedRoute';
 import HomeCliente from './vistas/homecli';
 import { CartProvider } from './context/CartContext';
-
 // Importar las nuevas vistas para administración
 import InventoryManagement from './vistas/Inventario';
 import GestionPedidos from './vistas/Pedidos';
@@ -38,7 +37,7 @@ function App() {
             <CartProvider>
               <CrudProviderProveedores>
                 <CrudProviderCompras>
-                  <CrudProviderVentas> {/* Agregar el proveedor de ventas aquí */}
+                  <CrudProviderVentas>
                     <Routes>
                       {/* Rutas públicas */}
                       <Route path="/" element={<Home />} />
@@ -48,7 +47,13 @@ function App() {
                       <Route path="/cuenta" element={<Cuenta />} />
                       <Route path="/carrito" element={<CarritoDeCompras />} />
                       <Route path="/producto/:id" element={<ProductDetail />} />
-                      <Route path="/homecli" element={<HomeCliente />} />
+
+                      {/* Rutas protegidas del cliente */}
+                      <Route path="/homecli" element={
+                        <ProtectedRoute role="cliente">
+                          <HomeCliente />
+                        </ProtectedRoute>
+                      } />
 
                       {/* Rutas protegidas del admin */}
                       <Route path="/admin" element={

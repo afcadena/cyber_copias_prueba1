@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, User, MapPin, Package, CreditCard, Tag, Grid, ShoppingCart, ShoppingBag, Edit } from "lucide-react";
+import { ArrowLeft, User, MapPin, Package, Grid, ShoppingCart, Edit } from "lucide-react";
 import Logo from "../assets/images/Logo.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import Footer from "./footer"; // Importa el footer desde el archivo Footer.jsx
 
 const UpdateProfileModal = ({ email, phone, onUpdate, onClose }) => {
   const [newEmail, setNewEmail] = useState(email);
@@ -155,34 +156,6 @@ const OrdersContent = () => (
   </Card>
 );
 
-const CardsContent = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Métodos de pago</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Visa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Número de tarjeta: •••• •••• •••• 1234</p>
-          <p>Fecha de vencimiento: 02/2025</p>
-        </CardContent>
-      </Card>
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Mastercard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Número de tarjeta: •••• •••• •••• 5678</p>
-          <p>Fecha de vencimiento: 08/2026</p>
-        </CardContent>
-      </Card>
-    </CardContent>
-  </Card>
-);
-
 export default function Cuenta() {
   const [activeSection, setActiveSection] = useState('perfil');
 
@@ -201,23 +174,13 @@ export default function Cuenta() {
         </div>
         <nav className="hidden md:flex space-x-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link to="#ofertas" aria-label="Ofertas">
-              <Tag className="h-6 w-6" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/catalog" aria-label="Catálogo">
+            <Link to="/catalogo" aria-label="Catálogo">
               <Grid className="h-6 w-6" />
             </Link>
           </Button>
           <Button variant="ghost" size="icon" asChild>
             <Link to="/carrito" aria-label="Carrito">
               <ShoppingCart className="h-6 w-6" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="#" aria-label="Compras">
-              <ShoppingBag className="h-6 w-6" />
             </Link>
           </Button>
         </nav>
@@ -252,14 +215,6 @@ export default function Cuenta() {
               <Package className="mr-2 h-5 w-5" />
               Pedidos
             </Button>
-            <Button 
-              variant={activeSection === 'tarjetas' ? "default" : "ghost"}
-              className="w-full justify-start text-lg"
-              onClick={() => setActiveSection('tarjetas')}
-            >
-              <CreditCard className="mr-2 h-5 w-5" />
-              Métodos de pago
-            </Button>
           </nav>
         </div>
 
@@ -267,9 +222,10 @@ export default function Cuenta() {
           {activeSection === 'perfil' && <ProfileContent />}
           {activeSection === 'direcciones' && <AddressesContent />}
           {activeSection === 'pedidos' && <OrdersContent />}
-          {activeSection === 'tarjetas' && <CardsContent />}
         </div>
       </main>
+
+      <Footer /> {/* Usa el componente Footer importado aquí */}
     </div>
   );
 }

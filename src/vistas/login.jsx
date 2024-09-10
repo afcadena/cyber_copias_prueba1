@@ -1,16 +1,16 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import { CrudContextForm } from "../context/CrudContextForms";
+import { useCrudContextForms } from "../context/CrudContextForms"; // Corrige la importación
 import { useNavigate } from 'react-router-dom';
 import Header from './header';  
 import Footer from './footer';  
 
 export default function Login() {
-  const { loginUser, error, currentUser } = useContext(CrudContextForm);
+  const { loginUser, error, currentUser } = useCrudContextForms(); // Usa el hook correcto
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +19,6 @@ export default function Login() {
   const [userRole, setUserRole] = useState(null); 
   const navigate = useNavigate();
 
-  // Redirigir a la página adecuada si el usuario ya está autenticado
   useEffect(() => {
     if (currentUser) {
       if (currentUser.role === 'admin') {
