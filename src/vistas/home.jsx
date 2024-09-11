@@ -7,15 +7,13 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import AutoPlay from "embla-carousel-autoplay";
 import { SearchIcon, ShoppingCartIcon, StarIcon, Badge } from 'lucide-react';
 import { ChevronRight } from "heroicons-react";
-// Importación de imágenes para categorías
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import escrituraImage from '../assets/images/escritura.jpg';
 import arteImage from '../assets/images/arte.jpg';
 import accesoriosImage from '../assets/images/accesorios.jpg';
 import cuadernosImage from '../assets/images/cuadernos.jpg';
 import papelImage from '../assets/images/papel.jpg';
 import coleccionablesImage from '../assets/images/coleccionables.jpg';
-
-// Importación de imágenes para Hero Carousel
 import heroImage1 from '../assets/images/hero1.jpg';
 import heroImage2 from '../assets/images/hero2.jpg';
 import heroImage3 from '../assets/images/hero3.jpg';
@@ -39,7 +37,8 @@ const HomePage = () => {
 
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
-  
+  const navigate = useNavigate(); // Inicializar useNavigate
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -54,11 +53,8 @@ const HomePage = () => {
   }, []);
 
   const handleAddToCart = (product) => {
-    // Check if the product is already in the cart
     const existingProduct = cart.find((item) => item.id === product.id);
-  
     if (existingProduct) {
-      // If the product is already in the cart, update its quantity
       setCart(
         cart.map((item) => {
           if (item.id === product.id) {
@@ -68,10 +64,14 @@ const HomePage = () => {
         })
       );
     } else {
-      // If the product is not in the cart, add it with a quantity of 1
       setCart([...cart, { ...product, quantity: 1 }]);
     }
     console.log(`Added product ${product.name} to cart`);
+  };
+
+  const handleProductClick = (product) => {
+    // Redirige a la página de producto con el ID del producto como parámetro
+    navigate(`/producto/${product.id}`); 
   };
 
   return (
