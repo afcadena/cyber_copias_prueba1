@@ -318,7 +318,8 @@
       "email": "maria.gomez@example.com",
       "password": "password456",
       "confirmpassword": "password456",
-      "role": "cliente"
+      "role": "cliente",
+      "direccion": ""
     },
     {
       "id": "3",
@@ -326,7 +327,8 @@
       "email": "luis.martinez@example.com",
       "password": "password789",
       "confirmpassword": "password789",
-      "role": "cliente"
+      "role": "cliente",
+      "direccion": ""
     },
     {
       "id": "4",
@@ -342,35 +344,40 @@
       "email": "pedro.fernandez@example.com",
       "password": "password654",
       "confirmpassword": "password654",
-      "role": "cliente"
+      "role": "cliente",
+      "direccion": ""
     },
     {
       "id": "1725411403084",
       "name": "Andres Cadena",
       "email": "afca@test.com",
       "password": "1013112289Fe@",
-      "role": "cliente"
+      "role": "cliente",
+      "direccion": ""
     },
     {
       "id": "1725411693460",
       "name": "Julian Prieto",
       "email": "Julian@test.com",
       "password": "123456789Se#",
-      "role": "cliente"
+      "role": "cliente",
+      "direccion": ""
     },
     {
       "id": "1725491302910",
       "name": "Julian Romero",
       "email": "julian@test11.com",
       "password": "123456789Pe#",
-      "role": "cliente"
+      "role": "cliente",
+      "direccion": ""
     },
     {
       "id": "1725492944879",
       "name": "Luis Alejandro Galicia Novoa",
       "email": "iglesiag1908@gmail.com",
       "password": "Alek122334.",
-      "role": "cliente"
+      "role": "cliente",
+      "direccion": ""
     },
     {
       "id": "10",
