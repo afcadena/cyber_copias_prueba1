@@ -4,6 +4,7 @@ import Catalog from './vistas/catalogo';
 import Home from './vistas/home';
 import CarritoDeCompras from './vistas/Carrito';
 import Cuenta from './vistas/cuenta';
+import { CuentaProvider } from './vistas/cuenta';
 import ProductDetail from './vistas/producto';
 import AdminLayout from './context/adminLayout';
 import { CrudProvider as CrudProviderInventario } from './context/CrudContextInventario';
@@ -44,7 +45,6 @@ function App() {
                       <Route path="/login" element={<Login />} />
                       <Route path="/register" element={<Register />} />
                       <Route path="/catalogo" element={<Catalog />} />
-                      <Route path="/cuenta" element={<Cuenta />} />
                       <Route path="/carrito" element={<CarritoDeCompras />} />
                       <Route path="/producto/:id" element={<ProductDetail />} />
 
@@ -67,6 +67,13 @@ function App() {
                         <Route path="purchases" element={<GestionCompras />} /> {/* Compras */}
                         <Route path="sales" element={<GestionVentas />} />  {/* Ventas */}
                       </Route>
+
+                      {/* Ruta protegida de cuenta */}
+                      <Route path="/cuenta" element={
+                        <CuentaProvider>
+                          <Cuenta />
+                        </CuentaProvider>
+                      } />
                     </Routes>
                   </CrudProviderVentas>
                 </CrudProviderCompras>

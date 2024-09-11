@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext, createContext } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, User, MapPin, Package, Grid, ShoppingCart, Edit } from "lucide-react";
 import Logo from "../assets/images/Logo.png";
@@ -14,14 +14,36 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Footer from "./footer"; // Importa el footer desde el archivo Footer.jsx
+import { useCrudContextForms } from '../context/CrudContextForms';
+
+const CuentaContext = createContext();
+
+const CuentaProvider = ({ children }) => {
+  const { currentUser, updateUserAddress } = useCrudContextForms(); // Add this line
+  const [userData, setUserData] = useState({}); // Initialize userData with an empty object
+
+  // Update userData when the currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      setUserData(currentUser);
+    }
+  }, [currentUser]);
+
+    return (
+    <CuentaContext.Provider value={{ userData, setUserData, updateUserAddress }}>
+      {children}
+    </CuentaContext.Provider>
+  );
+};
 
 const UpdateProfileModal = ({ email, phone, onUpdate, onClose }) => {
+  const { currentUser, updateUser } = useCrudContextForms();
   const [newEmail, setNewEmail] = useState(email);
   const [newPhone, setNewPhone] = useState(phone);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onUpdate({ email: newEmail, phone: newPhone });
+    updateUser({ email: newEmail, phone: newPhone });
     onClose();
   };
 
@@ -53,13 +75,43 @@ const UpdateProfileModal = ({ email, phone, onUpdate, onClose }) => {
   );
 };
 
+const UpdateAddressModal = ({ address, onUpdate, onClose }) => {
+  const { currentUser, updateUser } = useCrudContextForms();
+  const [newAddress, setNewAddress] = useState(address);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    updateUser({ direccion: newAddress });
+    onClose();
+  };
+
+  return (
+    <DialogContent className="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>Actualizar dirección</DialogTitle>
+      </DialogHeader>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="address">Dirección</Label>
+          <Input
+            id="address"
+            value={newAddress}
+            onChange={(e) => setNewAddress(e.target.value)}
+          />
+        </div>
+        <Button type="submit">Guardar cambios</Button>
+      </form>
+    </DialogContent>
+  );
+};
+
 const ProfileContent = () => {
-  const [userData, setUserData] = useState({
-    name: "Juan Pérez",
-    email: "juan@example.com",
-    phone: "+1234567890"
-  });
+  const { userData, setUserData } = useContext(CuentaContext);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  if (!userData) {
+    return <div>Loading...</div>;
+  }
 
   const handleUpdate = (newData) => {
     setUserData({ ...userData, ...newData });
@@ -103,18 +155,42 @@ const ProfileContent = () => {
   );
 };
 
-const AddressesContent = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Direcciones de Envío</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p>Calle Principal 123</p>
-      <p>Ciudad Ejemplo, 12345</p>
-      <p>País</p>
-    </CardContent>
-  </Card>
-);
+const AddressesContent = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { userData, setUserData } = useContext(CuentaContext);
+
+  if (!userData) {
+    return <div>Loading...</div>;
+  }
+
+  const handleUpdate = (newData) => {
+    setUserData({ ...userData, ...newData });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Direcciones de Envío</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>{userData.direccion}</p>
+        <Button variant="outline" onClick={() => setIsDialogOpen(true)}>
+          <Edit className="mr-2 h-5 w-5" /> Editar
+        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="ghost">Cerrar</Button>
+          </DialogTrigger>
+          <UpdateAddressModal
+            address={userData.direccion}
+            onUpdate={handleUpdate}
+            onClose={() => setIsDialogOpen(false)}
+          />
+        </Dialog>
+      </CardContent>
+    </Card>
+  );
+};
 
 const OrdersContent = () => (
   <Card>
@@ -158,6 +234,14 @@ const OrdersContent = () => (
 
 export default function Cuenta() {
   const [activeSection, setActiveSection] = useState('perfil');
+  const { currentUser } = useCrudContextForms();
+  const [userData, setUserData] = useState({});
+
+  useEffect(() => {
+    if (currentUser) {
+      setUserData(currentUser);
+    }
+  }, [currentUser]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -191,7 +275,7 @@ export default function Cuenta() {
           <h1 className="text-3xl font-bold mb-6">¡Hola!</h1>
 
           <nav className="space-y-2">
-            <Button 
+            <Button
               variant={activeSection === 'perfil' ? "default" : "ghost"}
               className="w-full justify-start text-lg"
               onClick={() => setActiveSection('perfil')}
@@ -199,7 +283,7 @@ export default function Cuenta() {
               <User className="mr-2 h-5 w-5" />
               Perfil
             </Button>
-            <Button 
+            <Button
               variant={activeSection === 'direcciones' ? "default" : "ghost"}
               className="w-full justify-start text-lg"
               onClick={() => setActiveSection('direcciones')}
@@ -207,7 +291,7 @@ export default function Cuenta() {
               <MapPin className="mr-2 h-5 w-5" />
               Direcciones
             </Button>
-            <Button 
+            <Button
               variant={activeSection === 'pedidos' ? "default" : "ghost"}
               className="w-full justify-start text-lg"
               onClick={() => setActiveSection('pedidos')}
@@ -229,3 +313,5 @@ export default function Cuenta() {
     </div>
   );
 }
+
+export { CuentaProvider };

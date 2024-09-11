@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { helpHttp } from "../helpers/helpHttp";
 import { useNavigate } from "react-router-dom";
 
-const CrudContextForm = createContext();
+export const CrudContextForms = createContext();
 
 const CrudProvider = ({ children }) => {
   const [db, setDb] = useState([]);
@@ -13,6 +13,7 @@ const CrudProvider = ({ children }) => {
     const savedUser = localStorage.getItem("currentUser");
     return savedUser ? JSON.parse(savedUser) : null;
   });
+  const [currentUserAddress, setCurrentUserAddress] = useState(currentUser ? currentUser.direccion : null);
   const navigate = useNavigate();
 
   const api = helpHttp();
@@ -89,22 +90,31 @@ const CrudProvider = ({ children }) => {
     registerUser,
     logoutUser,
     currentUser,
+    currentUserAddress,
+    updateUserAddress,
   };
 
   return (
-    <CrudContextForm.Provider value={data}>
+    <CrudContextForms.Provider value={data}>
       {children}
-    </CrudContextForm.Provider>
+    </CrudContextForms.Provider>
   );
 };
 
 // Renombrar el hook a `useCrudContextForms`
 const useCrudContextForms = () => {
-  const context = useContext(CrudContextForm);
+  const context = useContext(CrudContextForms);
   if (!context) {
     throw new Error('useCrudContextForms must be used within a CrudProvider');
   }
   return context;
+};
+
+const updateUserAddress = (newAddress) => {
+  const updatedUser = { ...currentUser, direccion: newAddress };
+  setCurrentUser(updatedUser);
+  setCurrentUserAddress(newAddress);
+  localStorage.setItem("currentUser", JSON.stringify(updatedUser));
 };
 
 export { CrudProvider, useCrudContextForms };
