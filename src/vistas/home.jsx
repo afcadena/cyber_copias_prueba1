@@ -19,6 +19,7 @@ import coleccionablesImage from '../assets/images/coleccionables.jpg';
 import heroImage1 from '../assets/images/hero1.jpg';
 import heroImage2 from '../assets/images/hero2.jpg';
 import heroImage3 from '../assets/images/hero3.jpg';
+import { Link } from 'react-router-dom';
 
 const HomePage = () => {
   const categories = [
@@ -105,9 +106,11 @@ const HomePage = () => {
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-3xl font-bold text-primary">Escritura</h2>
+              <Link to ="/catalogo" className="text-sm text-gray-600 hover:text-gray-800">
               <Button variant="link" className="text-primary">
                 Ver todo <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
+              </Link>
             </div>
             <Carousel 
               opts={{ align: "start", loop: true }} 
