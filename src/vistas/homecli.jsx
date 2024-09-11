@@ -1,11 +1,12 @@
 // homecli.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Footer from './footer';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import AutoPlay from "embla-carousel-autoplay";
-import { ChevronRight } from 'lucide-react';
+import { SearchIcon, ShoppingCartIcon, StarIcon, Badge } from 'lucide-react';
+import { ChevronRight } from "heroicons-react";
 // Importar el hook correcto
 import { useCrudContextForms } from "../context/CrudContextForms";
 // Importación de imagenes
@@ -19,6 +20,7 @@ import coleccionablesImage from '../assets/images/coleccionables.jpg';
 import heroImage1 from '../assets/images/hero1.jpg';
 import heroImage2 from '../assets/images/hero2.jpg';
 import heroImage3 from '../assets/images/hero3.jpg';
+import { Link } from 'react-router-dom';
 
 import Header from "./headercli";  // Importamos el nuevo componente
 
@@ -31,23 +33,60 @@ const HomePage = () => {
     { name: "Accesorios", icon: "👜", image: accesoriosImage },
     { name: "Cuadernos", icon: "📓", image: cuadernosImage },
     { name: "Papel", icon: "📃", image: papelImage },
-    { name: "Coleccionables", icon: "🧸", image: coleccionablesImage} 
+    { name: "Coleccionables", icon: "🧸", image: coleccionablesImage }
   ];
-  
+
   const heroOffers = [
     { title: "", image: heroImage1 },
     { title: "", image: heroImage2 },
     { title: "", image: heroImage3 },
   ];
 
+  const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/products");
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const handleAddToCart = (product) => {
+    // Check if the product is already in the cart
+    const existingProduct = cart.find((item) => item.id === product.id);
+
+    if (existingProduct) {
+      // If the product is already in the cart, update its quantity
+      setCart(
+        cart.map((item) => {
+          if (item.id === product.id) {
+            return { ...item, quantity: item.quantity + 1 };
+          }
+          return item;
+        })
+      );
+    } else {
+      // If the product is not in the cart, add it with a quantity of 1
+      setCart([...cart, { ...product, quantity: 1 }]);
+    }
+    console.log(`Added product ${product.name} to cart`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-x-hidden">
       <Header />  {/* Usamos el componente Header */}
-      
+
       {/* Hero Carousel */}
       <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-        <Carousel 
-          opts={{ align: "start", loop: true }} 
+        <Carousel
+          opts={{ align: "start", loop: true }}
           plugins={[AutoPlay({ delay: 5000 })]}
           className="w-full"
         >
@@ -56,11 +95,11 @@ const HomePage = () => {
               <CarouselItem key={index}>
                 <div className="p-1">
                   <Card className="relative">
-                  <CardContent className="flex items-center justify-center p-0 h-[500px] w-[1380px]">
-                      <img 
-                        src={offer.image} 
-                        alt={offer.title} 
-                        className="w-full h-full object-cover" 
+                    <CardContent className="flex items-center justify-center p-0 h-[500px] w-[1380px]">
+                      <img
+                        src={offer.image}
+                        alt={offer.title}
+                        className="w-full h-full object-cover"
                       />
                       <span className="absolute bottom-4 left-4 text-4xl font-semibold text-white bg-black bg-opacity-50 p-2 rounded">
                         {offer.title}
@@ -82,8 +121,8 @@ const HomePage = () => {
         <section className="bg-white py-8">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-bold mb-4">Nuestras Categorías</h2>
-            <Carousel 
-              opts={{ align: "start", loop: true }} 
+            <Carousel
+              opts={{ align: "start", loop: true }}
               plugins={[AutoPlay({ delay: 3000 })]}
             >
               <CarouselContent>
@@ -104,28 +143,47 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Categoría Destacada: Escritura */}
+        {/* Categoría Destacada */}
         <section className="bg-white py-8">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-3xl font-bold text-primary">ESCRITURA</h2>
-              <Button variant="link" className="text-primary">
-                Ver todo <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
+              <h2 className="text-3xl font-bold text-primary">Escritura</h2>
+              <Link to="/catalogo" className="text-sm text-gray-600 hover:text-gray-800">
+                <Button variant="link" className="text-primary">
+                  Ver todo <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
-            <Carousel 
-              opts={{ align: "start", loop: true }} 
+            <Carousel
+              opts={{ align: "start", loop: true }}
               plugins={[AutoPlay({ delay: 3000 })]}
             >
               <CarouselContent>
-                {[1, 2, 3, 4, 5].map((_, productIndex) => (
-                  <CarouselItem key={productIndex} className="md:basis-1/3 lg:basis-1/4">
-                    <Card>
+                {products.filter((product) => product.category === "Escritura").map((product, index) => (
+                  <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/4">
+                    <Card
+                      className="flex flex-col justify-between cursor-pointer"
+                      onClick={() => handleProductClick(product)}
+                    >
+                      <CardHeader className="p-4">
+                        <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-contain" />
+                      </CardHeader>
                       <CardContent className="p-4">
-                        <div className="aspect-square bg-gray-200 rounded-md mb-2"></div>
-                        <h4 className="font-semibold">Producto {productIndex + 1}</h4>
-                        <p className="text-sm text-gray-500">$10.00</p>
+                        <CardTitle className="text-sm font-medium line-clamp-2 mb-2">{product.name}</CardTitle>
+                        <div className="flex items-center mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <StarIcon key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                          ))}
+                          <span className="ml-1 text-sm text-gray-600">({product.reviews})</span>
+                        </div>
+                        <p className="text-lg font-bold">${product.price.toLocaleString()}</p>
                       </CardContent>
+                      <CardFooter className="p-4 pt-0">
+                        <Button className="w-full" onClick={() => handleAddToCart(product)}>
+                          <ShoppingCartIcon className="w-4 h-4 mr-2" />
+                          Agregar al carrito
+                        </Button>
+                      </CardFooter>
                     </Card>
                   </CarouselItem>
                 ))}
