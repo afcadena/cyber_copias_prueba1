@@ -53,7 +53,7 @@ const AdminLayout = () => {
       <div className="w-64 bg-white shadow-lg flex flex-col">
         {/* Header del sidebar */}
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
+          <h1 className="text-2xl font-bold text-gray-800">CyberCopias Administración</h1>
         </div>
         {/* Menú */}
         <nav className="flex-1 mt-6 overflow-y-auto">
