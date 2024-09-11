@@ -49,7 +49,7 @@ export default function ProductDetail() {
       <Header />
       <div className="container mx-auto px-4 py-8">
         {product ? (
-          <div className="flex flex-col md:flex-row gap-8">
+          <div className="flex flex-col md:flex-row gap-8 w-full max-w-[1400px]">
             <div className="md:w-1/2">
               <img src={mainImage} alt={product.name} className="w-full h-auto rounded-lg shadow-md mb-4" />
               <div className="flex gap-4 overflow-x-auto">

@@ -1,20 +1,39 @@
-import React from 'react'
-import Header from './header'
-import Footer from './footer'
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import AutoPlay from "embla-carousel-autoplay"
-import { ChevronRight } from 'lucide-react'
+import React from 'react';
+import Header from './header';
+import Footer from './footer';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import AutoPlay from "embla-carousel-autoplay";
+import { ChevronRight } from 'lucide-react';
+
+// Importación de imágenes para categorías
+import escrituraImage from '../assets/images/escritura.jpg';
+import arteImage from '../assets/images/arte.jpg';
+import accesoriosImage from '../assets/images/accesorios.jpg';
+import cuadernosImage from '../assets/images/cuadernos.jpg';
+import papelImage from '../assets/images/papel.jpg';
+import coleccionablesImage from '../assets/images/coleccionables.jpg';
+
+// Importación de imágenes para Hero Carousel
+import heroImage1 from '../assets/images/hero1.jpg';
+import heroImage2 from '../assets/images/hero2.jpg';
+import heroImage3 from '../assets/images/hero3.jpg';
 
 const HomePage = () => {
   const categories = [
-    { name: "Escritura", icon: "✏️", image: "/placeholder.svg?height=200&width=200" },
-    { name: "Arte", icon: "🎨", image: "/placeholder.svg?height=200&width=200" },
-    { name: "Accesorios", icon: "👜", image: "/placeholder.svg?height=200&width=200" },
-    { name: "Cuadernos", icon: "📓", image: "/placeholder.svg?height=200&width=200" },
-    { name: "Papel", icon: "📃", image: "/placeholder.svg?height=200&width=200" },
-    { name: "Coleccionables", icon: "🧸", image: "/placeholder.svg?height=200&width=200" }
+    { name: "Escritura", icon: "✏️", image: escrituraImage },
+    { name: "Arte", icon: "🎨", image: arteImage },
+    { name: "Accesorios", icon: "👜", image: accesoriosImage },
+    { name: "Cuadernos", icon: "📓", image: cuadernosImage },
+    { name: "Papel", icon: "📃", image: papelImage },
+    { name: "Coleccionables", icon: "🧸", image: coleccionablesImage }    
+  ];
+
+  const heroOffers = [
+    { title: "", image: heroImage1 },
+    { title: "", image: heroImage2 },
+    { title: "", image: heroImage3 },
   ];
 
   return (
@@ -29,12 +48,19 @@ const HomePage = () => {
           className="w-full"
         >
           <CarouselContent>
-            {[1, 2, 3].map((_, index) => (
+            {heroOffers.map((offer, index) => (
               <CarouselItem key={index}>
                 <div className="p-1">
-                  <Card>
-                    <CardContent className="flex aspect-[20/7] items-center justify-center p-6">
-                      <span className="text-4xl font-semibold">{`Oferta ${index + 1}`}</span>
+                  <Card className="relative">
+                  <CardContent className="flex items-center justify-center p-0 h-[500px] w-[1380px]">
+                      <img 
+                        src={offer.image} 
+                        alt={offer.title} 
+                        className="w-full h-full object-cover" 
+                      />
+                      <span className="absolute bottom-4 left-4 text-4xl font-semibold text-white bg-black bg-opacity-50 p-2 rounded">
+                        {offer.title}
+                      </span>
                     </CardContent>
                   </Card>
                 </div>
@@ -110,7 +136,7 @@ const HomePage = () => {
 
       <Footer />
     </div>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;
