@@ -44,7 +44,7 @@
     },
     {
       "id": "4",
-      "name": "Plumígrafos punta media 0.7mm vintage x24 unds PAPER MATE",
+      "name": "Plumígrafos punta media 0.7mm vintage x24",
       "category": "Escritura",
       "price": 70190,
       "imageUrl": [
@@ -427,7 +427,7 @@
       "id": "1725731587174",
       "cliente": "Luis Martínez",
       "fecha": "2024-09-19",
-      "estado": "Entregado",
+      "estado": "En proceso",
       "total": 3555,
       "products": [
         {

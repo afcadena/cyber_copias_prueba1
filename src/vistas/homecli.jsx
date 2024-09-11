@@ -1,32 +1,25 @@
-// homecli.jsx
 import React, { useState, useEffect } from 'react';
+import Header from './headercli';
 import Footer from './footer';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import AutoPlay from "embla-carousel-autoplay";
 import { SearchIcon, ShoppingCartIcon, StarIcon, Badge } from 'lucide-react';
 import { ChevronRight } from "heroicons-react";
-// Importar el hook correcto
-import { useCrudContextForms } from "../context/CrudContextForms";
-// Importación de imagenes
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import escrituraImage from '../assets/images/escritura.jpg';
 import arteImage from '../assets/images/arte.jpg';
 import accesoriosImage from '../assets/images/accesorios.jpg';
 import cuadernosImage from '../assets/images/cuadernos.jpg';
 import papelImage from '../assets/images/papel.jpg';
 import coleccionablesImage from '../assets/images/coleccionables.jpg';
-// Importación de imágenes para Hero Carousel
 import heroImage1 from '../assets/images/hero1.jpg';
 import heroImage2 from '../assets/images/hero2.jpg';
 import heroImage3 from '../assets/images/hero3.jpg';
 import { Link } from 'react-router-dom';
 
-import Header from "./headercli";  // Importamos el nuevo componente
-
 const HomePage = () => {
-  const { logoutUser } = useCrudContextForms();  // Usa el hook correctamente
-
   const categories = [
     { name: "Escritura", icon: "✏️", image: escrituraImage },
     { name: "Arte", icon: "🎨", image: arteImage },
@@ -44,6 +37,7 @@ const HomePage = () => {
 
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+  const navigate = useNavigate(); // Inicializar useNavigate
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -59,11 +53,8 @@ const HomePage = () => {
   }, []);
 
   const handleAddToCart = (product) => {
-    // Check if the product is already in the cart
     const existingProduct = cart.find((item) => item.id === product.id);
-
     if (existingProduct) {
-      // If the product is already in the cart, update its quantity
       setCart(
         cart.map((item) => {
           if (item.id === product.id) {
@@ -73,15 +64,19 @@ const HomePage = () => {
         })
       );
     } else {
-      // If the product is not in the cart, add it with a quantity of 1
       setCart([...cart, { ...product, quantity: 1 }]);
     }
     console.log(`Added product ${product.name} to cart`);
   };
 
+  const handleProductClick = (product) => {
+    // Redirige a la página de producto con el ID del producto como parámetro
+    navigate(`/producto/${product.id}`); 
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-x-hidden">
-      <Header />  {/* Usamos el componente Header */}
+      <Header />
 
       {/* Hero Carousel */}
       <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-4">
@@ -195,9 +190,9 @@ const HomePage = () => {
         </section>
       </main>
 
-      <Footer />  {/* Usamos el componente Footer */}
+      <Footer />
     </div>
   );
-};
+}
 
 export default HomePage;
