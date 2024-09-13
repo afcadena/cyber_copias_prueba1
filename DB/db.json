@@ -10,8 +10,8 @@
       ],
       "rating": 0,
       "reviews": 0,
-      "stock": "33",
-      "status": "low",
+      "stock": "35",
+      "status": "active",
       "image": [
         "https://exitocol.vteximg.com.br/arquivos/ids/20970023/Resma-Carta-500-Hojas-541782_a.jpg"
       ]
@@ -543,6 +543,21 @@
           "nombre": "pincel",
           "cantidad": 1,
           "precio": 302
+        }
+      ]
+    },
+    {
+      "id": "eb2c",
+      "cliente": "biugioujf",
+      "fecha": "2024-09-13",
+      "estado": "Pendiente",
+      "total": 12,
+      "productos": [
+        {
+          "id": "1726266753878",
+          "nombre": "jdbvidfugv",
+          "cantidad": 1,
+          "precio": 12
         }
       ]
     }

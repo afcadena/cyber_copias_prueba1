@@ -33,10 +33,14 @@ export default function CarritoDeCompras() {
   }, [currentUser, cart]);
 
   const handleQuantityChange = (productId, newQuantity) => {
-    setQuantities(prev => ({
-      ...prev,
-      [productId]: newQuantity < 1 ? 1 : newQuantity
-    }));
+    const product = cart.find((product) => product.id === productId);
+    if (product) {
+      const maxQuantity = parseInt(product.stock); // get the stock quantity from the product object
+      setQuantities((prev) => ({
+        ...prev,
+        [productId]: Math.min(newQuantity, maxQuantity), // limit quantity to max available
+      }));
+    }
   };
 
   const handleRemoveFromCart = (productId) => {
