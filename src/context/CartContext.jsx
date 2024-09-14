@@ -37,8 +37,13 @@ export const CartProvider = ({ children }) => {
     setCart((prevCart) => prevCart.filter((p) => p.id !== productId));
   };
 
+  // Función para vaciar el carrito
+  const clearCart = () => {
+    setCart([]);
+  };
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );

@@ -192,46 +192,64 @@ const AddressesContent = () => {
   );
 };
 
-const OrdersContent = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Pedidos Recientes</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Pedido #1234</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Estado: En camino</p>
-          <p>Fecha: 2023-02-20</p>
-          <p>Total: 100.00</p>
-        </CardContent>
-      </Card>
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Pedido #5678</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Estado: Entregado</p>
-          <p>Fecha: 2023-02-15</p>
-          <p>Total: 50.00</p>
-        </CardContent>
-      </Card>
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Pedido #9012</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Estado: Procesando</p>
-          <p>Fecha: 2023-02-10</p>
-          <p>Total: 200.00</p>
-        </CardContent>
-      </Card>
-    </CardContent>
-  </Card>
-);
+const OrdersContent = () => {
+  const { currentUser } = useCrudContextForms(); // Usamos el contexto para obtener el usuario actual
+  const [pedidos, setPedidos] = useState([]); // Aquí se almacenan los pedidos
 
+  useEffect(() => {
+    // Aquí puedes hacer una petición a tu API o base de datos para obtener los pedidos
+    const fetchPedidos = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/pedidos'); // Cambia la URL a la de tu API
+        const data = await response.json();
+        setPedidos(data);
+      } catch (error) {
+        console.error("Error al obtener los pedidos:", error);
+      }
+    };
+
+    fetchPedidos();
+  }, []);
+
+  // Filtrar los pedidos por el cliente autenticado
+  const pedidosFiltrados = pedidos.filter(pedido => pedido.cliente === currentUser.name);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Pedidos Recientes</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {pedidosFiltrados.length > 0 ? (
+          pedidosFiltrados.map((pedido) => (
+            <Card key={pedido.id} className="mb-4">
+              <CardHeader>
+                <CardTitle>Pedido #{pedido.id}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Estado: {pedido.estado}</p>
+                <p>Fecha: {pedido.fecha}</p>
+                <p>Total: ${pedido.total}</p>
+                <div className="mt-4">
+                  <strong>Productos:</strong>
+                  <ul className="list-disc list-inside">
+                    {pedido.products.map((product, index) => (
+                      <li key={index}>
+                        {product.name} - Cantidad: {product.quantity}, Precio: ${product.price}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <p>No tienes pedidos recientes.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 export default function Cuenta() {
   const [activeSection, setActiveSection] = useState('perfil');
   const { currentUser } = useCrudContextForms();

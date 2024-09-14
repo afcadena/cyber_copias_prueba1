@@ -138,10 +138,10 @@ export default function GestionPedidos() {
               <div className="mt-4">
                 <strong>Productos:</strong>
                 <ul className="list-disc list-inside">
-                  {pedido.products && pedido.products.map((product, index) => (
-                    <li key={index}>
-                      {product.name} - Cantidad: {product.quantity}, Precio: ${product.price.toFixed(2)}
-                    </li>
+                {pedido.products && pedido.products.map((product, index) => (
+                  <li key={index}>
+                    {product.name} - Cantidad: {product.quantity}, Precio: ${parseFloat(product.price || 0).toFixed(2)}
+                  </li>
                   ))}
                 </ul>
               </div>

@@ -1,5 +1,3 @@
-// CrudContextForms.jsx
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { helpHttp } from "../helpers/helpHttp";
 import { useNavigate } from "react-router-dom";
@@ -33,10 +31,16 @@ const CrudProvider = ({ children }) => {
 
   const registerUser = async (userData) => {
     try {
-      userData.id = Date.now();
-      userData.role = "cliente";
-      
-      const res = await api.post(url, { body: userData, headers: { "content-type": "application/json" } });
+      // Asegurarse de que el id sea una cadena y los campos vacíos estén incluidos
+      const newUserData = {
+        ...userData,
+        id: String(Date.now()),  // Generar id como cadena
+        role: "cliente",
+        direccion: "",  // Agregar campo vacio
+        telefono: ""    // Agregar campo vacio
+      };
+
+      const res = await api.post(url, { body: newUserData, headers: { "content-type": "application/json" } });
       if (!res.err) {
         setDb([...db, res]);
         setCurrentUser(res);
@@ -83,6 +87,13 @@ const CrudProvider = ({ children }) => {
     navigate("/login");
   };
 
+  const updateUserAddress = (newAddress) => {
+    const updatedUser = { ...currentUser, direccion: newAddress };
+    setCurrentUser(updatedUser);
+    setCurrentUserAddress(newAddress);
+    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+  };
+
   const data = {
     db,
     error,
@@ -108,13 +119,6 @@ const useCrudContextForms = () => {
     throw new Error('useCrudContextForms must be used within a CrudProvider');
   }
   return context;
-};
-
-const updateUserAddress = (newAddress) => {
-  const updatedUser = { ...currentUser, direccion: newAddress };
-  setCurrentUser(updatedUser);
-  setCurrentUserAddress(newAddress);
-  localStorage.setItem("currentUser", JSON.stringify(updatedUser));
 };
 
 export { CrudProvider, useCrudContextForms };

@@ -7,12 +7,14 @@ import { useCart } from "../context/CartContext";
 import { XIcon } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { useCrudContextForms } from "../context/CrudContextForms"; // Asegúrate de importar el contexto
+import axios from 'axios'; // Asegúrate de tener axios instalado
 
 export default function CarritoDeCompras() {
-  const { cart, removeFromCart, addToCart } = useCart();
+  const { cart, removeFromCart, addToCart, clearCart } = useCart(); // Añadir clearCart para vaciar el carrito
   const { currentUser } = useCrudContextForms(); // Usamos el contexto para obtener el usuario actual
   const [isOpen, setIsOpen] = useState(false);
-  const [showMessage, setShowMessage] = useState(false); // Estado para mostrar el mensaje
+  const [showMessage, setShowMessage] = useState(false); // Estado para mostrar el mensaje de error de autenticación
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // Estado para mostrar el modal de éxito
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
@@ -62,9 +64,47 @@ export default function CarritoDeCompras() {
     }
   };
 
-  const handleConfirmPurchase = () => {
-    console.log("Finalizar compra");
-    setIsOpen(false);
+  // Función para manejar la confirmación de compra
+  const handleConfirmPurchase = async () => {
+    // Recolectar los productos
+    const products = cart.map((product) => ({
+      name: product.name,
+      quantity: product.quantity,
+      price: product.price
+    }));
+
+    // Crear el objeto del pedido
+    const order = {
+      cliente: currentUser.name,
+      fecha: new Date().toISOString().split('T')[0], // Fecha actual en formato yyyy-mm-dd
+      estado: "En proceso", // Estado inicial del pedido
+      total: totalCompra, // Total de la compra
+      products: products, // Productos en el carrito
+    };
+
+    try {
+      // Hacer el POST request a tu API para guardar el pedido
+      await axios.post('http://localhost:3000/pedidos', order); // Cambia la URL a tu API real
+
+      // Mostrar un mensaje de éxito y vaciar el carrito
+      setIsOpen(false);
+      setShowSuccessModal(true);
+
+      // Ocultar el modal de éxito después de 10 segundos
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        clearCart(); // Vaciar el carrito
+      }, 10000);
+      
+    } catch (error) {
+      console.error("Error al guardar el pedido:", error);
+      // Manejar el error mostrando un mensaje de error
+    }
+  };
+
+  const handleCloseSuccessModal = () => {
+    clearCart(); // Vaciar el carrito
+    setShowSuccessModal(false); // Cerrar el modal de éxito
   };
 
   return (
@@ -145,12 +185,25 @@ export default function CarritoDeCompras() {
         </div>
       )}
 
+      {/* Modal de éxito después de la compra */}
+      {showSuccessModal && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-4 rounded-md shadow-md">
+            <h2 className="text-2xl font-bold mb-4">Pedido Agendado con Éxito</h2>
+            <p className="text-lg mb-4">Tu pedido ha sido procesado correctamente.</p>
+            <div className="flex justify-end space-x-4">
+              <Button onClick={handleCloseSuccessModal}>Cerrar</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mensaje de error de autenticación */}
       {showMessage && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-4 rounded-md shadow-md">
-            <h2 className="text-2xl font-bold mb-4">Acceso Denegado</h2>
-            <p className="text-lg mb-4">Debes estar autenticado para realizar una compra.</p>
+            <h2 className="text-2xl font-bold mb-4">Error</h2>
+            <p className="text-lg mb-4">Debes iniciar sesión para finalizar la compra.</p>
             <div className="flex justify-end space-x-4">
               <Button onClick={() => setShowMessage(false)}>Cerrar</Button>
             </div>
