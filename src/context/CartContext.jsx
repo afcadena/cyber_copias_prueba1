@@ -17,7 +17,19 @@ export const CartProvider = ({ children }) => {
 
   // Función para agregar productos al carrito
   const addToCart = (product) => {
-    setCart((prevCart) => [...prevCart, product]);
+    setCart((prevCart) => {
+      const productExists = prevCart.find((p) => p.id === product.id);
+
+      if (productExists) {
+        // Si el producto ya existe, incrementa su cantidad
+        return prevCart.map((p) =>
+          p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p
+        );
+      } else {
+        // Si no existe, agrégalo con cantidad 1
+        return [...prevCart, { ...product, quantity: 1 }];
+      }
+    });
   };
 
   // Función para eliminar productos del carrito

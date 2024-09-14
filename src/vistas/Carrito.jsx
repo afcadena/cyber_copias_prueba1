@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "./header";
 import Footer from "./footer";
 import { Button } from "@/components/ui/button";
@@ -9,15 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useCrudContextForms } from "../context/CrudContextForms"; // Asegúrate de importar el contexto
 
 export default function CarritoDeCompras() {
-  const { cart, removeFromCart } = useCart();
+  const { cart, removeFromCart, addToCart } = useCart();
   const { currentUser } = useCrudContextForms(); // Usamos el contexto para obtener el usuario actual
-  const [quantities, setQuantities] = useState(() => {
-    const initialQuantities = {};
-    cart.forEach(product => {
-      initialQuantities[product.id] = 1;
-    });
-    return initialQuantities;
-  });
   const [isOpen, setIsOpen] = useState(false);
   const [showMessage, setShowMessage] = useState(false); // Estado para mostrar el mensaje
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,28 +26,31 @@ export default function CarritoDeCompras() {
   }, [currentUser, cart]);
 
   const handleQuantityChange = (productId, newQuantity) => {
-    const product = cart.find((product) => product.id === productId);
+    const product = cart.find((p) => p.id === productId);
     if (product) {
-      const maxQuantity = parseInt(product.stock); // get the stock quantity from the product object
-      setQuantities((prev) => ({
-        ...prev,
-        [productId]: Math.min(newQuantity, maxQuantity), // limit quantity to max available
-      }));
+      const maxQuantity = parseInt(product.stock); // Control de stock
+      const quantityToSet = Math.min(newQuantity, maxQuantity);
+
+      if (quantityToSet > product.quantity) {
+        // Si la cantidad es mayor, agrega más al carrito
+        addToCart(product);
+      } else if (quantityToSet < product.quantity) {
+        // Si la cantidad es menor, remueve del carrito
+        removeFromCart(product.id);
+        for (let i = 0; i < quantityToSet; i++) {
+          addToCart(product); // Reagregar la cantidad ajustada
+        }
+      }
     }
   };
 
   const handleRemoveFromCart = (productId) => {
     removeFromCart(productId);
-    setQuantities(prev => {
-      const newQuantities = { ...prev };
-      delete newQuantities[productId];
-      return newQuantities;
-    });
   };
 
   const totalCompra = cart.reduce((total, producto) => {
     const price = parseFloat(producto.price) || 0;
-    const quantity = quantities[producto.id] || 1;
+    const quantity = producto.quantity || 1;
     return total + price * quantity;
   }, 0);
 
@@ -68,7 +64,6 @@ export default function CarritoDeCompras() {
 
   const handleConfirmPurchase = () => {
     console.log("Finalizar compra");
-    // Aquí podrías agregar la lógica para procesar la compra
     setIsOpen(false);
   };
 
@@ -81,7 +76,7 @@ export default function CarritoDeCompras() {
           {cart.length > 0 ? (
             cart.map((producto) => {
               const price = parseFloat(producto.price) || 0;
-              const quantity = quantities[producto.id] || 1;
+              const quantity = producto.quantity || 1;
 
               return (
                 <Card key={producto.id} className="relative">
@@ -102,9 +97,7 @@ export default function CarritoDeCompras() {
                       alt={producto.name}
                       className="w-full h-40 object-cover mb-4"
                     />
-                    <p className="text-2xl font-bold">
-                      ${price.toFixed(2)}
-                    </p>
+                    <p className="text-2xl font-bold">${price.toFixed(2)}</p>
                     <div className="mt-2">
                       <label className="block text-sm font-medium text-gray-700">Cantidad:</label>
                       <input
@@ -146,9 +139,7 @@ export default function CarritoDeCompras() {
             <p className="text-lg mb-4">¿Estás seguro de que deseas finalizar la compra?</p>
             <div className="flex justify-end space-x-4">
               <Button onClick={() => setIsOpen(false)}>Cancelar</Button>
-              <Button onClick={handleConfirmPurchase}>
-                Confirmar Compra
-              </Button>
+              <Button onClick={handleConfirmPurchase}>Confirmar Compra</Button>
             </div>
           </div>
         </div>
