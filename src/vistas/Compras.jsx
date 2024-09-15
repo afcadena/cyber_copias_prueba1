@@ -112,6 +112,7 @@ export default function GestionCompras() {
           Gestión de Compras
         </h1>
         <div className="flex items-center space-x-4">
+          <Button>Generar Reporte</Button> {/* Botón agregado aquí */}
           <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input

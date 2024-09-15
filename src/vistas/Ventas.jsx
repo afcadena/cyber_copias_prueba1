@@ -105,6 +105,7 @@ export default function GestionVentas() {
           Gestión de Ventas
         </h1>
         <div className="flex items-center space-x-4">
+          <Button>Generar Reporte</Button> {/* Botón agregado aquí */}
           <Button onClick={handleNewVenta}>
             <Plus className="mr-2 h-4 w-4" /> Nueva Venta
           </Button>
