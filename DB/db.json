@@ -524,71 +524,49 @@
   ],
   "ventas": [
     {
-      "id": "1",
-      "cliente": "Juan Pérez",
-      "fecha": "2024-09-09",
-      "estado": "Completada",
-      "total": 43,
-      "products": [
-        {
-          "id": "1",
-          "name": "Sobres x 5 Fifa Copa América 2024 PANINI 23204",
-          "quantity": 2,
-          "price": 325
-        },
-        {
-          "id": "4",
-          "name": "Plumígrafos punta media 0.7mm vintage x24 unds PAPER MATE",
-          "quantity": 1,
-          "price": 70190
-        }
-      ],
+      "id": "f480",
+      "fecha": "2024-09-12",
+      "total": 1200,
       "productos": [
         {
-          "id": "1725895497068",
-          "nombre": "pincel",
+          "id": "1726363709210",
+          "productoId": "9",
           "cantidad": 1,
-          "precio": 43
-        }
-      ]
-    },
-    {
-      "id": "2",
-      "cliente": "María Gómez",
-      "fecha": "2024-09-10",
-      "estado": "Completada",
-      "total": 302,
-      "products": [
-        {
-          "id": "6",
-          "name": "Cuaderno MICKEY CUERO Rayado 80 hojas Argollado tamaño grande",
-          "quantity": 1,
-          "price": 24900
+          "precio": 1200,
+          "nombre": "Bolígrafo Kilométrico 100 Negro"
         }
       ],
-      "productos": [
-        {
-          "id": "1725895580213",
-          "nombre": "pincel",
-          "cantidad": 1,
-          "precio": 302
-        }
-      ]
+      "estado": "Completada"
     },
     {
-      "id": "eb2c",
-      "cliente": "biugioujf",
+      "id": "810e",
       "fecha": "2024-09-13",
-      "estado": "Pendiente",
-      "total": 12,
+      "total": 640,
       "productos": [
         {
-          "id": "1726266753878",
-          "nombre": "jdbvidfugv",
-          "cantidad": 1,
-          "precio": 12
+          "id": "1726364725898",
+          "productoId": "2",
+          "cantidad": 4,
+          "precio": 160,
+          "nombre": "Resma tamaño carta x500 hojas DISPAPELES"
         }
-      ]
+      ],
+      "estado": "Completada"
+    },
+    {
+      "id": "a0dd",
+      "fecha": "2024-09-12",
+      "total": 37400,
+      "productos": [
+        {
+          "id": "1726364930295",
+          "productoId": "12",
+          "cantidad": 34,
+          "precio": 1100,
+          "nombre": "Borrador Nata Grande PELIKAN"
+        }
+      ],
+      "estado": "Completada"
     }
   ]
 }

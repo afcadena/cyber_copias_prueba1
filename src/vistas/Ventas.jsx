@@ -1,21 +1,27 @@
-import { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, CalendarDays, TrendingUp, Plus, Edit, Trash2, Search, BarChart2 } from 'lucide-react';
-import { useCrudContextVentas } from '../context/CrudContextVentas'; // Asegúrate de que la ruta sea correcta
+import { DollarSign, CalendarDays, TrendingUp, Plus, Edit, Trash2, BarChart2 } from 'lucide-react';
+import CrudContext from '../context/CrudContextInventario'; // Importamos el CrudContext de inventario
+import { useCrudContextVentas } from '../context/CrudContextVentas'; // Importamos el contexto de ventas
 
 export default function GestionVentas() {
-  const { db: ventas, createData, updateData, deleteData, loading, error } = useCrudContextVentas();
+  const { db: productosInventario, loading: inventarioLoading } = useContext(CrudContext); // Productos de inventario
+  const { db: ventas, createData, updateData, deleteData } = useCrudContextVentas(); // Ventas
+
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [currentVenta, setCurrentVenta] = useState(null);
   const [productos, setProductos] = useState([]);
   const [ventaToDelete, setVentaToDelete] = useState(null);
+
+  useEffect(() => {
+    console.log('Productos Inventario:', productosInventario);
+  }, [productosInventario]);
 
   const handleNewVenta = () => {
     setCurrentVenta(null);
@@ -42,16 +48,27 @@ export default function GestionVentas() {
   };
 
   const handleAddProduct = () => {
-    setProductos([...productos, { id: Date.now().toString(), nombre: '', cantidad: 1, precio: 0 }]);
+    setProductos([...productos, { id: Date.now().toString(), productoId: '', cantidad: 1, precio: 0 }]);
   };
 
   const handleRemoveProduct = (id) => {
     setProductos(productos.filter(producto => producto.id !== id));
   };
 
-  const handleProductChange = (id, field, value) => {
+  const handleProductSelect = (id, productoId) => {
+    const selectedProduct = productosInventario.find(prod => prod.id === productoId);
+    if (selectedProduct) {
+      setProductos(productos.map(producto =>
+        producto.id === id
+          ? { ...producto, productoId, nombre: selectedProduct.name, precio: Number(selectedProduct.price) }
+          : producto
+      ));
+    }
+  };
+
+  const handleQuantityChange = (id, cantidad) => {
     setProductos(productos.map(producto =>
-      producto.id === id ? { ...producto, [field]: value } : producto
+      producto.id === id ? { ...producto, cantidad: Number(cantidad) } : producto
     ));
   };
 
@@ -64,13 +81,11 @@ export default function GestionVentas() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const cliente = formData.get('cliente');
     const fecha = formData.get('fecha');
-    const estado = formData.get('estado');
     const total = productos.reduce((sum, p) => sum + p.cantidad * p.precio, 0);
 
-    if (cliente && fecha && estado) {
-      const ventaData = { cliente, fecha, estado, total, productos };
+    if (fecha && total > 0) {
+      const ventaData = { fecha, total, productos, estado: 'Completada' }; // Añadido estado "Completada"
       if (currentVenta) {
         updateData({ ...currentVenta, ...ventaData });
       } else {
@@ -78,7 +93,7 @@ export default function GestionVentas() {
       }
       setIsOpen(false);
     } else {
-      alert('Por favor, complete todos los campos.');
+      alert('Por favor, ingrese una fecha y al menos un producto.');
     }
   };
 
@@ -90,10 +105,6 @@ export default function GestionVentas() {
           Gestión de Ventas
         </h1>
         <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input className="pl-8" placeholder="Buscar ventas..." />
-          </div>
           <Button onClick={handleNewVenta}>
             <Plus className="mr-2 h-4 w-4" /> Nueva Venta
           </Button>
@@ -111,6 +122,7 @@ export default function GestionVentas() {
             <p className="text-xs text-muted-foreground">Suma de todas las ventas</p>
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Promedio de Ventas</CardTitle>
@@ -121,13 +133,14 @@ export default function GestionVentas() {
             <p className="text-xs text-muted-foreground">Promedio de ventas completadas</p>
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Última Venta</CardTitle>
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{ventas[ventas.length - 1]?.fecha}</div>
+            <div className="text-2xl font-bold">{ventas[ventas.length - 1]?.fecha || 'N/A'}</div>
             <p className="text-xs text-muted-foreground">Fecha de la última venta registrada</p>
           </CardContent>
         </Card>
@@ -138,10 +151,8 @@ export default function GestionVentas() {
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
-              <TableHead>Cliente</TableHead>
               <TableHead>Fecha</TableHead>
               <TableHead>Total</TableHead>
-              <TableHead>Estado</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -149,18 +160,8 @@ export default function GestionVentas() {
             {ventas.map((venta) => (
               <TableRow key={venta.id} className="hover:bg-gray-50">
                 <TableCell className="font-medium">{venta.id}</TableCell>
-                <TableCell>{venta.cliente}</TableCell>
                 <TableCell>{venta.fecha}</TableCell>
                 <TableCell>${venta.total.toFixed(2)}</TableCell>
-                <TableCell>
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                  venta.estado === 'Completada' ? 'bg-blue-100 text-blue-800' : 
-                  venta.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {venta.estado}
-                </span>
-              </TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => handleEditVenta(venta)}>
                     <Edit className="h-4 w-4" />
@@ -175,110 +176,104 @@ export default function GestionVentas() {
         </Table>
       </div>
 
+      {/* Modal para crear/editar ventas */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="w-[800px] p-4 max-w-full overflow-x-auto">
           <DialogHeader>
-            <DialogTitle>{currentVenta ? 'Editar Venta' : 'Nueva Venta'}</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">
+              {currentVenta ? 'Editar Venta' : 'Nueva Venta'}
+            </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor="cliente">Cliente</Label>
-                <Input
-                  id="cliente"
-                  name="cliente"
-                  defaultValue={currentVenta?.cliente || ''}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="fecha">Fecha</Label>
-                <Input
-                  id="fecha"
-                  name="fecha"
-                  type="date"
-                  defaultValue={currentVenta?.fecha || ''}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="estado">Estado</Label>
-                <Select
-                  id="estado"
-                  name="estado"
-                  defaultValue={currentVenta?.estado || 'Pendiente'}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Pendiente">Pendiente</SelectItem>
-                    <SelectItem value="Completada">Completada</SelectItem>
-                    <SelectItem value="Cancelada">Cancelada</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Productos</Label>
-                {productos.map(producto => (
-                  <div key={producto.id} className="flex items-center space-x-4">
-                    <Input
-                      placeholder="Nombre"
-                      value={producto.nombre}
-                      onChange={(e) => handleProductChange(producto.id, 'nombre', e.target.value)}
-                    />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex flex-col">
+              <Label htmlFor="fecha">Fecha</Label>
+              <Input
+                id="fecha"
+                name="fecha"
+                type="date"
+                defaultValue={currentVenta ? currentVenta.fecha : ''}
+                required
+                className="mt-1 max-w-xs"
+              />
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="text-lg font-semibold mb-2">Productos</div>
+              <div className="overflow-x-auto">
+                {productos.map((producto) => (
+                  <div key={producto.id} className="flex items-center space-x-4 mb-2">
+                    <select
+                      value={producto.productoId}
+                      onChange={(e) => handleProductSelect(producto.id, e.target.value)}
+                      className="flex-1 max-w-xs"
+                    >
+                      <option value="">Seleccionar Producto</option>
+                      {productosInventario.map((prod) => (
+                        <option key={prod.id} value={prod.id}>
+                          {prod.name}
+                        </option>
+                      ))}
+                    </select>
                     <Input
                       type="number"
-                      placeholder="Cantidad"
                       value={producto.cantidad}
-                      onChange={(e) => handleProductChange(producto.id, 'cantidad', Number(e.target.value))}
+                      onChange={(e) => handleQuantityChange(producto.id, e.target.value)}
+                      placeholder="Cantidad"
+                      className="w-20 max-w-xs"
                     />
-                    <Input
-                      type="number"
-                      placeholder="Precio"
-                      value={producto.precio}
-                      onChange={(e) => handleProductChange(producto.id, 'precio', Number(e.target.value))}
-                    />
+                    <span className="w-24 text-right">${(producto.precio * producto.cantidad).toFixed(2)}</span>
                     <Button
                       variant="destructive"
-                      className="mt-1"
+                      size="sm"
                       onClick={() => handleRemoveProduct(producto.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                <Button
-                  type="button"
-                  onClick={handleAddProduct}
-                >
-                  <Plus className="mr-2 h-4 w-4" /> Agregar Producto
+                <Button onClick={handleAddProduct} className="mt-2">
+                  Agregar Producto
                 </Button>
               </div>
             </div>
-            <div className="flex justify-end mt-4">
-              <Button type="submit">
-                {currentVenta ? 'Actualizar Venta' : 'Crear Venta'}
+            <div className="flex justify-end mt-4 space-x-2">
+              <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
+                {currentVenta ? 'Guardar Cambios' : 'Guardar Venta'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+                className="text-gray-500"
+              >
+                Cancelar
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
+      {/* Modal de confirmación de eliminación */}
       <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
-        <DialogContent>
+        <DialogContent className="w-[400px] p-4">
           <DialogHeader>
-            <DialogTitle>Confirmar Eliminación</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">Confirmar Eliminación</DialogTitle>
           </DialogHeader>
-          <div className="p-4">
-            <p>¿Estás seguro de que deseas eliminar esta venta?</p>
+          <div className="mt-4">
+            <p>¿Estás seguro de que quieres eliminar esta venta?</p>
             <div className="flex justify-end mt-4 space-x-2">
-              <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>
-                Cancelar
+              <Button
+                onClick={confirmDelete}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                Eliminar
               </Button>
-              <Button variant="destructive" onClick={confirmDelete}>
-                Confirmar
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsConfirmDeleteOpen(false)}
+                className="text-gray-500"
+              >
+                Cancelar
               </Button>
             </div>
           </div>
