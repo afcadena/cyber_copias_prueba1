@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { useCart } from "../context/CartContext";
 import { XIcon } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
-import { useCrudContextForms } from "../context/CrudContextForms"; // Asegúrate de importar el contexto
+import { useCrudContextForms } from "../context/CrudContextForms";
 import axios from 'axios'; // Asegúrate de tener axios instalado
 
 export default function CarritoDeCompras() {
@@ -66,14 +66,14 @@ export default function CarritoDeCompras() {
 
   // Función para manejar la confirmación de compra
   const handleConfirmPurchase = async () => {
-    // Recolectar los productos
     const products = cart.map((product) => ({
+      id: product.id,
       name: product.name,
       quantity: product.quantity,
-      price: product.price
+      price: product.price,
+      stock: product.stock // Añadimos el stock para actualizarlo luego
     }));
 
-    // Crear el objeto del pedido
     const order = {
       cliente: currentUser.name,
       fecha: new Date().toISOString().split('T')[0], // Fecha actual en formato yyyy-mm-dd
@@ -83,10 +83,24 @@ export default function CarritoDeCompras() {
     };
 
     try {
-      // Hacer el POST request a tu API para guardar el pedido
+      // 1. Guardar el pedido en la base de datos
       await axios.post('http://localhost:3000/pedidos', order); // Cambia la URL a tu API real
 
-      // Mostrar un mensaje de éxito y vaciar el carrito
+      // 2. Reducir el stock de cada producto en el carrito
+      await Promise.all(
+        products.map(async (product) => {
+          const newStock = product.stock - product.quantity; // Reducimos el stock
+          if (newStock >= 0) { // Asegurar que no se tenga stock negativo
+            await axios.patch(`http://localhost:3000/products/${product.id}`, {
+              stock: newStock
+            });
+          } else {
+            console.error(`Stock insuficiente para el producto: ${product.name}`);
+          }
+        })
+      );
+
+      // 3. Mostrar un mensaje de éxito y vaciar el carrito
       setIsOpen(false);
       setShowSuccessModal(true);
 
@@ -95,10 +109,9 @@ export default function CarritoDeCompras() {
         setShowSuccessModal(false);
         clearCart(); // Vaciar el carrito
       }, 10000);
-      
+
     } catch (error) {
-      console.error("Error al guardar el pedido:", error);
-      // Manejar el error mostrando un mensaje de error
+      console.error("Error al procesar la compra o actualizar el stock:", error);
     }
   };
 
