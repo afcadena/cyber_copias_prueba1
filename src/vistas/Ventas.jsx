@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, CalendarDays, TrendingUp, Plus, Edit, Trash2, BarChart2 } from 'lucide-react';
+import { DollarSign, CalendarDays, TrendingUp, Plus, Trash2, BarChart2 } from 'lucide-react';
 import CrudContext from '../context/CrudContextInventario'; // Importamos el CrudContext de inventario
 import { useCrudContextVentas } from '../context/CrudContextVentas'; // Importamos el contexto de ventas
 
@@ -18,6 +18,7 @@ export default function GestionVentas() {
   const [currentVenta, setCurrentVenta] = useState(null);
   const [productos, setProductos] = useState([]);
   const [ventaToDelete, setVentaToDelete] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     console.log('Productos Inventario:', productosInventario);
@@ -26,12 +27,6 @@ export default function GestionVentas() {
   const handleNewVenta = () => {
     setCurrentVenta(null);
     setProductos([]);
-    setIsOpen(true);
-  };
-
-  const handleEditVenta = (venta) => {
-    setCurrentVenta(venta);
-    setProductos(venta.productos || []);
     setIsOpen(true);
   };
 
@@ -67,8 +62,10 @@ export default function GestionVentas() {
   };
 
   const handleQuantityChange = (id, cantidad) => {
+    const cantidadNumerica = Math.max(Number(cantidad), 1); // Asegurarse de que sea al menos 1
+
     setProductos(productos.map(producto =>
-      producto.id === id ? { ...producto, cantidad: Number(cantidad) } : producto
+      producto.id === id ? { ...producto, cantidad: cantidadNumerica } : producto
     ));
   };
 
@@ -85,15 +82,16 @@ export default function GestionVentas() {
     const total = productos.reduce((sum, p) => sum + p.cantidad * p.precio, 0);
 
     if (fecha && total > 0) {
-      const ventaData = { fecha, total, productos, estado: 'Completada' }; // Añadido estado "Completada"
+      const ventaData = { fecha, total, productos, estado: 'Completada' };
       if (currentVenta) {
         updateData({ ...currentVenta, ...ventaData });
       } else {
         createData(ventaData);
       }
       setIsOpen(false);
+      setErrorMessage(''); // Limpiar mensaje de error
     } else {
-      alert('Por favor, ingrese una fecha y al menos un producto.');
+      setErrorMessage('Por favor, ingrese una fecha y al menos un producto.');
     }
   };
 
@@ -105,8 +103,7 @@ export default function GestionVentas() {
           Gestión de Ventas
         </h1>
         <div className="flex items-center space-x-4">
-          <Button>Generar Reporte</Button> {/* Botón agregado aquí */}
-          <Button onClick={handleNewVenta}>
+          <Button onClick={handleNewVenta} className="bg-blue-600 text-white hover:bg-blue-700">
             <Plus className="mr-2 h-4 w-4" /> Nueva Venta
           </Button>
         </div>
@@ -164,10 +161,12 @@ export default function GestionVentas() {
                 <TableCell>{venta.fecha}</TableCell>
                 <TableCell>${venta.total.toFixed(2)}</TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => handleEditVenta(venta)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteVenta(venta)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteVenta(venta)}
+                    className="bg-red-500 hover:bg-red-600 text-white"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </TableCell>
@@ -201,16 +200,16 @@ export default function GestionVentas() {
               <div className="text-lg font-semibold mb-2">Productos</div>
               <div className="overflow-x-auto">
                 {productos.map((producto) => (
-                  <div key={producto.id} className="flex items-center space-x-4 mb-2">
+                  <div key={producto.id} className="flex items-center mb-2">
                     <select
                       value={producto.productoId}
                       onChange={(e) => handleProductSelect(producto.id, e.target.value)}
-                      className="flex-1 max-w-xs"
+                      className="border rounded p-1"
                     >
-                      <option value="">Seleccionar Producto</option>
-                      {productosInventario.map((prod) => (
-                        <option key={prod.id} value={prod.id}>
-                          {prod.name}
+                      <option value="">Seleccionar producto</option>
+                      {productosInventario.map((inventario) => (
+                        <option key={inventario.id} value={inventario.id}>
+                          {inventario.name} - ${inventario.price.toFixed(2)}
                         </option>
                       ))}
                     </select>
@@ -218,35 +217,34 @@ export default function GestionVentas() {
                       type="number"
                       value={producto.cantidad}
                       onChange={(e) => handleQuantityChange(producto.id, e.target.value)}
-                      placeholder="Cantidad"
-                      className="w-20 max-w-xs"
+                      className="ml-2 w-24"
+                      min="1"
                     />
-                    <span className="w-24 text-right">${(producto.precio * producto.cantidad).toFixed(2)}</span>
+                    <span className="ml-2">${(producto.cantidad * producto.precio).toFixed(2)}</span>
                     <Button
-                      variant="destructive"
-                      size="sm"
+                      type="button"
                       onClick={() => handleRemoveProduct(producto.id)}
+                      className="ml-2 bg-red-500 hover:bg-red-600 text-white"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                <Button onClick={handleAddProduct} className="mt-2">
-                  Agregar Producto
-                </Button>
               </div>
-            </div>
-            <div className="flex justify-end mt-4 space-x-2">
-              <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
-                {currentVenta ? 'Guardar Cambios' : 'Guardar Venta'}
-              </Button>
               <Button
                 type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-                className="text-gray-500"
+                onClick={handleAddProduct}
+                className="bg-blue-500 hover:bg-blue-600 text-white mt-2"
               >
-                Cancelar
+                Agregar Producto
+              </Button>
+            </div>
+            {errorMessage && (
+              <div className="text-red-600 font-medium mt-2">{errorMessage}</div>
+            )}
+            <div className="flex justify-end mt-4">
+              <Button type="submit" className="bg-green-500 hover:bg-green-600 text-white">
+                {currentVenta ? 'Actualizar Venta' : 'Guardar Venta'}
               </Button>
             </div>
           </form>
@@ -255,28 +253,26 @@ export default function GestionVentas() {
 
       {/* Modal de confirmación de eliminación */}
       <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
-        <DialogContent className="w-[400px] p-4">
+        <DialogContent className="w-[400px] p-4 max-w-full overflow-x-auto">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">Confirmar Eliminación</DialogTitle>
           </DialogHeader>
-          <div className="mt-4">
-            <p>¿Estás seguro de que quieres eliminar esta venta?</p>
-            <div className="flex justify-end mt-4 space-x-2">
-              <Button
-                onClick={confirmDelete}
-                className="bg-red-500 hover:bg-red-600 text-white"
-              >
-                Eliminar
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsConfirmDeleteOpen(false)}
-                className="text-gray-500"
-              >
-                Cancelar
-              </Button>
-            </div>
+          <div className="text-center mb-4">
+            ¿Estás seguro de que deseas eliminar esta venta?
+          </div>
+          <div className="flex justify-center space-x-4">
+            <Button
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Eliminar
+            </Button>
+            <Button
+              onClick={() => setIsConfirmDeleteOpen(false)}
+              className="bg-gray-500 hover:bg-gray-600 text-white"
+            >
+              Cancelar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -1,37 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Plus, Edit, Trash2, Search } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCrudContextCompras } from '../context/CrudContextCompras';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DollarSign, CalendarDays, TrendingUp, Plus, Edit, Trash2 } from 'lucide-react';
+import CrudContextInventario from '../context/CrudContextInventario'; 
+import CrudContextCompras from '../context/CrudContextCompras'; 
+import CrudContextProveedores from '../context/CrudContextProveedores'; 
 
 export default function GestionCompras() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentCompra, setCurrentCompra] = useState(null);
-  const [products, setProducts] = useState([{ name: '', quantity: 0, price: 0 }]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
-  const [compraToDelete, setCompraToDelete] = useState(null);
+  const { db: productosInventario } = useContext(CrudContextInventario); 
+  const { db: proveedores } = useContext(CrudContextProveedores); 
+  const { db: compras, createData, updateData, deleteData } = useContext(CrudContextCompras); 
 
-  const { db: comprasData, createData, updateData, deleteData, error, loading } = useCrudContextCompras();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [currentCompra, setCurrentCompra] = useState(null);
+  const [productos, setProductos] = useState([]);
+  const [compraToDelete, setCompraToDelete] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    // Lógica adicional si es necesaria para el uso de comprasData
-  }, [comprasData]);
+    console.log('Productos Inventario:', productosInventario);
+    console.log('Proveedores:', proveedores);
+  }, [productosInventario, proveedores]);
 
   const handleNewCompra = () => {
     setCurrentCompra(null);
-    setProducts([{ name: '', quantity: 0, price: 0 }]);
+    setProductos([]);
     setIsOpen(true);
   };
 
   const handleEditCompra = (compra) => {
     setCurrentCompra(compra);
-    setProducts(compra.products || [{ name: '', quantity: 0, price: 0 }]);
+    setProductos(compra.productos || []);
     setIsOpen(true);
   };
 
@@ -43,213 +47,226 @@ export default function GestionCompras() {
   const confirmDelete = () => {
     if (compraToDelete) {
       deleteData(compraToDelete.id);
+      setIsConfirmDeleteOpen(false);
     }
-    setIsConfirmDeleteOpen(false);
-    setCompraToDelete(null);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const total = products.reduce((sum, product) => sum + product.quantity * product.price, 0);
+  const handleAddProduct = () => {
+    setProductos([...productos, { id: Date.now().toString(), productoId: '', cantidad: 1, precio: 0 }]);
+  };
 
-    const newCompra = {
-      id: currentCompra ? currentCompra.id : Date.now().toString(),
-      proveedor: formData.get('proveedor'),
-      fecha: formData.get('fecha'),
-      total: total,
-      estado: formData.get('estado'),
-      products: products,
-    };
+  const handleRemoveProduct = (id) => {
+    setProductos(productos.filter(producto => producto.id !== id));
+  };
 
-    if (currentCompra) {
-      updateData(newCompra);
+  const handleProductSelect = (id, productoId) => {
+    const selectedProduct = productosInventario.find(prod => prod.id === productoId);
+    if (selectedProduct) {
+      setProductos(productos.map(producto =>
+        producto.id === id
+          ? { ...producto, productoId, nombre: selectedProduct.name, precio: Number(selectedProduct.price) }
+          : producto
+      ));
+    }
+  };
+
+  const handleQuantityChange = (id, cantidad) => {
+    const cantidadNumerica = Math.max(Number(cantidad), 1); 
+    setProductos(productos.map(producto =>
+      producto.id === id ? { ...producto, cantidad: cantidadNumerica } : producto
+    ));
+  };
+
+  const totalCompras = compras.reduce((sum, compra) => sum + compra.total, 0);
+  const comprasCompletadas = compras.filter(compra => compra.estado === 'Completada');
+  const promedioCompras = comprasCompletadas.length > 0
+    ? comprasCompletadas.reduce((sum, compra) => sum + compra.total, 0) / comprasCompletadas.length
+    : 0;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const proveedorId = formData.get('proveedor');
+    const fecha = formData.get('fecha');
+    const total = productos.reduce((sum, p) => sum + p.cantidad * p.precio, 0);
+
+    if (proveedorId && fecha && total > 0) {
+      const compraData = { proveedorId, fecha, total, productos, estado: 'Completada' };
+      if (currentCompra) {
+        updateData({ ...currentCompra, ...compraData });
+      } else {
+        createData(compraData);
+      }
+      setIsOpen(false);
+      setErrorMessage('');
     } else {
-      createData(newCompra);
+      setErrorMessage('Por favor, seleccione un proveedor, ingrese una fecha y al menos un producto.');
     }
-    setIsOpen(false);
-    setCurrentCompra(null);
   };
-
-  const handleProductChange = (index, field, value) => {
-    const newProducts = [...products];
-    newProducts[index][field] = field === 'name' ? value : parseFloat(value) || 0;
-    setProducts(newProducts);
-  };
-
-  const addProduct = () => {
-    setProducts([...products, { name: '', quantity: 0, price: 0 }]);
-  };
-
-  const removeProduct = (index) => {
-    const newProducts = products.filter((_, i) => i !== index);
-    setProducts(newProducts);
-  };
-
-  const getStatusBadge = (status) => {
-    const statusStyles = {
-      'Recibido': 'bg-green-100 text-green-800',
-      'Pendiente': 'bg-yellow-100 text-yellow-800',
-      'En tránsito': 'bg-blue-100 text-blue-800',
-    };
-    return <Badge className={statusStyles[status] || 'bg-gray-100 text-gray-800'}>{status}</Badge>;
-  };
-
-  const filteredCompras = comprasData.filter(compra =>
-    compra.proveedor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    compra.estado.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    compra.fecha.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (loading) return <div>Cargando...</div>;
-  if (error) return <div>Error: {error.message || "Ocurrió un error"}</div>;
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold flex items-center">
-          <ShoppingCart className="mr-2 h-8 w-8" />
+    <div className="container mx-auto p-6 overflow-hidden">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-extrabold flex items-center">
+          <DollarSign className="mr-3 h-9 w-9" />
           Gestión de Compras
         </h1>
-        <div className="flex items-center space-x-4">
-          <Button>Generar Reporte</Button> {/* Botón agregado aquí */}
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input
-              className="pl-8"
-              placeholder="Buscar compras..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Button onClick={handleNewCompra}>
+        <div className="flex items-center space-x-6">
+          <Button onClick={handleNewCompra} className="bg-blue-600 text-white hover:bg-blue-700">
             <Plus className="mr-2 h-5 w-5" /> Nueva Compra
           </Button>
         </div>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>Proveedor</TableHead>
-            <TableHead>Fecha</TableHead>
-            <TableHead>Total</TableHead>
-            <TableHead>Estado</TableHead>
-            <TableHead>Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredCompras.map((compra) => (
-            <TableRow key={compra.id}>
-              <TableCell>{compra.id}</TableCell>
-              <TableCell>{compra.proveedor}</TableCell>
-              <TableCell>{compra.fecha}</TableCell>
-              <TableCell>${compra.total.toFixed(2)}</TableCell>
-              <TableCell>{getStatusBadge(compra.estado)}</TableCell>
-              <TableCell>
-                <Button onClick={() => handleEditCompra(compra)} className="mr-2">
-                  <Edit className="h-5 w-5" />
-                </Button>
-                <Button onClick={() => handleDeleteCompra(compra)} variant="destructive">
-                  <Trash2 className="h-5 w-5" />
-                </Button>
-              </TableCell>
+      <div className="grid gap-6 md:grid-cols-3 mb-8">
+        <Card className="bg-white shadow-lg border border-gray-200 overflow-hidden">
+          <CardHeader className="flex items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-md font-semibold">Compras Totales</CardTitle>
+            <DollarSign className="h-5 w-5 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl font-bold">${totalCompras.toFixed(2)}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white shadow-lg border border-gray-200 overflow-hidden">
+          <CardHeader className="flex items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-md font-semibold">Promedio de Compras</CardTitle>
+            <TrendingUp className="h-5 w-5 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl font-bold">${promedioCompras.toFixed(2)}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white shadow-lg border border-gray-200 overflow-hidden">
+          <CardHeader className="flex items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-md font-semibold">Última Compra</CardTitle>
+            <CalendarDays className="h-5 w-5 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl font-bold">{compras[compras.length - 1]?.fecha || 'N/A'}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead>Proveedor</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {compras.map((compra) => {
+              const proveedor = proveedores.find(p => p.id === compra.proveedorId);
+              return (
+                <TableRow key={compra.id} className="hover:bg-gray-50">
+                  <TableCell className="font-medium">{compra.id}</TableCell>
+                  <TableCell>{compra.fecha}</TableCell>
+                  <TableCell>{proveedor ? proveedor.nombre : 'Desconocido'}</TableCell>
+                  <TableCell>${compra.total.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    <Button onClick={() => handleEditCompra(compra)} className="bg-blue-600 text-white hover:bg-blue-700 mr-2">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button onClick={() => handleDeleteCompra(compra)} className="bg-red-600 text-white hover:bg-red-700">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{currentCompra ? 'Editar Compra' : 'Nueva Compra'}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="proveedor">Proveedor</Label>
-                  <Input
-                    id="proveedor"
-                    name="proveedor"
-                    defaultValue={currentCompra?.proveedor || ''}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="fecha">Fecha</Label>
-                  <Input
-                    id="fecha"
-                    name="fecha"
-                    type="date"
-                    defaultValue={currentCompra?.fecha || ''}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="estado">Estado</Label>
-                  <Select
-                    id="estado"
-                    name="estado"
-                    defaultValue={currentCompra?.estado || 'Pendiente'}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Recibido">Recibido</SelectItem>
-                      <SelectItem value="Pendiente">Pendiente</SelectItem>
-                      <SelectItem value="En tránsito">En tránsito</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div>
-                <Label>Productos</Label>
-                {products.map((product, index) => (
-                  <div key={index} className="flex space-x-2 mb-2">
-                    <Input
-                      placeholder="Nombre del producto"
-                      value={product.name}
-                      onChange={(e) => handleProductChange(index, 'name', e.target.value)}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Cantidad"
-                      value={product.quantity}
-                      onChange={(e) => handleProductChange(index, 'quantity', e.target.value)}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Precio"
-                      value={product.price}
-                      onChange={(e) => handleProductChange(index, 'price', e.target.value)}
-                    />
-                    <Button type="button" variant="destructive" onClick={() => removeProduct(index)}>Eliminar</Button>
-                  </div>
-                ))}
-                <Button type="button" onClick={addProduct}>Agregar Producto</Button>
-              </div>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <Button type="submit" variant="primary">Guardar</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
+      {/* Modal de Confirmación de Eliminación */}
       <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
-        <DialogContent>
+        <DialogContent className="flex flex-col justify-center items-center p-6">
           <DialogHeader>
             <DialogTitle>Confirmar Eliminación</DialogTitle>
           </DialogHeader>
-          <p>¿Estás seguro de que deseas eliminar esta compra?</p>
-          <div className="mt-4 flex justify-end space-x-2">
-            <Button onClick={() => setIsConfirmDeleteOpen(false)}>Cancelar</Button>
-            <Button onClick={confirmDelete} variant="destructive">Eliminar</Button>
+          <p className="text-lg mb-4">¿Estás seguro de que deseas eliminar esta compra?</p>
+          <div className="flex space-x-4">
+            <Button onClick={confirmDelete} className="bg-red-600 text-white hover:bg-red-700">
+              Eliminar
+            </Button>
+            <Button onClick={() => setIsConfirmDeleteOpen(false)} className="bg-gray-600 text-white hover:bg-gray-700">
+              Cancelar
+            </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Compra */}
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="w-full max-w-4xl p-6">
+          <DialogHeader>
+            <DialogTitle>{currentCompra ? 'Editar Compra' : 'Nueva Compra'}</DialogTitle>
+          </DialogHeader>
+          {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="proveedor" className="block mb-2">Proveedor</Label>
+                <select name="proveedor" id="proveedor" className="border border-gray-300 rounded-lg p-2 w-full" defaultValue={currentCompra?.proveedorId || ''}>
+                  <option value="">Seleccionar Proveedor</option>
+                  {proveedores.map(proveedor => (
+                    <option key={proveedor.id} value={proveedor.id}>{proveedor.nombre}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="fecha" className="block mb-2">Fecha</Label>
+                <Input type="date" name="fecha" id="fecha" defaultValue={currentCompra?.fecha || ''} />
+              </div>
+            </div>
+            <div className="my-6">
+              <h2 className="text-lg font-bold mb-4">Productos</h2>
+              <div className="space-y-4">
+                {productos.map(producto => (
+                  <div key={producto.id} className="flex items-center space-x-4 border-b border-gray-200 pb-4">
+                    <select
+                      value={producto.productoId}
+                      onChange={(e) => handleProductSelect(producto.id, e.target.value)}
+                      className="border border-gray-300 rounded-lg p-2 w-1/3"
+                    >
+                      <option value="">Seleccionar Producto</option>
+                      {productosInventario.map(prod => (
+                        <option key={prod.id} value={prod.id}>{prod.name}</option>
+                      ))}
+                    </select>
+                    <Input
+                      type="number"
+                      value={producto.cantidad}
+                      onChange={(e) => handleQuantityChange(producto.id, e.target.value)}
+                      className="border border-gray-300 rounded-lg p-2 w-1/4"
+                      min="1"
+                    />
+                    <div className="w-1/4 text-center">
+                      ${producto.precio.toFixed(2)}
+                    </div>
+                    <Button onClick={() => handleRemoveProduct(producto.id)} className="bg-red-600 text-white hover:bg-red-700">
+                      Eliminar
+                    </Button>
+                  </div>
+                ))}
+                <Button onClick={handleAddProduct} className="bg-green-600 text-white hover:bg-green-700 mt-4">
+                  Añadir Producto
+                </Button>
+              </div>
+            </div>
+            <div className="text-right mt-6">
+              <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700">
+                {currentCompra ? 'Actualizar Compra' : 'Guardar Compra'}
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

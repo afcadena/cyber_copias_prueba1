@@ -104,7 +104,6 @@ export default function GestionPedidos() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestión de Pedidos</h1>
         <div className="flex items-center space-x-4">
-          <Button>Generar Reporte</Button> {/* Botón agregado aquí */}
           <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input 

@@ -561,8 +561,8 @@
       "id": "3",
       "proveedor": "Importadora de Artículos",
       "fecha": "2023-06-10",
-      "total": 1260,
-      "estado": "Pendiente",
+      "total": 178800,
+      "estado": "Completada",
       "products": [
         {
           "name": "Pincel",
@@ -573,6 +573,16 @@
           "name": "",
           "quantity": 0,
           "price": 0
+        }
+      ],
+      "proveedorId": "1",
+      "productos": [
+        {
+          "id": "1726703649260",
+          "productoId": "11",
+          "cantidad": 12,
+          "precio": 14900,
+          "nombre": "Colores Norma Hexagonales x12"
         }
       ]
     },
@@ -589,6 +599,22 @@
           "price": 326
         }
       ]
+    },
+    {
+      "id": "6a5e",
+      "proveedorId": "1",
+      "fecha": "2024-09-19",
+      "total": 648000,
+      "productos": [
+        {
+          "id": "1726704415313",
+          "productoId": "13",
+          "cantidad": 144,
+          "precio": 4500,
+          "nombre": "Tijeras Escolares 5 MAPED"
+        }
+      ],
+      "estado": "Completada"
     }
   ],
   "ventas": [
