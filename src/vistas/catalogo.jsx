@@ -14,6 +14,7 @@ import HeaderCliente from "./headerCli"; // Header para usuarios logueados
 import Footer from "./footer";
 
 import { useCrudContextForms } from "../context/CrudContextForms"; // Importar el contexto
+import { useCart } from '../context/CartContext'; // Importar el contexto del carrito
 
 const categories = ["Todos", "Escritura", "Cuadernos", "Papel", "Arte", "Accesorios", "Coleccionables"];
 
@@ -31,6 +32,9 @@ export default function Catalog() {
 
   // Extraer currentUser del contexto de autenticación
   const { currentUser } = useCrudContextForms();
+
+  // Extraer funciones del contexto del carrito
+  const { addToCart } = useCart();
 
   useEffect(() => {
     setCategoryFilter(initialCategory); // Establece el filtro de categoría inicial
@@ -81,6 +85,10 @@ export default function Catalog() {
     setCategoryFilter(category);
     setCurrentPage(1); // Resetea la página actual al seleccionar una categoría
     window.scrollTo(0, 0); // Desplazar hacia arriba
+  };
+
+  const handleAddToCart = (product) => {
+    addToCart(product); // Agregar el producto al carrito
   };
 
   console.log('Usuario actual:', currentUser); // Depuración
@@ -161,7 +169,7 @@ export default function Catalog() {
                     <Badge variant="secondary" className="mt-2">{product.category}</Badge>
                   </CardContent>
                   <CardFooter className="p-4 pt-0">
-                    <Button className="w-full">
+                    <Button className="w-full" onClick={(e) => { e.stopPropagation(); handleAddToCart(product); }}>
                       <ShoppingCartIcon className="w-4 h-4 mr-2" />
                       Agregar al carrito
                     </Button>
@@ -203,6 +211,7 @@ export default function Catalog() {
           </div>
         </main>
       </div>
+
       <Footer />
     </>
   );

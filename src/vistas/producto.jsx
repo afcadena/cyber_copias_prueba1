@@ -3,10 +3,12 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { StarIcon, HeartIcon, ShareIcon, ShoppingCartIcon } from 'lucide-react';
+import { StarIcon, HeartIcon, ShoppingCartIcon } from 'lucide-react';
 import Header from "./header";
+import HeaderCliente from "./headerCli"; // Header para usuarios logueados
 import Footer from "./footer";
 import { useCart } from '../context/CartContext';  // Importa el useCart
+import { useCrudContextForms } from "../context/CrudContextForms"; // Importa el contexto de autenticación
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -16,16 +18,21 @@ export default function ProductDetail() {
   const { addToCart } = useCart();  // Obtén la función addToCart
   const [message, setMessage] = useState('');
 
+  // Extraer currentUser del contexto de autenticación
+  const { currentUser } = useCrudContextForms();
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`http://localhost:3000/products/${id}`);
         const product = response.data;
         setProduct(product);
-        if (product.imageUrls && product.imageUrls.length > 0) {
-          setMainImage(product.imageUrls[0]);
+        
+        // Asegurarte de que la imagen principal se establezca desde el inicio
+        if (product.imageUrl && product.imageUrl.length > 0) {
+          setMainImage(product.imageUrl[0]);  // Asigna la primera imagen como la imagen principal
         } else {
-          setMainImage("/placeholder.svg");
+          setMainImage("/placeholder.svg");  // Imagen de placeholder si no hay imágenes
         }
       } catch (error) {
         console.error("Error al cargar el producto:", error);
@@ -46,7 +53,9 @@ export default function ProductDetail() {
 
   return (
     <>
-      <Header />
+      {/* Verificar si el usuario está logueado */}
+      {currentUser ? <HeaderCliente /> : <Header />}
+      
       <div className="container mx-auto px-4 py-8">
         {product ? (
           <div className="flex flex-col md:flex-row gap-8 w-full max-w-[1400px]">
@@ -60,7 +69,7 @@ export default function ProductDetail() {
                       src={img} 
                       alt={`${product.name} - Image ${index + 1}`} 
                       className="w-20 h-20 object-cover rounded-md cursor-pointer hover:opacity-75 transition"
-                      onClick={() => setMainImage(img)}
+                      onClick={() => setMainImage(img)}  // Actualiza la imagen principal al hacer clic
                     />
                   ))
                 ) : (
@@ -101,4 +110,3 @@ export default function ProductDetail() {
     </>
   );
 }
-  

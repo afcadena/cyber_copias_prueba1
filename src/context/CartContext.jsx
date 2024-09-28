@@ -1,7 +1,11 @@
+// src/context/CartContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 // Crear el contexto del carrito
 const CartContext = createContext();
+
+// Hook para acceder al contexto del carrito
+export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
   // Estado del carrito inicial, cargando desde localStorage si existe
@@ -9,6 +13,9 @@ export const CartProvider = ({ children }) => {
     const storedCart = localStorage.getItem('cart');
     return storedCart ? JSON.parse(storedCart) : [];
   });
+
+  // Estado para controlar si el carrito está abierto
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Efecto para actualizar el localStorage cada vez que cambie el carrito
   useEffect(() => {
@@ -30,6 +37,7 @@ export const CartProvider = ({ children }) => {
         return [...prevCart, { ...product, quantity: 1 }];
       }
     });
+    setIsCartOpen(true); // Abrir el carrito automáticamente al agregar un producto
   };
 
   // Función para eliminar productos del carrito
@@ -51,13 +59,10 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // Proveer todas las funciones y el carrito
+  // Proveer todas las funciones y estados
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity, isCartOpen, setIsCartOpen }}>
       {children}
     </CartContext.Provider>
   );
 };
-
-// Hook para acceder al contexto del carrito
-export const useCart = () => useContext(CartContext);

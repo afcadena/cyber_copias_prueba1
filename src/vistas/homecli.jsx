@@ -1,3 +1,4 @@
+// src/components/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import HeaderCliente from './headercli';
 import Footer from './footer';
@@ -18,6 +19,7 @@ import heroImage1 from '../assets/images/hero1.jpg';
 import heroImage2 from '../assets/images/hero2.jpg';
 import heroImage3 from '../assets/images/hero3.jpg';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext'; // Importa el useCart
 
 const HomePage = () => {
   const categories = [
@@ -48,8 +50,8 @@ const HomePage = () => {
   ];
 
   const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
   const navigate = useNavigate(); // Inicializar useNavigate
+  const { addToCart } = useCart(); // Obtén la función addToCart del contexto
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -64,20 +66,9 @@ const HomePage = () => {
     fetchProducts();
   }, []);
 
-  const handleAddToCart = (product) => {
-    const existingProduct = cart.find((item) => item.id === product.id);
-    if (existingProduct) {
-      setCart(
-        cart.map((item) => {
-          if (item.id === product.id) {
-            return { ...item, quantity: item.quantity + 1 };
-          }
-          return item;
-        })
-      );
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
-    }
+  const handleAddToCart = (product, event) => {
+    event.stopPropagation(); // Detiene la propagación del evento
+    addToCart(product); // Usa la función del contexto
     console.log(`Added product ${product.name} to cart`);
   };
 
@@ -90,13 +81,6 @@ const HomePage = () => {
     navigate(`/catalogo?category=${category}`);
   };
   
-  // En el renderizado de categorías
-  {categories.map((category) => (
-    <li key={category} onClick={() => handleCategoryClick(category)}>
-      <span>{category}</span>
-    </li>
-  ))}
-
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-x-hidden">
       <HeaderCliente />
@@ -164,56 +148,60 @@ const HomePage = () => {
         </section>
 
         {/* Categoría Destacada */}
-      <section className="bg-white py-8">
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-4">
-            <h2 className="text-3xl font-bold text-primary">Escritura</h2>
-            <Link to="/catalogo?category=Escritura" className="text-sm text-gray-600 hover:text-gray-800">
+        <section className="bg-white py-8">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-3xl font-bold text-primary">Escritura</h2>
+              <Link to="/catalogo?category=Escritura" className="text-sm text-gray-600 hover:text-gray-800">
                 <Button variant="link" className="text-primary">
-                    Ver todo <ChevronRight className="ml-1 h-4 w-4" />
+                  Ver todo <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
-            </Link>
-        </div>
-        <Carousel
-            opts={{ align: "start", loop: true }}
-            plugins={[AutoPlay({ delay: 3000 })]}
-        >
-            <CarouselContent>
+              </Link>
+            </div>
+            <Carousel
+              opts={{ align: "start", loop: true }}
+              plugins={[AutoPlay({ delay: 3000 })]}
+            >
+              <CarouselContent>
                 {products.filter((product) => product.category === "Escritura").map((product, index) => (
-                    <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/4">
-                        <Card
-                            className="flex flex-col justify-between cursor-pointer"
-                            onClick={() => handleProductClick(product)}
+                  <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/4">
+                    <Card
+                      className="flex flex-col justify-between cursor-pointer"
+                      onClick={() => handleProductClick(product)}
+                    >
+                      <CardHeader className="p-4">
+                        <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-contain" />
+                      </CardHeader>
+                      <CardContent className="p-4">
+                        <CardTitle className="text-sm font-medium line-clamp-2 mb-2">{product.name}</CardTitle>
+                        <div className="flex items-center mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <StarIcon key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                          ))}
+                          <span className="ml-1 text-sm text-gray-600">({product.reviews})</span>
+                        </div>
+                        <p className="text-lg font-bold">${product.price.toLocaleString()}</p>
+                      </CardContent>
+                      <CardFooter className="p-4 pt-0">
+                        <Button 
+                          className="w-full" 
+                          onClick={(event) => handleAddToCart(product, event)} // Pasar el evento
                         >
-                            <CardHeader className="p-4">
-                                <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-contain" />
-                            </CardHeader>
-                            <CardContent className="p-4">
-                                <CardTitle className="text-sm font-medium line-clamp-2 mb-2">{product.name}</CardTitle>
-                                <div className="flex items-center mb-2">
-                                    {[...Array(5)].map((_, i) => (
-                                        <StarIcon key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
-                                    ))}
-                                    <span className="ml-1 text-sm text-gray-600">({product.reviews})</span>
-                                </div>
-                                <p className="text-lg font-bold">${product.price.toLocaleString()}</p>
-                            </CardContent>
-                            <CardFooter className="p-4 pt-0">
-                                <Button className="w-full" onClick={() => handleAddToCart(product)}>
-                                    <ShoppingCartIcon className="w-4 h-4 mr-2" />
-                                    Agregar al carrito
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    </CarouselItem>
+                          <ShoppingCartIcon className="w-4 h-4 mr-2" />
+                          Agregar al carrito
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </CarouselItem>
                 ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-        </Carousel>
-    </div>
-</section>
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </div>
+        </section>
 
+        {/* Puedes agregar más secciones de categorías destacadas aquí siguiendo el mismo patrón */}
       </main>
       <Footer />
     </div>
