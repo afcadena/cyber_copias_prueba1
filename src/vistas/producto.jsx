@@ -88,9 +88,6 @@ export default function ProductDetail() {
                   <HeartIcon className="w-4 h-4 mr-2" />
                   Guardar
                 </Button>
-                <Button variant="outline">
-                  <ShareIcon className="w-4 h-4" />
-                </Button>
               </div>
               <Badge variant="outline" className="mb-4">Envío gratis</Badge>
             </div>

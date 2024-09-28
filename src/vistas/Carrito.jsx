@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Header from "./headercli";
+import HeaderCliente from "./headercli";
 import Footer from "./footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -151,7 +151,7 @@ export default function CarritoDeCompras() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <Header />
+      <HeaderCliente />
       <main className="flex-1 container py-6 px-4 md:px-0">
         <h1 className="text-4xl font-bold mb-8 text-center text-primary">Tu Pedido</h1>
         <div className="grid gap-8 lg:grid-cols-2">

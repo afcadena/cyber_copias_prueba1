@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import AutoPlay from "embla-carousel-autoplay";
-import { SearchIcon, ShoppingCartIcon, StarIcon, Badge } from 'lucide-react';
+import { SearchIcon, ShoppingCartIcon, StarIcon } from 'lucide-react';
 import { ChevronRight } from "heroicons-react";
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import escrituraImage from '../assets/images/escritura.jpg';
@@ -86,8 +86,17 @@ const HomePage = () => {
     navigate(`/producto/${product.id}`); 
   };
 
-
+  const handleCategoryClick = (category) => {
+    navigate(`/catalogo?category=${category}`);
+  };
   
+  // En el renderizado de categorías
+  {categories.map((category) => (
+    <li key={category} onClick={() => handleCategoryClick(category)}>
+      <span>{category}</span>
+    </li>
+  ))}
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-x-hidden">
       <Header />
@@ -136,7 +145,10 @@ const HomePage = () => {
               <CarouselContent>
                 {categories.map((category, index) => (
                   <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/4">
-                    <Card>
+                    <Card
+                      className="flex flex-col justify-between cursor-pointer"
+                      onClick={() => handleCategoryClick(category.name)} // Redirigir al catálogo
+                    >
                       <CardContent className="p-4 flex flex-col items-center">
                         <img src={category.image} alt={category.name} className="w-32 h-32 object-cover mb-2" />
                         <h3 className="font-semibold text-center">{category.name}</h3>
@@ -152,60 +164,60 @@ const HomePage = () => {
         </section>
 
         {/* Categoría Destacada */}
-        <section className="bg-white py-8">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-3xl font-bold text-primary">Escritura</h2>
-              <Link to="/catalogo" className="text-sm text-gray-600 hover:text-gray-800">
+      <section className="bg-white py-8">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center mb-4">
+            <h2 className="text-3xl font-bold text-primary">Escritura</h2>
+            <Link to="/catalogo?category=Escritura" className="text-sm text-gray-600 hover:text-gray-800">
                 <Button variant="link" className="text-primary">
-                  Ver todo <ChevronRight className="ml-1 h-4 w-4" />
+                    Ver todo <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
-              </Link>
-            </div>
-            <Carousel
-              opts={{ align: "start", loop: true }}
-              plugins={[AutoPlay({ delay: 3000 })]}
-            >
-              <CarouselContent>
+            </Link>
+        </div>
+        <Carousel
+            opts={{ align: "start", loop: true }}
+            plugins={[AutoPlay({ delay: 3000 })]}
+        >
+            <CarouselContent>
                 {products.filter((product) => product.category === "Escritura").map((product, index) => (
-                  <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/4">
-                    <Card
-                      className="flex flex-col justify-between cursor-pointer"
-                      onClick={() => handleProductClick(product)}
-                    >
-                      <CardHeader className="p-4">
-                        <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-contain" />
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <CardTitle className="text-sm font-medium line-clamp-2 mb-2">{product.name}</CardTitle>
-                        <div className="flex items-center mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <StarIcon key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
-                          ))}
-                          <span className="ml-1 text-sm text-gray-600">({product.reviews})</span>
-                        </div>
-                        <p className="text-lg font-bold">${product.price.toLocaleString()}</p>
-                      </CardContent>
-                      <CardFooter className="p-4 pt-0">
-                        <Button className="w-full" onClick={() => handleAddToCart(product)}>
-                          <ShoppingCartIcon className="w-4 h-4 mr-2" />
-                          Agregar al carrito
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </CarouselItem>
+                    <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/4">
+                        <Card
+                            className="flex flex-col justify-between cursor-pointer"
+                            onClick={() => handleProductClick(product)}
+                        >
+                            <CardHeader className="p-4">
+                                <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-contain" />
+                            </CardHeader>
+                            <CardContent className="p-4">
+                                <CardTitle className="text-sm font-medium line-clamp-2 mb-2">{product.name}</CardTitle>
+                                <div className="flex items-center mb-2">
+                                    {[...Array(5)].map((_, i) => (
+                                        <StarIcon key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                                    ))}
+                                    <span className="ml-1 text-sm text-gray-600">({product.reviews})</span>
+                                </div>
+                                <p className="text-lg font-bold">${product.price.toLocaleString()}</p>
+                            </CardContent>
+                            <CardFooter className="p-4 pt-0">
+                                <Button className="w-full" onClick={() => handleAddToCart(product)}>
+                                    <ShoppingCartIcon className="w-4 h-4 mr-2" />
+                                    Agregar al carrito
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    </CarouselItem>
                 ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
-          </div>
-        </section>
-      </main>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+        </Carousel>
+    </div>
+</section>
 
+      </main>
       <Footer />
     </div>
   );
-}
+};
 
 export default HomePage;

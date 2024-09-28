@@ -16,7 +16,7 @@ import {
 import { useCrudContextForms } from "../context/CrudContextForms";
 import { useCart } from "../context/CartContext";
 
-export default function Header() {
+export default function HeaderCliente() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -187,8 +187,8 @@ export default function Header() {
                       <button 
                         onClick={() => handleQuantityChange(item.id, item.quantity - 1)} 
                         className={`text-gray-500 hover:text-gray-700 ${item.quantity === 1 ? 'cursor-not-allowed opacity-50' : ''}`}
-                        disabled={item.quantity === 1} // Deshabilitamos el botón si la cantidad es 1
-                        aria-disabled={item.quantity === 1} // Mejora de accesibilidad
+                        disabled={item.quantity === 1} 
+                        aria-disabled={item.quantity === 1} 
                       >
                         <Minus className="h-4 w-4" />
                       </button>
@@ -202,7 +202,7 @@ export default function Header() {
                       {/* Botón de Eliminación */}
                       <button 
                         onClick={() => removeFromCart(item.id)} 
-                        className="text-gray-500 hover:text-red-500 ml-2" 
+                        className="text-red-500 hover:text-red-700 ml-2" 
                         aria-label={`Eliminar ${item.name} del carrito`}
                       >
                         <Trash className="h-4 w-4" />
@@ -214,17 +214,12 @@ export default function Header() {
             )}
           </div>
           <div className="p-4 border-t">
-            <div className="flex justify-between items-center mb-4">
-              <span className="font-semibold">Subtotal:</span>
-              <span>${subtotal.toFixed(2)}</span>
-            </div>
+            <h3 className="text-lg font-semibold">Subtotal: ${subtotal.toFixed(2)}</h3>
             <button 
-              onClick={() => navigate('/previa')} 
-              disabled={cart.length === 0} // Deshabilitamos el botón si el carrito está vacío
-              aria-disabled={cart.length === 0} // Mejora de accesibilidad
-              className={`w-full bg-primary text-white py-2 px-4 rounded transition duration-200 ${cart.length === 0 ? 'opacity-50 cursor-not-allowed hover:bg-primary' : 'hover:bg-primary-dark'}`}
+              onClick={() => navigate('/checkout')} 
+              className="w-full bg-primary text-white py-2 rounded mt-2 hover:bg-primary-dark"
             >
-              CHECKOUT
+              Proceder a la compra
             </button>
           </div>
         </div>

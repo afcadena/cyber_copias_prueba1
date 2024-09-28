@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom'; 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,9 +9,11 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Checkbox } from "@/components/ui/checkbox";
 import { SearchIcon, ShoppingCartIcon, StarIcon } from 'lucide-react';
 
-// Importa los componentes Header y Footer
-import Header from "./header";
+import Header from "./header"; // Header normal
+import HeaderCliente from "./headerCli"; // Header para usuarios logueados
 import Footer from "./footer";
+
+import { useCrudContextForms } from "../context/CrudContextForms"; // Importar el contexto
 
 const categories = ["Todos", "Escritura", "Cuadernos", "Papel", "Arte", "Accesorios", "Coleccionables"];
 
@@ -24,12 +26,25 @@ export default function Catalog() {
   const productsPerPage = 12;
 
   const navigate = useNavigate(); 
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get("category") || "Todos"; // Obtiene la categoría de la URL
+
+  // Extraer currentUser del contexto de autenticación
+  const { currentUser } = useCrudContextForms();
+
+  useEffect(() => {
+    setCategoryFilter(initialCategory); // Establece el filtro de categoría inicial
+  }, [initialCategory]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch("http://localhost:3000/products");
+        if (!response.ok) { // Manejo de errores
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
         const data = await response.json();
+        console.log("Productos cargados:", data); // Depuración
         setProducts(data);
       } catch (error) {
         console.error("Error al cargar productos:", error);
@@ -57,9 +72,25 @@ export default function Catalog() {
     navigate(`/producto/${product.id}`); 
   };
 
+  useEffect(() => {
+    setCategoryFilter(initialCategory); // Establece el filtro de categoría inicial
+    window.scrollTo(0, 0); // Desplazar hacia arriba
+  }, [initialCategory]);
+
+  const handleCategoryChange = (category) => {
+    setCategoryFilter(category);
+    setCurrentPage(1); // Resetea la página actual al seleccionar una categoría
+    window.scrollTo(0, 0); // Desplazar hacia arriba
+  };
+
+  console.log('Usuario actual:', currentUser); // Depuración
+
   return (
     <>
-      <Header />
+      {/* Depuración del estado de autenticación */}
+      {console.log('User logged in:', currentUser ? true : false)}
+      {currentUser ? <HeaderCliente /> : <Header />}
+      
       <div className="flex flex-col md:flex-row gap-8 p-6 bg-gray-100">
         <aside className="md:w-64">
           <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -71,7 +102,7 @@ export default function Catalog() {
                     <Checkbox
                       id={category}
                       checked={categoryFilter === category}
-                      onCheckedChange={() => setCategoryFilter(category)}
+                      onCheckedChange={() => handleCategoryChange(category)}
                     />
                     <label htmlFor={category} className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                       {category}
