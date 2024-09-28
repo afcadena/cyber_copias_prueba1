@@ -88,10 +88,6 @@ export default function Header() {
             <Book className="h-5 w-5" />
             <span className="text-xs mt-1">Catálogo</span>
           </Link>
-          <Link to="/pedidos" className="flex flex-col items-center hover:text-primary">
-            <Package className="h-5 w-5" />
-            <span className="text-xs mt-1">Pedidos</span>
-          </Link>
           {isCartAccessible && (
             <button onClick={toggleCart} className="flex flex-col items-center hover:text-primary relative">
               <ShoppingCart className="h-5 w-5" />

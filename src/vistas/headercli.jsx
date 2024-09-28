@@ -49,6 +49,11 @@ export default function HeaderCliente() {
     }
   };
 
+  // Modificación: Redirige a la página de cuenta mostrando la sección "Pedidos"
+  const handlePedidosClick = () => {
+    navigate('/cuenta?section=pedidos'); // Redirige a la cuenta directamente a la sección de pedidos
+  };
+
   const handleQuantityChange = (productId, newQuantity) => {
     if (newQuantity >= 1) { // Aseguramos que la cantidad no sea menor que 1
       updateQuantity(productId, newQuantity);
@@ -106,10 +111,10 @@ export default function HeaderCliente() {
             <Book className="h-5 w-5" />
             <span className="text-xs mt-1">Catálogo</span>
           </Link>
-          <Link to="/pedidos" className="flex flex-col items-center hover:text-primary">
+          <button onClick={handlePedidosClick} className="flex flex-col items-center hover:text-primary">
             <Package className="h-5 w-5" />
             <span className="text-xs mt-1">Pedidos</span>
-          </Link>
+          </button>
           {isCartAccessible && (
             <button onClick={toggleCart} className="flex flex-col items-center hover:text-primary relative">
               <ShoppingCart className="h-5 w-5" />
