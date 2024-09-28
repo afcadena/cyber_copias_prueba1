@@ -1,98 +1,130 @@
 import React, { useEffect, useState } from "react";
-import Header from "./header";
+import Header from "./headercli";
 import Footer from "./footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useCart } from "../context/CartContext";
-import { XIcon } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { useCrudContextForms } from "../context/CrudContextForms";
-import axios from 'axios'; // Asegúrate de tener axios instalado
+import axios from 'axios';
 
 export default function CarritoDeCompras() {
-  const { cart, removeFromCart, addToCart, clearCart } = useCart(); // Añadir clearCart para vaciar el carrito
-  const { currentUser } = useCrudContextForms(); // Usamos el contexto para obtener el usuario actual
+  const { cart, clearCart } = useCart();
+  const { currentUser } = useCrudContextForms();
   const [isOpen, setIsOpen] = useState(false);
-  const [showMessage, setShowMessage] = useState(false); // Estado para mostrar el mensaje de error de autenticación
-  const [showSuccessModal, setShowSuccessModal] = useState(false); // Estado para mostrar el modal de éxito
+  const [showMessage, setShowMessage] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
+  const [formData, setFormData] = useState({
+    name: "",  // Se inicializan vacíos
+    surname: "",  // Se inicializan vacíos
+    address: "",
+    apartment: "",
+    state: "Bogotá",
+    phone: "",
+  });
+  const [formErrors, setFormErrors] = useState({});
+
   useEffect(() => {
-    // Verificar la autenticación del usuario actual
     if (currentUser && currentUser.role === "cliente") {
       setIsAuthenticated(true);
+
+      // Cargar valores de currentUser si están presentes
+      setFormData({
+        ...formData,
+        name: currentUser?.name || "", 
+        surname: currentUser?.surname || "",  // Ahora surname se carga correctamente
+      });
     } else {
       setIsAuthenticated(false);
     }
   }, [currentUser, cart]);
 
-  const handleQuantityChange = (productId, newQuantity) => {
-    const product = cart.find((p) => p.id === productId);
-    if (product) {
-      const maxQuantity = parseInt(product.stock); // Control de stock
-      const quantityToSet = Math.min(newQuantity, maxQuantity);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+    validateField(name, value);
+  };
 
-      if (quantityToSet > product.quantity) {
-        // Si la cantidad es mayor, agrega más al carrito
-        addToCart(product);
-      } else if (quantityToSet < product.quantity) {
-        // Si la cantidad es menor, remueve del carrito
-        removeFromCart(product.id);
-        for (let i = 0; i < quantityToSet; i++) {
-          addToCart(product); // Reagregar la cantidad ajustada
-        }
-      }
+  const validateField = (fieldName, value) => {
+    let errors = { ...formErrors };
+    switch (fieldName) {
+      case "name":
+      case "surname":
+      case "address":
+      case "apartment":
+        errors[fieldName] = value
+          ? ""
+          : `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} es requerido`;
+        break;
+      case "phone":
+        errors.phone = value
+          ? /^[3][0-9]{9}$/.test(value)
+            ? ""
+            : "Teléfono inválido (10 dígitos, comenzando con 3)"
+          : "Teléfono es requerido";
+        break;
+      default:
+        break;
     }
+    setFormErrors(errors);
   };
 
-  const handleRemoveFromCart = (productId) => {
-    removeFromCart(productId);
-  };
-
-  const totalCompra = cart.reduce((total, producto) => {
+  const subtotal = cart.reduce((total, producto) => {
     const price = parseFloat(producto.price) || 0;
     const quantity = producto.quantity || 1;
     return total + price * quantity;
   }, 0);
 
+  const total = subtotal;
+
   const handleFinalizarCompra = () => {
     if (!isAuthenticated) {
-      setShowMessage(true); // Mostrar mensaje si no está autenticado
+      setShowMessage(true);
     } else {
-      setIsOpen(true); // Abrir el modal para confirmar la compra
+      if (
+        Object.values(formErrors).every((x) => x === "") &&
+        Object.values(formData).every((x) => x !== "")
+      ) {
+        setIsOpen(true);
+      } else {
+        setShowMessage(true);
+      }
     }
   };
 
-  // Función para manejar la confirmación de compra
   const handleConfirmPurchase = async () => {
     const products = cart.map((product) => ({
       id: product.id,
       name: product.name,
       quantity: product.quantity,
       price: product.price,
-      stock: product.stock // Añadimos el stock para actualizarlo luego
+      stock: product.stock,
     }));
 
     const order = {
       cliente: currentUser.name,
-      fecha: new Date().toISOString().split('T')[0], // Fecha actual en formato yyyy-mm-dd
-      estado: "En proceso", // Estado inicial del pedido
-      total: totalCompra, // Total de la compra
-      products: products, // Productos en el carrito
+      fecha: new Date().toISOString().split("T")[0],
+      estado: "En proceso",
+      total: total,
+      products: products,
+      shippingDetails: formData,
     };
 
     try {
-      // 1. Guardar el pedido en la base de datos
-      await axios.post('http://localhost:3000/pedidos', order); // Cambia la URL a tu API real
-
-      // 2. Reducir el stock de cada producto en el carrito
+      await axios.post("http://localhost:3000/pedidos", order);
       await Promise.all(
         products.map(async (product) => {
-          const newStock = product.stock - product.quantity; // Reducimos el stock
-          if (newStock >= 0) { // Asegurar que no se tenga stock negativo
+          const newStock = product.stock - product.quantity;
+          if (newStock >= 0) {
             await axios.patch(`http://localhost:3000/products/${product.id}`, {
-              stock: newStock
+              stock: newStock,
             });
           } else {
             console.error(`Stock insuficiente para el producto: ${product.name}`);
@@ -100,129 +132,170 @@ export default function CarritoDeCompras() {
         })
       );
 
-      // 3. Mostrar un mensaje de éxito y vaciar el carrito
       setIsOpen(false);
       setShowSuccessModal(true);
 
-      // Ocultar el modal de éxito después de 10 segundos
       setTimeout(() => {
         setShowSuccessModal(false);
-        clearCart(); // Vaciar el carrito
+        clearCart();
       }, 10000);
-
     } catch (error) {
       console.error("Error al procesar la compra o actualizar el stock:", error);
     }
   };
 
   const handleCloseSuccessModal = () => {
-    clearCart(); // Vaciar el carrito
-    setShowSuccessModal(false); // Cerrar el modal de éxito
+    clearCart();
+    setShowSuccessModal(false);
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-100">
       <Header />
-      <main className="flex-1 container py-6">
-        <h1 className="text-2xl font-bold mb-6">Carrito de Compras</h1>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {cart.length > 0 ? (
-            cart.map((producto) => {
-              const price = parseFloat(producto.price) || 0;
-              const quantity = producto.quantity || 1;
-
-              return (
-                <Card key={producto.id} className="relative">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <CardTitle>{producto.name}</CardTitle>
-                      <button
-                        onClick={() => handleRemoveFromCart(producto.id)}
-                        className="text-red-500"
-                      >
-                        <XIcon className="w-6 h-6" />
-                      </button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <img
-                      src={producto.imageUrl}
-                      alt={producto.name}
-                      className="w-full h-40 object-cover mb-4"
+      <main className="flex-1 container py-6 px-4 md:px-0">
+        <h1 className="text-4xl font-bold mb-8 text-center text-primary">Tu Pedido</h1>
+        <div className="grid gap-8 lg:grid-cols-2">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl">Información de Entrega</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Nombre
+                    </label>
+                    <Input
+                      id="name"
+                      name="name"
+                      placeholder="Nombre"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full"
                     />
-                    <p className="text-2xl font-bold">${price.toFixed(2)}</p>
-                    <div className="mt-2">
-                      <label className="block text-sm font-medium text-gray-700">Cantidad:</label>
-                      <input
-                        type="number"
-                        value={quantity}
-                        min="1"
-                        onChange={(e) => handleQuantityChange(producto.id, parseInt(e.target.value))}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                    {formErrors.name && (
+                      <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="surname"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Apellidos
+                    </label>
+                    <Input
+                      id="surname"
+                      name="surname"
+                      placeholder="Apellidos"
+                      value={formData.surname}
+                      onChange={handleInputChange}
+                      className="w-full"
+                    />
+                    {formErrors.surname && (
+                      <p className="text-red-500 text-xs mt-1">{formErrors.surname}</p>
+                    )}
+                  </div>
+                </div>
+                  <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                    <Input id="address" name="address" placeholder="Dirección" value={formData.address} onChange={handleInputChange} className="w-full" />
+                    {formErrors.address && <p className="text-red-500 text-xs mt-1">{formErrors.address}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="apartment" className="block text-sm font-medium text-gray-700 mb-1">Casa, apartamento, etc.</label>
+                    <Input id="apartment" name="apartment" placeholder="Casa, apartamento, etc." value={formData.apartment} onChange={handleInputChange} className="w-full" />
+                    {formErrors.apartment && <p className="text-red-500 text-xs mt-1">{formErrors.apartment}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md">
+                        +57
+                      </span>
+                      <Input 
+                        id="phone"
+                        name="phone" 
+                        placeholder="Teléfono" 
+                        value={formData.phone} 
+                        onChange={handleInputChange} 
+                        className="rounded-l-none"
                       />
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between items-center">
-                    <p className="text-lg">Subtotal: ${(price * quantity).toFixed(2)}</p>
-                  </CardFooter>
-                </Card>
-              );
-            })
-          ) : (
-            <p>No hay productos en el carrito.</p>
+                    {formErrors.phone && <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>}
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+            <Card className="bg-[#1a2b4a] text-white shadow-lg flex flex-col">
+              <CardHeader>
+                <CardTitle className="text-2xl">Resumen del Pedido</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow overflow-y-auto">
+                <div className="space-y-4">
+                  {cart.map((producto) => (
+                    <div key={producto.id} className="flex justify-between items-center border-b border-gray-600 pb-4">
+                      <div className="flex items-center space-x-4">
+                        <img src={producto.imageUrl} alt={producto.name} className="w-16 h-16 object-cover rounded" />
+                        <div>
+                          <p className="font-semibold">{producto.name}</p>
+                          <p className="font-semibold">Cantidad: {producto.quantity}</p>
+                        </div>
+                      </div>
+                      <p className="font-semibold">$ {producto.price.toLocaleString('es-CO')}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between items-center">
+                <p className="font-semibold">Total</p>
+                <p className="font-semibold">$ {total.toLocaleString('es-CO')}</p>
+              </CardFooter>
+              <div className="p-4">
+                <Button onClick={handleFinalizarCompra} className="w-full">Finalizar Compra</Button>
+              </div>
+            </Card>
+          </div>
+          {showMessage && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">¡Atención!</h2>
+                <p className="mb-4">Debes iniciar sesión para continuar con la compra.</p>
+                <div className="flex justify-end">
+                  <Button onClick={() => setShowMessage(false)}>Cerrar</Button>
+                </div>
+              </div>
+            </div>
           )}
-        </div>
-      </main>
-
-      <footer className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container py-4 flex justify-end">
-          <p className="text-lg font-bold mr-auto">Total: ${totalCompra.toFixed(2)}</p>
-          <Button onClick={handleFinalizarCompra} disabled={cart.length === 0}>
-            Finalizar Compra
-          </Button>
-        </div>
-      </footer>
-      <Footer />
-
-      {/* Modal de confirmación de compra */}
-      {isOpen && (
-        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-4 rounded-md shadow-md">
-            <h2 className="text-2xl font-bold mb-4">Finalizar Compra</h2>
-            <p className="text-lg mb-4">¿Estás seguro de que deseas finalizar la compra?</p>
-            <div className="flex justify-end space-x-4">
-              <Button onClick={() => setIsOpen(false)}>Cancelar</Button>
-              <Button onClick={handleConfirmPurchase}>Confirmar Compra</Button>
+          {isOpen && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">Confirmar Compra</h2>
+                <p className="mb-4">¿Estás seguro de que deseas finalizar la compra?</p>
+                <div className="flex justify-end space-x-4">
+                  <Button onClick={() => setIsOpen(false)} variant="outline">Cancelar</Button>
+                  <Button onClick={handleConfirmPurchase}>Confirmar</Button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de éxito después de la compra */}
-      {showSuccessModal && (
-        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-4 rounded-md shadow-md">
-            <h2 className="text-2xl font-bold mb-4">Pedido Agendado con Éxito</h2>
-            <p className="text-lg mb-4">Tu pedido ha sido procesado correctamente.</p>
-            <div className="flex justify-end space-x-4">
-              <Button onClick={handleCloseSuccessModal}>Cerrar</Button>
+          )}
+          {showSuccessModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">¡Éxito!</h2>
+                <p className="mb-4">Tu pedido se ha realizado con éxito.</p>
+                <div className="flex justify-end">
+                  <Button onClick={handleCloseSuccessModal}>Cerrar</Button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mensaje de error de autenticación */}
-      {showMessage && (
-        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-4 rounded-md shadow-md">
-            <h2 className="text-2xl font-bold mb-4">Error</h2>
-            <p className="text-lg mb-4">Debes iniciar sesión para finalizar la compra.</p>
-            <div className="flex justify-end space-x-4">
-              <Button onClick={() => setShowMessage(false)}>Cerrar</Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+          )}
+        </main>
+        <Footer />
+      </div>
+    );
+  }

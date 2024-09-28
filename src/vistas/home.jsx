@@ -30,9 +30,21 @@ const HomePage = () => {
   ];
 
   const heroOffers = [
-    { title: "", image: heroImage1 },
-    { title: "", image: heroImage2 },
-    { title: "", image: heroImage3 },
+    { 
+      title: "Descubre tu creatividad", 
+      subtitle: "Encuentra todo lo que necesitas para dar vida a tus ideas",
+      image: heroImage1 
+    },
+    { 
+      title: "Organiza tu mundo", 
+      subtitle: "Herramientas para mantener tu vida en orden",
+      image: heroImage2 
+    },
+    { 
+      title: "Inspira tu día", 
+      subtitle: "Productos que hacen especial cada momento",
+      image: heroImage3 
+    },
   ];
 
   const [products, setProducts] = useState([]);
@@ -74,12 +86,14 @@ const HomePage = () => {
     navigate(`/producto/${product.id}`); 
   };
 
+
+  
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-x-hidden">
       <Header />
 
       {/* Hero Carousel */}
-      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+      <div className="w-full">
         <Carousel
           opts={{ align: "start", loop: true }}
           plugins={[AutoPlay({ delay: 5000 })]}
@@ -87,26 +101,25 @@ const HomePage = () => {
         >
           <CarouselContent>
             {heroOffers.map((offer, index) => (
-              <CarouselItem key={index}>
-                <div className="p-1">
-                  <Card className="relative">
-                    <CardContent className="flex items-center justify-center p-0 h-[500px] w-[1380px]">
-                      <img
-                        src={offer.image}
-                        alt={offer.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <span className="absolute bottom-4 left-4 text-4xl font-semibold text-white bg-black bg-opacity-50 p-2 rounded">
-                        {offer.title}
-                      </span>
-                    </CardContent>
-                  </Card>
+              <CarouselItem key={index} className="w-full">
+                <div className="relative w-full h-screen">
+                  <img
+                    src={offer.image}
+                    alt={offer.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-white text-center px-4">
+                    <h2 className="text-5xl sm:text-6xl font-bold mb-4 transition-all duration-300 ease-in-out transform hover:scale-105">
+                      {offer.title}
+                    </h2>
+                    <p className="text-xl sm:text-2xl max-w-2xl transition-all duration-300 ease-in-out transform hover:scale-105">
+                      {offer.subtitle}
+                    </p>
+                  </div>
                 </div>
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
         </Carousel>
       </div>
 

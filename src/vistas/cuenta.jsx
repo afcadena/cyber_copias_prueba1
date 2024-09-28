@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import Footer from "./footer"; // Importa el footer desde el archivo Footer.jsx
 import { useCrudContextForms } from '../context/CrudContextForms';
+import HeaderCli from './/headercli'; // Asegúrate de que la ruta sea correcta
 
 const CuentaContext = createContext();
 
@@ -29,7 +30,7 @@ const CuentaProvider = ({ children }) => {
     }
   }, [currentUser]);
 
-    return (
+  return (
     <CuentaContext.Provider value={{ userData, setUserData, updateUserAddress }}>
       {children}
     </CuentaContext.Provider>
@@ -126,6 +127,10 @@ const ProfileContent = () => {
         <div className="space-y-2">
           <Label>Nombre</Label>
           <p>{userData.name}</p>
+        </div>
+        <div className="space-y-2">
+          <Label>Apellido</Label> {/* Añadido para mostrar el apellido */}
+          <p>{userData.surname}</p> {/* Mostrar el apellido del usuario */}
         </div>
         <div className="space-y-2">
           <Label>Email</Label>
@@ -263,30 +268,8 @@ export default function Cuenta() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between p-4 bg-background border-b">
-        <Link to="/homecli">
-          <Button variant="ghost" size="sm" className="flex items-center text-primary">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            <span className="text-sm">Volver</span>
-          </Button>
-        </Link>
-        <div className="flex items-center">
-          <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
-          <h1 className="text-xl font-bold">CyberCopias</h1>
-        </div>
-        <nav className="hidden md:flex space-x-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/catalogo" aria-label="Catálogo">
-              <Grid className="h-6 w-6" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/carrito" aria-label="Carrito">
-              <ShoppingCart className="h-6 w-6" />
-            </Link>
-          </Button>
-        </nav>
-      </header>
+      <HeaderCli /> {/* Reemplazamos el header antiguo con el nuevo HeaderCli */}
+
 
       <main className="container mx-auto py-6 px-4 flex flex-col md:flex-row">
         <div className="md:w-1/3 mb-6 md:mb-0">

@@ -20,6 +20,7 @@ import GestionPedidos from './vistas/Pedidos';
 import GestionProveedores from './vistas/Proveedores';
 import GestionVentas from './vistas/Ventas';
 import GestionCompras from './vistas/Compras'; // Nueva vista
+import CartPreview from './vistas/previa_compra';
 
 // Importar los proveedores de contexto
 import { CrudProviderProveedores } from './context/CrudContextProveedores';
@@ -46,6 +47,7 @@ function App() {
                       <Route path="/register" element={<Register />} />
                       <Route path="/catalogo" element={<Catalog />} />
                       <Route path="/carrito" element={<CarritoDeCompras />} />
+                      <Route path="/previa" element={< CartPreview/>} />
                       <Route path="/producto/:id" element={<ProductDetail />} />
 
                       {/* Rutas protegidas del cliente */}

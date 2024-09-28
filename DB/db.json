@@ -306,7 +306,8 @@
   "users": [
     {
       "id": "1",
-      "name": "Juan Pérez",
+      "name": "Juan ",
+      "surname": "Pérez",
       "email": "juan.perez@example.com",
       "password": "password123",
       "confirmpassword": "password123",
@@ -314,7 +315,8 @@
     },
     {
       "id": "2",
-      "name": "María Gómez",
+      "name": "María ",
+      "surname": "Gómez",
       "email": "maria.gomez@example.com",
       "password": "password456",
       "confirmpassword": "password456",
@@ -324,7 +326,8 @@
     },
     {
       "id": "3",
-      "name": "Luis Martínez",
+      "name": "Luis",
+      "surname": "García",
       "email": "luis.martinez@example.com",
       "password": "password789",
       "confirmpassword": "password789",
@@ -334,7 +337,8 @@
     },
     {
       "id": "4",
-      "name": "Ana López",
+      "name": "Ana",
+      "surname": "Rodríguez",
       "email": "ana.lopez@example.com",
       "password": "password321",
       "confirmpassword": "password321",
@@ -342,7 +346,8 @@
     },
     {
       "id": "5",
-      "name": "Pedro Fernández",
+      "name": "Pedro ",
+      "surname": "Fernández",
       "email": "pedro.fernandez@example.com",
       "password": "password654",
       "confirmpassword": "password654",
@@ -352,7 +357,8 @@
     },
     {
       "id": "1725411403084",
-      "name": "Andres Cadena",
+      "name": "Andres ",
+      "surname": "Cadena",
       "email": "afca@test.com",
       "password": "1013112289Fe@",
       "role": "cliente",
@@ -361,7 +367,8 @@
     },
     {
       "id": "1725411693460",
-      "name": "Julian Prieto",
+      "name": "Julian ",
+      "surname": "Prieto",
       "email": "Julian@test.com",
       "password": "123456789Se#",
       "role": "cliente",
@@ -370,7 +377,8 @@
     },
     {
       "id": "1725491302910",
-      "name": "Julian Romero",
+      "name": "Julian ",
+      "surname": "Romero",
       "email": "julian@test11.com",
       "password": "123456789Pe#",
       "role": "cliente",
@@ -379,7 +387,8 @@
     },
     {
       "id": "1725492944879",
-      "name": "Luis Alejandro Galicia Novoa",
+      "name": "Luis Alejandro ",
+      "surname": "Galicia Novoa",
       "email": "iglesiag1908@gmail.com",
       "password": "Alek122334.",
       "role": "cliente",
@@ -389,6 +398,7 @@
     {
       "id": "10",
       "name": "Luis",
+      "surname": "Galicia",
       "email": "lagalicia4@soy.sena.edu.co",
       "password": "Luis1212",
       "confirmpassword": "Luis1212",
@@ -396,9 +406,20 @@
     },
     {
       "id": "1726342088829",
-      "name": "Pedro Gonzalez Leon",
+      "name": "Pedro Gonzalez ",
+      "surname": "Leon",
       "email": "Gonzales@gmail.com",
       "password": "Password123#",
+      "role": "cliente",
+      "direccion": "",
+      "telefono": ""
+    },
+    {
+      "id": "1727488929900",
+      "name": "Roberto",
+      "surname": "Palmer",
+      "email": "Palmer@gmail.com",
+      "password": "123456789Fe@",
       "role": "cliente",
       "direccion": "",
       "telefono": ""

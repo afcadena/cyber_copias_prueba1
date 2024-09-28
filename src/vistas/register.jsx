@@ -12,6 +12,7 @@ import Footer from './footer';  // Asegúrate de que la ruta sea correcta
 export default function Register() {
   const { registerUser, error } = useCrudContextForms();
   const [name, setName] = useState('');
+  const [surname, setSurname] = useState(''); // Nuevo estado para el apellido
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -50,7 +51,7 @@ export default function Register() {
       return;
     }
 
-    const newUser = { name, email, password };
+    const newUser = { name, surname, email, password }; // Añadir el apellido al objeto del nuevo usuario
     const response = await registerUser(newUser);
 
     if (response) {
@@ -79,11 +80,20 @@ export default function Register() {
               <div className="space-y-4">
                 {(formError || error) && <p className="text-red-500">{formError || error.statusText}</p>}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nombre Completo</Label>
+                  <Label htmlFor="name">Nombre</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    required
+                  />  
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="surname">Apellidos</Label> {/* Campo para el apellido */}
+                  <Input
+                    id="surname"
+                    value={surname}
+                    onChange={(e) => setSurname(e.target.value)}
                     required
                   />
                 </div>
@@ -139,6 +149,16 @@ export default function Register() {
                       {showConfirmPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
                     </Button>
                   </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p>La contraseña debe tener al menos:</p>
+                  <ul className="list-disc pl-5">
+                    <li>8 caracteres</li>
+                    <li>1 letra mayúscula</li>
+                    <li>1 letra minúscula</li>
+                    <li>1 número</li>
+                    <li>1 símbolo especial</li>
+                  </ul>
                 </div>
               </div>
               <Button type="submit" className="w-full mt-6">Registrarse</Button>

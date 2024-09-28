@@ -4,13 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import { useCrudContextForms } from "../context/CrudContextForms"; // Corrige la importación
-import { useNavigate } from 'react-router-dom';
+import { useCrudContextForms } from "../context/CrudContextForms"; 
+import { useNavigate, useLocation } from 'react-router-dom'; 
 import Header from './header';  
 import Footer from './footer';  
 
 export default function Login() {
-  const { loginUser, error, currentUser } = useCrudContextForms(); // Usa el hook correcto
+  const { loginUser, error, currentUser } = useCrudContextForms(); 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,16 +18,19 @@ export default function Login() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [userRole, setUserRole] = useState(null); 
   const navigate = useNavigate();
+  const location = useLocation(); 
+  const from = location.state?.from || '/homecli'; 
 
   useEffect(() => {
     if (currentUser) {
+      // Si currentUser cambia y es un admin, redirige inmediatamente.
       if (currentUser.role === 'admin') {
         navigate('/admin');
       } else {
-        navigate('/homecli');
+        navigate(from);
       }
     }
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,14 +39,15 @@ export default function Login() {
     if (user) {
       setUserRole(user.role); 
       setShowWelcome(true);
+      console.log("Usuario autenticado:", user); // Verifica la autenticación
       setTimeout(() => {
-        setShowWelcome(false);
+        setShowWelcome(false); // Ocultar la alerta
         if (user.role === 'admin') {
-          navigate('/admin');
+          navigate('/admin'); // Si es admin, redirige al panel de administrador
         } else {
-          navigate('/homecli');
+          navigate(from, { replace: true }); // Si es cliente, redirige a la URL previa o a /homecli
         }
-      }, 1000);
+      }, 15000); // Duración de la alerta en milisegundos (15 segundos)
     } else {
       setFormError("Credenciales incorrectas. Inténtalo de nuevo.");
     }
@@ -111,7 +115,8 @@ export default function Login() {
             <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
               <div className="bg-white p-8 rounded shadow-lg">
                 <h2 className="text-xl font-semibold">¡Bienvenido!</h2>
-                <p>Te has iniciado sesión con éxito. {userRole === 'admin' ? "Eres un Administrador" : "Eres un Cliente"}</p>
+                <p>Has iniciado sesión con éxito. {userRole === 'admin' ? "Eres un Administrador" : "Eres un Cliente"}</p>
+                <p>Serás redirigido en 15 segundos...</p> {/* Cambié a 15 segundos */}
               </div>
             </div>
           )}

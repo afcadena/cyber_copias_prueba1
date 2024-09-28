@@ -15,28 +15,32 @@ export function CrudProviderPedidos({ children }) {
   const url = 'http://localhost:3000/pedidos'; // URL del endpoint de pedidos
 
   useEffect(() => {
-    setLoading(true);
-    api.get(url).then((res) => {
+    const fetchData = async () => {
+      setLoading(true);
+      const res = await api.get(url);
       if (!res.err) {
         setDb(res);
         setError(null);
       } else {
-        setDb([]);
+        setDb([]); // Limpiar la base de datos en caso de error
         setError(res);
       }
       setLoading(false);
-    });
-  }, [api, url]); // Solo dependencias necesarias
+    };
+
+    fetchData(); // Llamar a la función para obtener datos
+
+  }, [url]); // Solo la URL como dependencia necesaria
 
   const createData = (data) => {
     const options = {
-      body: data, // No es necesario usar JSON.stringify aquí, helpHttp lo maneja
+      body: data,
       headers: { 'Content-Type': 'application/json' },
     };
 
     api.post(url, options).then((res) => {
       if (!res.err) {
-        setDb((prevDb) => [...prevDb, res]);
+        setDb((prevDb) => [...prevDb, res]); // Actualizar el estado de manera segura
       } else {
         setError(res);
       }
@@ -46,14 +50,13 @@ export function CrudProviderPedidos({ children }) {
   const updateData = (data) => {
     const endpoint = `${url}/${data.id}`;
     const options = {
-      body: data, // No es necesario usar JSON.stringify aquí, helpHttp lo maneja
+      body: data,
       headers: { 'Content-Type': 'application/json' },
     };
 
     api.put(endpoint, options).then((res) => {
       if (!res.err) {
-        const updatedDb = db.map((el) => (el.id === data.id ? res : el));
-        setDb(updatedDb);
+        setDb((prevDb) => prevDb.map((el) => (el.id === data.id ? res : el))); // Actualizar el estado de manera segura
       } else {
         setError(res);
       }
@@ -68,8 +71,7 @@ export function CrudProviderPedidos({ children }) {
 
     api.del(endpoint, options).then((res) => {
       if (!res.err) {
-        const updatedDb = db.filter((el) => el.id !== id);
-        setDb(updatedDb);
+        setDb((prevDb) => prevDb.filter((el) => el.id !== id)); // Actualizar el estado de manera segura
       } else {
         setError(res);
       }
