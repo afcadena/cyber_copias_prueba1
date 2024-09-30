@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Asegúrate de incluir useLocation aquí
 import { ArrowLeft, User, MapPin, Package, Grid, ShoppingCart, Edit } from "lucide-react";
 import Logo from "../assets/images/Logo.png";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import Footer from "./footer"; // Importa el footer desde el archivo Footer.jsx
+import Footer from "./footer";
 import { useCrudContextForms } from '../context/CrudContextForms';
-import HeaderCli from './/headercli'; // Asegúrate de que la ruta sea correcta
+import HeaderCli from './headercli'; // Asegúrate de que la ruta sea correcta
 
 const CuentaContext = createContext();
 
@@ -255,10 +255,13 @@ const OrdersContent = () => {
     </Card>
   );
 };
+
 export default function Cuenta() {
   const [activeSection, setActiveSection] = useState('perfil');
   const { currentUser } = useCrudContextForms();
   const [userData, setUserData] = useState({});
+
+  const location = useLocation(); // <-- Añadido
 
   useEffect(() => {
     if (currentUser) {
@@ -266,10 +269,18 @@ export default function Cuenta() {
     }
   }, [currentUser]);
 
+  // Añadido: Actualiza activeSection según el parámetro de consulta 'section'
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const section = queryParams.get("section"); // Obtiene el valor del parámetro `section`
+    if (section) {
+      setActiveSection(section); // Actualiza la sección activa
+    }
+  }, [location.search]); // Vuelve a ejecutar el efecto si cambia el query string
+
   return (
     <div className="min-h-screen bg-background">
       <HeaderCli /> {/* Reemplazamos el header antiguo con el nuevo HeaderCli */}
-
 
       <main className="container mx-auto py-6 px-4 flex flex-col md:flex-row">
         <div className="md:w-1/3 mb-6 md:mb-0">

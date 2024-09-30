@@ -1,22 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { 
-  ShoppingCart, 
-  Book, 
-  User, 
-  Package, 
-  Heart, 
-  Search, 
-  X, 
-  Minus, 
-  Plus, 
-  Trash 
-} from "lucide-react";
+import { Search, X, ShoppingCart, Book, User, Heart, Minus, Plus, Trash } from "lucide-react";
 import { useCrudContextForms } from "../context/CrudContextForms";
 import { useCart } from "../context/CartContext";
 
 export default function Header() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [allProducts, setAllProducts] = useState([]); // Almacena todos los productos
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]); // Sugerencias filtradas
   const [isCartOpen, setIsCartOpen] = useState(false);
   
   const { currentUser } = useCrudContextForms();
@@ -25,14 +16,40 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Definir las rutas donde el carrito no debe ser accesible
   const excludedPaths = ["/carrito", "/previa"];
   const isCartAccessible = !excludedPaths.some(path => location.pathname.startsWith(path));
 
+  // Obtener todos los productos cuando el componente se monta
+  useEffect(() => {
+    fetch("http://localhost:3000/products")
+      .then(response => response.json())
+      .then(data => {
+        setAllProducts(data); // Guardar todos los productos
+      })
+      .catch(error => {
+        console.error("Error fetching products:", error);
+      });
+  }, []);
+
+  // Filtrar las sugerencias en función del término de búsqueda
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      const filtered = allProducts.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredSuggestions(filtered);
+    } else {
+      setFilteredSuggestions([]); // Limpiar sugerencias si no hay término de búsqueda
+    }
+  }, [searchTerm, allProducts]);
+
+  const handleProductClick = (product) => {
+    navigate(`/producto/${product.id}`);
+    setFilteredSuggestions([]); // Limpiar sugerencias después de hacer clic
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log("Searching for:", searchTerm);
-    // Aquí puedes agregar la lógica para manejar la búsqueda
   };
 
   const toggleCart = () => {
@@ -41,22 +58,20 @@ export default function Header() {
 
   const handleAccountClick = () => {
     if (currentUser) {
-      navigate('/cuenta'); // Cambiado a '/cuenta'
+      navigate('/cuenta');
     } else {
       navigate('/login');
     }
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    if (newQuantity >= 1) { // Aseguramos que la cantidad no sea menor que 1
+    if (newQuantity >= 1) {
       updateQuantity(productId, newQuantity);
     }
-    // No hacemos nada si newQuantity < 1, evitando así la eliminación del producto
   };
 
   const subtotal = cart.reduce((total, item) => total + (parseFloat(item.price) || 0) * item.quantity, 0);
 
-  // Efecto para cerrar el carrito al navegar a una ruta excluida
   useEffect(() => {
     if (!isCartAccessible && isCartOpen) {
       setIsCartOpen(false);
@@ -75,11 +90,26 @@ export default function Header() {
               placeholder="Buscar productos..."
               className="w-full py-2 pl-10 pr-4 text-gray-700 bg-white border rounded-full focus:outline-none focus:border-primary"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)} // Actualizar el término de búsqueda
             />
             <button type="submit" className="absolute inset-y-0 left-0 flex items-center pl-3">
               <Search className="w-5 h-5 text-gray-400" />
             </button>
+            
+            {/* Lista de sugerencias */}
+            {filteredSuggestions.length > 0 && (
+              <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-2 max-h-48 overflow-y-auto">
+                {filteredSuggestions.map((product) => (
+                  <li 
+                    key={product.id} 
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleProductClick(product)}
+                  >
+                    {product.name}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </form>
         
@@ -137,8 +167,8 @@ export default function Header() {
                       <button 
                         onClick={() => handleQuantityChange(item.id, item.quantity - 1)} 
                         className={`text-gray-500 hover:text-gray-700 ${item.quantity === 1 ? 'cursor-not-allowed opacity-50' : ''}`}
-                        disabled={item.quantity === 1} // Deshabilitamos el botón si la cantidad es 1
-                        aria-disabled={item.quantity === 1} // Mejora de accesibilidad
+                        disabled={item.quantity === 1}
+                        aria-disabled={item.quantity === 1}
                       >
                         <Minus className="h-4 w-4" />
                       </button>
@@ -149,7 +179,6 @@ export default function Header() {
                       >
                         <Plus className="h-4 w-4" />
                       </button>
-                      {/* Botón de Eliminación */}
                       <button 
                         onClick={() => removeFromCart(item.id)} 
                         className="text-gray-500 hover:text-red-500 ml-2" 
@@ -165,17 +194,12 @@ export default function Header() {
           </div>
           <div className="p-4 border-t">
             <div className="flex justify-between items-center mb-4">
-              <span className="font-semibold">Subtotal:</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span className="text-lg font-semibold">Subtotal</span>
+              <span className="text-lg font-semibold">${subtotal.toFixed(2)}</span>
             </div>
-            <button 
-              onClick={() => navigate('/previa')} 
-              disabled={cart.length === 0} // Deshabilitamos el botón si el carrito está vacío
-              aria-disabled={cart.length === 0} // Mejora de accesibilidad
-              className={`w-full bg-primary text-white py-2 px-4 rounded transition duration-200 ${cart.length === 0 ? 'opacity-50 cursor-not-allowed hover:bg-primary' : 'hover:bg-primary-dark'}`}
-            >
-              CHECKOUT
-            </button>
+            <button onClick={() => navigate("/previa")} className="bg-primary text-white w-full py-2 rounded hover:bg-blue-600">
+                Continuar a la Compra
+              </button>
           </div>
         </div>
       </div>

@@ -18,12 +18,14 @@ import { useCart } from "../context/CartContext";
 
 export default function HeaderCliente() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [allProducts, setAllProducts] = useState([]); // Almacena todos los productos
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]); // Almacena las sugerencias filtradas
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  
+
   const { currentUser, logoutUser } = useCrudContextForms();
   const { cart = [], updateQuantity, removeFromCart } = useCart();
-  
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,10 +33,39 @@ export default function HeaderCliente() {
   const excludedPaths = ["/carrito", "/previa"];
   const isCartAccessible = !excludedPaths.some(path => location.pathname.startsWith(path));
 
+  // Obtener todos los productos cuando el componente se monta
+  useEffect(() => {
+    fetch("http://localhost:3000/products")
+      .then(response => response.json())
+      .then(data => {
+        setAllProducts(data); // Guardar todos los productos
+      })
+      .catch(error => {
+        console.error("Error fetching products:", error);
+      });
+  }, []);
+
+  // Filtrar las sugerencias en función del término de búsqueda
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      const filtered = allProducts.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredSuggestions(filtered);
+    } else {
+      setFilteredSuggestions([]); // Limpiar sugerencias si no hay término de búsqueda
+    }
+  }, [searchTerm, allProducts]);
+
+  const handleProductClick = (product) => {
+    navigate(`/producto/${product.id}`);
+    setFilteredSuggestions([]); // Limpiar sugerencias después de hacer clic
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     console.log("Searching for:", searchTerm);
-    // Aquí puedes agregar la lógica para redirigir o buscar según el término.
+    // Lógica adicional para manejar la búsqueda (redirigir o mostrar resultados).
   };
 
   const toggleCart = () => {
@@ -49,16 +80,14 @@ export default function HeaderCliente() {
     }
   };
 
-  // Modificación: Redirige a la página de cuenta mostrando la sección "Pedidos"
   const handlePedidosClick = () => {
-    navigate('/cuenta?section=pedidos'); // Redirige a la cuenta directamente a la sección de pedidos
+    navigate('/cuenta?section=pedidos');
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    if (newQuantity >= 1) { // Aseguramos que la cantidad no sea menor que 1
+    if (newQuantity >= 1) {
       updateQuantity(productId, newQuantity);
     }
-    // No hacemos nada si newQuantity < 1, evitando así la eliminación del producto
   };
 
   const subtotal = cart.reduce((total, item) => total + (parseFloat(item.price) || 0) * item.quantity, 0);
@@ -70,14 +99,14 @@ export default function HeaderCliente() {
   const handleConfirmLogout = () => {
     logoutUser();
     setShowModal(false);
-    navigate('/login'); // Opcional: Redirige al usuario a la página de login
+    navigate('/login');
   };
 
   const handleCancelLogout = () => {
     setShowModal(false);
   };
 
-  // Efecto para cerrar el carrito al navegar a una ruta excluida
+  // Cerrar carrito al cambiar de ruta
   useEffect(() => {
     if (!isCartAccessible && isCartOpen) {
       setIsCartOpen(false);
@@ -91,7 +120,7 @@ export default function HeaderCliente() {
           <Link to="/homecli" className="text-xl font-bold text-primary">CyberCopias</Link>
         </div>
 
-        <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4">
+        <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4 relative">
           <div className="relative">
             <input
               type="text"
@@ -104,6 +133,20 @@ export default function HeaderCliente() {
               <Search className="w-5 h-5 text-gray-400" />
             </button>
           </div>
+              {/* Lista de sugerencias */}
+              {filteredSuggestions.length > 0 && (
+              <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-2 max-h-48 overflow-y-auto">
+                {filteredSuggestions.map((product) => (
+                  <li 
+                    key={product.id} 
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleProductClick(product)}
+                  >
+                    {product.name}
+                  </li>
+                ))}
+              </ul>
+            )}
         </form>
 
         <nav className="flex items-center space-x-6">
@@ -165,8 +208,8 @@ export default function HeaderCliente() {
         </div>
       )}
 
-      {/* Sidebar del carrito */}
-      <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
+     {/* Sidebar del carrito */}
+     <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
         <div className="flex flex-col h-full">
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="text-lg font-semibold">Carrito</h2>
@@ -192,8 +235,8 @@ export default function HeaderCliente() {
                       <button 
                         onClick={() => handleQuantityChange(item.id, item.quantity - 1)} 
                         className={`text-gray-500 hover:text-gray-700 ${item.quantity === 1 ? 'cursor-not-allowed opacity-50' : ''}`}
-                        disabled={item.quantity === 1} 
-                        aria-disabled={item.quantity === 1} 
+                        disabled={item.quantity === 1}
+                        aria-disabled={item.quantity === 1}
                       >
                         <Minus className="h-4 w-4" />
                       </button>
@@ -204,10 +247,9 @@ export default function HeaderCliente() {
                       >
                         <Plus className="h-4 w-4" />
                       </button>
-                      {/* Botón de Eliminación */}
                       <button 
                         onClick={() => removeFromCart(item.id)} 
-                        className="text-red-500 hover:text-red-700 ml-2" 
+                        className="text-gray-500 hover:text-red-500 ml-2" 
                         aria-label={`Eliminar ${item.name} del carrito`}
                       >
                         <Trash className="h-4 w-4" />
@@ -219,13 +261,13 @@ export default function HeaderCliente() {
             )}
           </div>
           <div className="p-4 border-t">
-            <h3 className="text-lg font-semibold">Subtotal: ${subtotal.toFixed(2)}</h3>
-            <button 
-              onClick={() => navigate('/checkout')} 
-              className="w-full bg-primary text-white py-2 rounded mt-2 hover:bg-primary-dark"
-            >
-              Proceder a la compra
-            </button>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-semibold">Subtotal</span>
+              <span className="text-lg font-semibold">${subtotal.toFixed(2)}</span>
+            </div>
+            <button onClick={() => navigate("/previa")} className="bg-primary text-white w-full py-2 rounded hover:bg-blue-600">
+                Continuar a la Compra
+              </button>
           </div>
         </div>
       </div>
