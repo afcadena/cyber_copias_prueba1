@@ -321,8 +321,9 @@
       "password": "password456",
       "confirmpassword": "password456",
       "role": "cliente",
-      "direccion": "",
-      "telefono": ""
+      "direccion": "cra 89A bis #87a27",
+      "telefono": "32537482343",
+      "casa": "casa"
     },
     {
       "id": "3",
@@ -333,7 +334,8 @@
       "confirmpassword": "password789",
       "role": "cliente",
       "direccion": "",
-      "telefono": ""
+      "telefono": "",
+      "casa": ""
     },
     {
       "id": "4",
@@ -353,7 +355,8 @@
       "confirmpassword": "password654",
       "role": "cliente",
       "direccion": "",
-      "telefono": ""
+      "telefono": "",
+      "casa": ""
     },
     {
       "id": "1725411403084",
@@ -363,7 +366,8 @@
       "password": "1013112289Fe@",
       "role": "cliente",
       "direccion": "",
-      "telefono": ""
+      "telefono": "",
+      "casa": ""
     },
     {
       "id": "1725411693460",
@@ -373,7 +377,8 @@
       "password": "123456789Se#",
       "role": "cliente",
       "direccion": "",
-      "telefono": ""
+      "telefono": "",
+      "casa": ""
     },
     {
       "id": "1725491302910",
@@ -383,7 +388,8 @@
       "password": "123456789Pe#",
       "role": "cliente",
       "direccion": "",
-      "telefono": ""
+      "telefono": "",
+      "casa": ""
     },
     {
       "id": "1725492944879",
@@ -393,7 +399,8 @@
       "password": "Alek122334.",
       "role": "cliente",
       "direccion": "",
-      "telefono": ""
+      "telefono": "",
+      "casa": ""
     },
     {
       "id": "10",
@@ -412,7 +419,8 @@
       "password": "Password123#",
       "role": "cliente",
       "direccion": "",
-      "telefono": ""
+      "telefono": "",
+      "casa": ""
     },
     {
       "id": "1727488929900",
@@ -422,7 +430,8 @@
       "password": "123456789Fe@",
       "role": "cliente",
       "direccion": "",
-      "telefono": ""
+      "telefono": "",
+      "casa": ""
     }
   ],
   "providers": [
@@ -508,73 +517,34 @@
       ]
     },
     {
-      "id": "ae5d",
-      "cliente": "María Gómez",
-      "fecha": "2024-09-16",
+      "id": "5db0",
+      "cliente": "María  Gómez",
+      "fecha": "2024-10-01",
       "estado": "En proceso",
-      "total": 1780,
+      "total": 10785,
       "products": [
         {
-          "id": "1",
           "name": "Sobres x 5 Fifa Copa América 2024 PANINI 23204",
-          "quantity": 4,
-          "price": "325",
-          "stock": "35"
+          "quantity": 1,
+          "price": "325"
         },
         {
-          "id": "2",
           "name": "Resma tamaño carta x500 hojas DISPAPELES",
-          "quantity": 3,
-          "price": "160",
-          "stock": 50
-        }
-      ]
-    },
-    {
-      "id": "02e8",
-      "cliente": "María Gómez",
-      "fecha": "2024-09-16",
-      "estado": "En proceso",
-      "total": 1780,
-      "products": [
-        {
-          "id": "1",
-          "name": "Sobres x 5 Fifa Copa América 2024 PANINI 23204",
-          "quantity": 4,
-          "price": "325",
-          "stock": "35"
+          "quantity": 1,
+          "price": "160"
         },
         {
-          "id": "2",
-          "name": "Resma tamaño carta x500 hojas DISPAPELES",
-          "quantity": 3,
-          "price": "160",
-          "stock": 50
+          "name": "ALBUM RETAIL COPA AMERICA 2024 PANINI",
+          "quantity": 1,
+          "price": "10300"
         }
-      ]
-    },
-    {
-      "id": "66ee",
-      "cliente": "María Gómez",
-      "fecha": "2024-09-16",
-      "estado": "En proceso",
-      "total": 1780,
-      "products": [
-        {
-          "id": "1",
-          "name": "Sobres x 5 Fifa Copa América 2024 PANINI 23204",
-          "quantity": 4,
-          "price": "325",
-          "stock": "35"
-        },
-        {
-          "id": "2",
-          "name": "Resma tamaño carta x500 hojas DISPAPELES",
-          "quantity": 3,
-          "price": "160",
-          "stock": 50
-        }
-      ]
+      ],
+      "shippingDetails": {
+        "direccion": "cra 89A bis #87a27",
+        "casa": "casa",
+        "telefono": "32537482343",
+        "state": "Bogotá"
+      }
     }
   ],
   "compras": [

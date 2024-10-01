@@ -37,7 +37,8 @@ const CrudProvider = ({ children }) => {
         id: String(Date.now()),  // Generar id como cadena
         role: "cliente",
         direccion: "",  // Agregar campo vacio
-        telefono: ""    // Agregar campo vacio
+        telefono: ""  ,
+        casa:""  // Agregar campo vacio
       };
 
       const res = await api.post(url, { body: newUserData, headers: { "content-type": "application/json" } });

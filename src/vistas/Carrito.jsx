@@ -7,41 +7,41 @@ import { Input } from "@/components/ui/input";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useCrudContextForms } from "../context/CrudContextForms";
-import axios from 'axios';
+import { useCrudContextPedidos } from "../context/CrudContextPedidos"; // Importa el contexto de pedidos
+import axios from 'axios'; // Asegúrate de tener axios instalado
 
 export default function CarritoDeCompras() {
   const { cart, clearCart } = useCart();
-  const { currentUser } = useCrudContextForms();
+  const { currentUser, updateUser } = useCrudContextForms(); // Asegúrate de que `updateUser` está disponible
+  const { createData: createPedido } = useCrudContextPedidos(); // Desestructura la función para crear pedidos
   const [isOpen, setIsOpen] = useState(false);
-  const [showMessage, setShowMessage] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: "",  // Se inicializan vacíos
-    surname: "",  // Se inicializan vacíos
-    address: "",
-    apartment: "",
+    name: "",
+    surname: "",
+    direccion: "",      // Cambiado de address a direccion
+    casa: "",           // Cambiado de apartment a casa
     state: "Bogotá",
-    phone: "",
+    telefono: "",       // Cambiado de phone a telefono
   });
   const [formErrors, setFormErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false); // Para manejar el estado de envío
 
   useEffect(() => {
     if (currentUser && currentUser.role === "cliente") {
-      setIsAuthenticated(true);
-
       // Cargar valores de currentUser si están presentes
-      setFormData({
-        ...formData,
+      setFormData((prevState) => ({
+        ...prevState,
         name: currentUser?.name || "", 
-        surname: currentUser?.surname || "",  // Ahora surname se carga correctamente
-      });
-    } else {
-      setIsAuthenticated(false);
+        surname: currentUser?.surname || "",
+        direccion: currentUser?.direccion || "",    // Cargar direccion
+        casa: currentUser?.casa || "",              // Cargar casa
+        telefono: currentUser?.telefono || "",      // Cargar telefono
+      }));
     }
-  }, [currentUser, cart]);
+  }, [currentUser]); // Eliminado 'cart' de las dependencias, ya que no afecta la autenticación
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -57,17 +57,17 @@ export default function CarritoDeCompras() {
     switch (fieldName) {
       case "name":
       case "surname":
-      case "address":
-      case "apartment":
+      case "direccion":
+      case "casa":
         errors[fieldName] = value
           ? ""
-          : `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} es requerido`;
+          : `${capitalize(fieldName)} es requerido`;
         break;
-      case "phone":
-        errors.phone = value
-          ? /^[3][0-9]{9}$/.test(value)
+      case "telefono":
+        errors.telefono = value
+          ? /^3\d{10}$/.test(value)
             ? ""
-            : "Teléfono inválido (10 dígitos, comenzando con 3)"
+            : "Teléfono inválido (11 dígitos, comenzando con 3)"
           : "Teléfono es requerido";
         break;
       default:
@@ -75,6 +75,8 @@ export default function CarritoDeCompras() {
     }
     setFormErrors(errors);
   };
+
+  const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
   const subtotal = cart.reduce((total, producto) => {
     const price = parseFloat(producto.price) || 0;
@@ -85,52 +87,73 @@ export default function CarritoDeCompras() {
   const total = subtotal;
 
   const handleFinalizarCompra = () => {
-    if (!isAuthenticated) {
-      setShowMessage(true);
+    // Validar los campos del formulario
+    const isFormValid = Object.values(formErrors).every((x) => x === "") &&
+                        Object.values(formData).every((x) => x !== "");
+
+    if (!currentUser || currentUser.role !== "cliente") {
+      // Redirigir al usuario a la página de inicio de sesión si no está autenticado
+      navigate("/login"); // Asegúrate de que esta ruta sea correcta en tu aplicación
+      return;
+    }
+
+    if (isFormValid) {
+      setIsOpen(true);
     } else {
-      if (
-        Object.values(formErrors).every((x) => x === "") &&
-        Object.values(formData).every((x) => x !== "")
-      ) {
-        setIsOpen(true);
-      } else {
-        setShowMessage(true);
-      }
+      // Validar todos los campos nuevamente para mostrar errores
+      Object.keys(formData).forEach((field) => {
+        validateField(field, formData[field]);
+      });
     }
   };
 
   const handleConfirmPurchase = async () => {
+    setIsSubmitting(true);
     const products = cart.map((product) => ({
-      id: product.id,
       name: product.name,
       quantity: product.quantity,
-      price: product.price,
-      stock: product.stock,
+      price: product.price.toString(), // Asegurarse de que sea string para coincidir con el ejemplo
     }));
 
-    const order = {
-      cliente: currentUser.name,
+    const pedido = {
+      cliente: `${currentUser.name} ${currentUser.surname}`, // Combina nombre y apellido
       fecha: new Date().toISOString().split("T")[0],
       estado: "En proceso",
       total: total,
       products: products,
-      shippingDetails: formData,
+      shippingDetails: {
+        direccion: formData.direccion,
+        casa: formData.casa,
+        telefono: formData.telefono,
+        state: formData.state,
+      },
     };
 
     try {
-      await axios.post("http://localhost:3000/pedidos", order);
-      await Promise.all(
-        products.map(async (product) => {
-          const newStock = product.stock - product.quantity;
-          if (newStock >= 0) {
-            await axios.patch(`http://localhost:3000/products/${product.id}`, {
-              stock: newStock,
-            });
-          } else {
-            console.error(`Stock insuficiente para el producto: ${product.name}`);
-          }
-        })
-      );
+      // Crear el pedido
+      await createPedido(pedido); // Utiliza el contexto para crear el pedido
+
+      // Actualizar los datos del usuario si están vacíos o si han cambiado
+      const updatedUserData = {};
+      if (!currentUser.direccion || currentUser.direccion !== formData.direccion) {
+        updatedUserData.direccion = formData.direccion;
+      }
+      if (!currentUser.casa || currentUser.casa !== formData.casa) {
+        updatedUserData.casa = formData.casa;
+      }
+      if (!currentUser.telefono || currentUser.telefono !== formData.telefono) {
+        updatedUserData.telefono = formData.telefono;
+      }
+
+      if (Object.keys(updatedUserData).length > 0) {
+        // Si hay datos para actualizar, realiza la solicitud
+        await axios.patch(`http://localhost:3000/users/${currentUser.id}`, updatedUserData);
+
+        // Opcional: Actualizar el contexto de usuario si tienes una función para hacerlo
+        if (updateUser) {
+          updateUser(updatedUserData);
+        }
+      }
 
       setIsOpen(false);
       setShowSuccessModal(true);
@@ -138,15 +161,20 @@ export default function CarritoDeCompras() {
       setTimeout(() => {
         setShowSuccessModal(false);
         clearCart();
-      }, 10000);
+        navigate("/cuenta"); // Redirigir al usuario a la página principal o donde prefieras
+      }, 5000); // Reducido a 5 segundos para mejor experiencia de usuario
     } catch (error) {
-      console.error("Error al procesar la compra o actualizar el stock:", error);
+      console.error("Error al procesar la compra o actualizar los datos del usuario:", error);
+      alert("Ocurrió un error al procesar tu pedido. Por favor, intenta nuevamente.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleCloseSuccessModal = () => {
     clearCart();
     setShowSuccessModal(false);
+    navigate("/cuenta?section=pedidos"); // Redirigir al usuario después de cerrar el modal de éxito
   };
 
   return (
@@ -160,7 +188,7 @@ export default function CarritoDeCompras() {
               <CardTitle className="text-2xl">Información de Entrega</CardTitle>
             </CardHeader>
             <CardContent>
-              <form className="space-y-6">
+              <form className="space-y-6" noValidate>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label
@@ -176,6 +204,7 @@ export default function CarritoDeCompras() {
                       value={formData.name}
                       onChange={handleInputChange}
                       className="w-full"
+                      required
                     />
                     {formErrors.name && (
                       <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
@@ -195,107 +224,120 @@ export default function CarritoDeCompras() {
                       value={formData.surname}
                       onChange={handleInputChange}
                       className="w-full"
+                      required
                     />
                     {formErrors.surname && (
                       <p className="text-red-500 text-xs mt-1">{formErrors.surname}</p>
                     )}
                   </div>
                 </div>
-                  <div>
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-                    <Input id="address" name="address" placeholder="Dirección" value={formData.address} onChange={handleInputChange} className="w-full" />
-                    {formErrors.address && <p className="text-red-500 text-xs mt-1">{formErrors.address}</p>}
+                <div>
+                  <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                  <Input
+                    id="direccion"
+                    name="direccion"
+                    placeholder="Dirección"
+                    value={formData.direccion}
+                    onChange={handleInputChange}
+                    className="w-full"
+                    required
+                  />
+                  {formErrors.direccion && <p className="text-red-500 text-xs mt-1">{formErrors.direccion}</p>}
+                </div>
+                <div>
+                  <label htmlFor="casa" className="block text-sm font-medium text-gray-700 mb-1">Casa, apartamento, etc.</label>
+                  <Input
+                    id="casa"
+                    name="casa"
+                    placeholder="Casa, apartamento, etc."
+                    value={formData.casa}
+                    onChange={handleInputChange}
+                    className="w-full"
+                    required
+                  />
+                  {formErrors.casa && <p className="text-red-500 text-xs mt-1">{formErrors.casa}</p>}
+                </div>
+                <div>
+                  <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md">
+                      +57
+                    </span>
+                    <Input 
+                      id="telefono"
+                      name="telefono" 
+                      placeholder="Teléfono" 
+                      value={formData.telefono} 
+                      onChange={handleInputChange} 
+                      className="rounded-l-none"
+                      required
+                    />
                   </div>
-                  <div>
-                    <label htmlFor="apartment" className="block text-sm font-medium text-gray-700 mb-1">Casa, apartamento, etc.</label>
-                    <Input id="apartment" name="apartment" placeholder="Casa, apartamento, etc." value={formData.apartment} onChange={handleInputChange} className="w-full" />
-                    {formErrors.apartment && <p className="text-red-500 text-xs mt-1">{formErrors.apartment}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md">
-                        +57
-                      </span>
-                      <Input 
-                        id="phone"
-                        name="phone" 
-                        placeholder="Teléfono" 
-                        value={formData.phone} 
-                        onChange={handleInputChange} 
-                        className="rounded-l-none"
-                      />
-                    </div>
-                    {formErrors.phone && <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>}
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-            <Card className="bg-[#1a2b4a] text-white shadow-lg flex flex-col">
-              <CardHeader>
-                <CardTitle className="text-2xl">Resumen del Pedido</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow overflow-y-auto">
-                <div className="space-y-4">
-                  {cart.map((producto) => (
-                    <div key={producto.id} className="flex justify-between items-center border-b border-gray-600 pb-4">
-                      <div className="flex items-center space-x-4">
-                        <img src={producto.imageUrl} alt={producto.name} className="w-16 h-16 object-cover rounded" />
-                        <div>
-                          <p className="font-semibold">{producto.name}</p>
-                          <p className="font-semibold">Cantidad: {producto.quantity}</p>
-                        </div>
+                  {formErrors.telefono && <p className="text-red-500 text-xs mt-1">{formErrors.telefono}</p>}
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+          <Card className="bg-[#1a2b4a] text-white shadow-lg flex flex-col">
+            <CardHeader>
+              <CardTitle className="text-2xl">Resumen del Pedido</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-grow overflow-y-auto">
+              <div className="space-y-4">
+                {cart.map((producto) => (
+                  <div key={producto.id} className="flex justify-between items-center border-b border-gray-600 pb-4">
+                    <div className="flex items-center space-x-4">
+                      <img src={producto.imageUrl} alt={producto.name} className="w-16 h-16 object-cover rounded" />
+                      <div>
+                        <p className="font-semibold">{producto.name}</p>
+                        <p className="font-semibold">Cantidad: {producto.quantity}</p>
                       </div>
-                      <p className="font-semibold">$ {producto.price.toLocaleString('es-CO')}</p>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between items-center">
-                <p className="font-semibold">Total</p>
-                <p className="font-semibold">$ {total.toLocaleString('es-CO')}</p>
-              </CardFooter>
-              <div className="p-4">
-                <Button onClick={handleFinalizarCompra} className="w-full">Finalizar Compra</Button>
+                    <p className="font-semibold">$ {parseFloat(producto.price).toLocaleString('es-CO')}</p>
+                  </div>
+                ))}
               </div>
-            </Card>
+            </CardContent>
+            <CardFooter className="flex justify-between items-center">
+              <p className="font-semibold">Total</p>
+              <p className="font-semibold">$ {total.toLocaleString('es-CO')}</p>
+            </CardFooter>
+            <div className="p-4">
+              <Button onClick={handleFinalizarCompra} className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Procesando..." : "Finalizar Compra"}
+              </Button>
+            </div>
+          </Card>
+        </div>
+        {/* Modal de Confirmación de Compra */}
+        {isOpen && (
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Confirmar Compra</h2>
+              <p className="mb-4">¿Estás seguro de que deseas finalizar la compra?</p>
+              <div className="flex justify-end space-x-4">
+                <Button onClick={() => setIsOpen(false)} variant="outline">Cancelar</Button>
+                <Button onClick={handleConfirmPurchase} disabled={isSubmitting}>
+                  {isSubmitting ? "Confirmando..." : "Confirmar"}
+                </Button>
+              </div>
+            </div>
           </div>
-          {showMessage && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">¡Atención!</h2>
-                <p className="mb-4">Debes iniciar sesión para continuar con la compra.</p>
-                <div className="flex justify-end">
-                  <Button onClick={() => setShowMessage(false)}>Cerrar</Button>
-                </div>
+        )}
+        {/* Modal de Éxito */}
+        {showSuccessModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">¡Éxito!</h2>
+              <p className="mb-4">Tu pedido se ha realizado con éxito.</p>
+              <div className="flex justify-end">
+                <Button onClick={handleCloseSuccessModal}>Cerrar</Button>
               </div>
             </div>
-          )}
-          {isOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Confirmar Compra</h2>
-                <p className="mb-4">¿Estás seguro de que deseas finalizar la compra?</p>
-                <div className="flex justify-end space-x-4">
-                  <Button onClick={() => setIsOpen(false)} variant="outline">Cancelar</Button>
-                  <Button onClick={handleConfirmPurchase}>Confirmar</Button>
-                </div>
-              </div>
-            </div>
-          )}
-          {showSuccessModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">¡Éxito!</h2>
-                <p className="mb-4">Tu pedido se ha realizado con éxito.</p>
-                <div className="flex justify-end">
-                  <Button onClick={handleCloseSuccessModal}>Cerrar</Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+          </div>
+        )}
+      </main>
+      <Footer />
+    </div>
+  );
+}

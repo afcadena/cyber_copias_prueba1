@@ -125,7 +125,7 @@ export default function CartPreview() {
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onClick={handleContinuePurchase}>
-                CONTINUAR COMPRA
+                Realizar pedido
               </Button>
               <div className="flex justify-between mt-4">
                 <div className="flex flex-col items-center">
