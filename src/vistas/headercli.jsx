@@ -85,8 +85,16 @@ export default function HeaderCliente() {
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    if (newQuantity >= 1) {
-      updateQuantity(productId, newQuantity);
+    const product = allProducts.find(p => p.id === productId);
+  
+    if (product) {
+      if (newQuantity <= product.stock) {
+        if (newQuantity >= 1) {
+          updateQuantity(productId, newQuantity);
+        }
+      }
+    } else {
+      console.error("Producto no encontrado");
     }
   };
 
@@ -169,10 +177,7 @@ export default function HeaderCliente() {
               )}
             </button>
           )}
-          <Link to="/favoritos" className="flex flex-col items-center hover:text-primary">
-            <Heart className="h-5 w-5" />
-            <span className="text-xs mt-1">Favoritos</span>
-          </Link>
+
           <button onClick={handleAccountClick} className="flex flex-col items-center hover:text-primary">
             <User className="h-5 w-5" />
             <span className="text-xs mt-1">Cuenta</span>
@@ -242,8 +247,9 @@ export default function HeaderCliente() {
                       </button>
                       <span className="text-sm">{item.quantity}</span>
                       <button 
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)} 
+                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                         className="text-gray-500 hover:text-gray-700"
+                        disabled={item.quantity >= item.stock}  // Desactivar el botón si se alcanza el stock
                       >
                         <Plus className="h-4 w-4" />
                       </button>

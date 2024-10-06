@@ -93,10 +93,6 @@ export default function ProductDetail() {
                   <ShoppingCartIcon className="w-4 h-4 mr-2" />
                   Agregar al carrito
                 </Button>
-                <Button variant="outline">
-                  <HeartIcon className="w-4 h-4 mr-2" />
-                  Guardar
-                </Button>
               </div>
               <Badge variant="outline" className="mb-4">Envío gratis</Badge>
             </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useContext, createContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { User, MapPin, Package, Edit } from "lucide-react";
+import { User, MapPin, Package, Edit, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,17 +46,64 @@ const CuentaProvider = ({ children }) => {
   );
 };
 
-// Modal para actualizar el perfil
-const UpdateProfileModal = ({ email, telefono, onUpdate, onClose }) => {
+const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) => {
   const { updateUser } = useCrudContextForms();
+
+  // Depuración: verificar los valores de las props
+  console.log("UpdateProfileModal - email:", email);
+  console.log("UpdateProfileModal - telefono:", telefono);
+
+  // Inicializar newTelefono sin el prefijo '57' si está presente
+  const initialTelefono = (telefono && typeof telefono === 'string' && telefono.startsWith('57')) 
+    ? telefono.slice(2) 
+    : (telefono || '');
+
   const [newEmail, setNewEmail] = useState(email);
-  const [newTelefono, setNewTelefono] = useState(telefono);
+  const [newTelefono, setNewTelefono] = useState(initialTelefono);
+  const [phoneError, setPhoneError] = useState("");
+
+  // Función para validar el número de teléfono
+  const validatePhone = (phone) => {
+    const regex = /^3\d{10}$/; // Debe comenzar con '3' y tener 11 dígitos
+    return regex.test(phone);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Actualizando perfil:", { email: newEmail, telefono: newTelefono }); // Depuración
-    await updateUser({ email: newEmail, telefono: newTelefono });
-    onClose();
+    console.log("Actualizando perfil:", { email: newEmail, telefono: `57${newTelefono}` });
+
+    // Validar el teléfono antes de enviar
+    if (!validatePhone(newTelefono)) {
+      setPhoneError("El teléfono debe comenzar con '3' y tener exactamente 11 dígitos.");
+      return;
+    } else {
+      setPhoneError("");
+    }
+
+    // Combina los datos existentes con los nuevos
+    const result = await updateUser({
+      email: newEmail,
+      telefono: `57${newTelefono}` // Almacenar con el prefijo '57'
+    });
+
+    if (result) {
+      onUpdate({ email: newEmail, telefono: `57${newTelefono}` });
+      onClose();
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    // Permitir solo números
+    if (/^\d*$/.test(value)) {
+      setNewTelefono(value);
+      // Validar en tiempo real
+      if (validatePhone(value)) {
+        setPhoneError("");
+      } else {
+        setPhoneError("El teléfono debe comenzar con '3' y tener exactamente 11 dígitos.");
+      }
+    }
   };
 
   return (
@@ -65,42 +112,65 @@ const UpdateProfileModal = ({ email, telefono, onUpdate, onClose }) => {
         <DialogTitle>Actualizar perfil</DialogTitle>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Campo de Email */}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
+            type="email"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             required
           />
         </div>
+
+        {/* Campo de Teléfono con Prefijo +57 */}
         <div className="space-y-2">
           <Label htmlFor="telefono">Teléfono</Label>
-          <Input
-            id="telefono"
-            value={newTelefono}
-            onChange={(e) => setNewTelefono(e.target.value)}
-            required
-          />
+          <div className="flex items-center">
+            <span className="mr-2 text-gray-700">+57</span>
+            <Input
+              id="telefono"
+              type="text"
+              value={newTelefono}
+              onChange={handlePhoneChange}
+              required
+              maxLength={11} // Limitar a 11 dígitos
+              placeholder="Ej: 31234567890" // Placeholder más informativo
+              className={phoneError ? "input-error" : ""}
+            />
+          </div>
+          {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
         </div>
-        <Button type="submit">Guardar cambios</Button>
+
+        {/* Botón de Envío */}
+        <Button type="submit" disabled={phoneError !== "" || newTelefono.length !== 11}>
+          Guardar cambios
+        </Button>
       </form>
     </DialogContent>
   );
 };
 
-// Modal para actualizar la dirección
 const UpdateAddressModal = ({ address, onUpdate, onClose }) => {
   const { updateUser } = useCrudContextForms();
   const [newAddress, setNewAddress] = useState(address);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Actualizando dirección:", newAddress); // Depuración
-    await updateUser({ direccion: newAddress });
-    onClose();
-  };
+    console.log("Actualizando dirección:", newAddress);
+    
+    const result = await updateUser({
+      direccion: newAddress
+    });
 
+    if (result) {
+      onUpdate({ direccion: newAddress }); // Llama a onUpdate aquí
+      onClose(); // Cerrar el modal después de la actualización
+    }
+  };
+  
+  
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
@@ -122,6 +192,7 @@ const UpdateAddressModal = ({ address, onUpdate, onClose }) => {
   );
 };
 
+
 // Componente para mostrar y editar el perfil del usuario
 const ProfileContent = () => {
   const { userData, setUserData } = useContext(CuentaContext);
@@ -132,8 +203,12 @@ const ProfileContent = () => {
   }
 
   const handleUpdate = (newData) => {
-    setUserData({ ...userData, ...newData });
+    setUserData((prevUserData) => ({
+      ...prevUserData,
+      ...newData, // Combina el objeto anterior con el nuevo
+    }));
   };
+
 
   return (
     <Card>
@@ -142,17 +217,18 @@ const ProfileContent = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>Nombre</Label>
+          <Label>Nombres</Label>
           <p>{userData.name}</p>
         </div>
         <div className="space-y-2">
-          <Label>Apellido</Label>
+          <Label>Apellidos</Label>
           <p>{userData.surname}</p>
         </div>
         <div className="space-y-2">
           <Label>Email</Label>
           <p>{userData.email}</p>
         </div>
+        
         <div className="space-y-2">
           <Label>Teléfono</Label>
           <p>{userData.telefono}</p>
@@ -168,9 +244,9 @@ const ProfileContent = () => {
           <UpdateProfileModal
             email={userData.email}
             telefono={userData.telefono}
-            onUpdate={handleUpdate}
+            onUpdate={handleUpdate} // Asegúrate de que esta función maneje correctamente la actualización
             onClose={() => setIsDialogOpen(false)}
-          />
+        />
         </Dialog>
       </CardFooter>
     </Card>
@@ -187,35 +263,67 @@ const AddressesContent = () => {
   }
 
   const handleUpdate = (newData) => {
-    setUserData({ ...userData, ...newData });
+    setUserData((prevUserData) => ({
+      ...prevUserData,
+      ...newData, // Combina el objeto anterior con el nuevo
+    }));
   };
 
-  console.log("Dirección actual:", userData.direccion); // Depuración
+  const addresses = userData.direccion ? [userData.direccion] : [];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Direcciones de Envío</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>{userData.direccion || "No has agregado una dirección."}</p>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline">
-              <Edit className="mr-2 h-5 w-5" /> Editar
-            </Button>
-          </DialogTrigger>
-          <UpdateAddressModal
-            address={userData.direccion}
-            onUpdate={handleUpdate}
-            onClose={() => setIsDialogOpen(false)}
-          />
-        </Dialog>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col py-5">
+      <Card className="flex-grow">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Direcciones de Envío</span>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild></DialogTrigger>
+              <UpdateAddressModal
+                address=""
+                onUpdate={handleUpdate}
+                onClose={() => setIsDialogOpen(false)}
+              />
+            </Dialog>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {addresses.length > 0 ? (
+            addresses.map((address, index) => (
+              <div key={index} className="mb-4 p-4 border rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start">
+                    <MapPin className="mr-2 h-5 w-5 text-gray-500 mt-1" />
+                    <div>
+                      <p className="font-medium">Dirección principal</p>
+                      <p className="text-sm text-gray-600">{address}</p>
+                    </div>
+                  </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <UpdateAddressModal
+                      address={address}
+                      onUpdate={handleUpdate}
+                      onClose={() => {}}
+                    />
+                  </Dialog>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500">
+              No has agregado una dirección.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
-};
-
+          };  
 // Componente para mostrar los pedidos del usuario
 const OrdersContent = () => {
   const { userData } = useContext(CuentaContext); // Usamos el contexto para obtener los datos del usuario
@@ -300,6 +408,7 @@ export default function Cuenta() {
   const [activeSection, setActiveSection] = useState('perfil');
   const { currentUser } = useCrudContextForms();
   const [userData, setUserData] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const location = useLocation(); // Para manejar parámetros de consulta
   const navigate = useNavigate(); // Para redirecciones
@@ -313,6 +422,7 @@ export default function Cuenta() {
         telefono: currentUser.telefono || "",
         direccion: currentUser.direccion || ""
       });
+      setLoading(false);  // Detenemos el estado de carga
     }
   }, [currentUser]);
 

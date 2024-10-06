@@ -11,10 +11,7 @@
       "rating": 0,
       "reviews": 0,
       "stock": 31,
-      "status": "active",
-      "image": [
-        "https://exitocol.vteximg.com.br/arquivos/ids/20970023/Resma-Carta-500-Hojas-541782_a.jpg"
-      ]
+      "status": "active"
     },
     {
       "id": "2",
@@ -317,12 +314,12 @@
       "id": "2",
       "name": "María ",
       "surname": "Gómez",
-      "email": "maria.gomez@example.com",
+      "email": "maria.gomez@example.co",
       "password": "password456",
       "confirmpassword": "password456",
       "role": "cliente",
-      "direccion": "cra 89A bis #87a27",
-      "telefono": "32537482343",
+      "direccion": "cra 90A bis #87a27",
+      "telefono": "5730229604106",
       "casa": "casa"
     },
     {

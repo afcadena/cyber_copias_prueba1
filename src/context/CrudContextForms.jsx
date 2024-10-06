@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { helpHttp } from "../helpers/helpHttp";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 export const CrudContextForms = createContext();
 
@@ -31,14 +32,13 @@ const CrudProvider = ({ children }) => {
 
   const registerUser = async (userData) => {
     try {
-      // Asegurarse de que el id sea una cadena y los campos vacíos estén incluidos
       const newUserData = {
         ...userData,
         id: String(Date.now()),  // Generar id como cadena
         role: "cliente",
         direccion: "",  // Agregar campo vacio
-        telefono: ""  ,
-        casa:""  // Agregar campo vacio
+        telefono: "", 
+        casa: ""  // Agregar campo vacio
       };
 
       const res = await api.post(url, { body: newUserData, headers: { "content-type": "application/json" } });
@@ -95,6 +95,26 @@ const CrudProvider = ({ children }) => {
     localStorage.setItem("currentUser", JSON.stringify(updatedUser));
   };
 
+  const updateUser = async (updatedData) => {
+    try {
+      const response = await axios.patch(`http://localhost:3000/users/${currentUser.id}`, updatedData, {
+        headers: { "Content-Type": "application/json" }
+      });
+  
+      if (response.data) {
+        const updatedUser = { ...currentUser, ...response.data };
+        setCurrentUser(updatedUser);
+        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+        console.log("Usuario actualizado:", updatedUser);
+      }
+    } catch (error) {
+      console.error("Error actualizando usuario:", error);
+      setError(error);
+    }
+  };
+  
+  
+
   const data = {
     db,
     error,
@@ -104,6 +124,7 @@ const CrudProvider = ({ children }) => {
     currentUser,
     currentUserAddress,
     updateUserAddress,
+    updateUser,
   };
 
   return (

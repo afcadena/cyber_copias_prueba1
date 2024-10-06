@@ -2,14 +2,16 @@ import React from 'react';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear(); // Define currentYear aquí
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-800 text-white">
+    <footer className="bg-gray-800 text-white w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <h3 className="text-lg font-semibold mb-4">Acerca de CyberCopias</h3>
-          <p className="text-sm">Somos tu tienda de confianza para todas tus necesidades de papelería y material de oficina.</p>
+          <p className="text-sm">
+            Somos tu tienda de confianza para todas tus necesidades de papelería y material de oficina.
+          </p>
         </div>
         <div>
           <h3 className="text-lg font-semibold mb-4">Enlaces Rápidos</h3>
@@ -46,6 +48,6 @@ const Footer = () => {
       </div>
     </footer>
   );
-}
+};
 
 export default Footer;
