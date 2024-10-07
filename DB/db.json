@@ -470,7 +470,7 @@
       "id": "pedido-1728336837074",
       "cliente": "María  Gómez",
       "fecha": "2024-10-07",
-      "estado": "En proceso",
+      "estado": "En Proceso",
       "total": 200875,
       "products": [
         {
@@ -497,6 +497,46 @@
           "name": "Marcadores Dobles Set De 80 Colores Base De Alcohol",
           "quantity": 1,
           "price": "119900"
+        }
+      ],
+      "shippingDetails": {
+        "direccion": "cra 90A bis #87a27",
+        "casa": "casa",
+        "telefono": "5731455667892",
+        "state": "Bogotá"
+      }
+    },
+    {
+      "id": "pedido-1728337814929",
+      "cliente": "María  Gómez",
+      "fecha": "2024-10-07",
+      "estado": "En proceso",
+      "total": 160,
+      "products": [
+        {
+          "name": "Resma tamaño carta x500 hojas DISPAPELES",
+          "quantity": 1,
+          "price": "160"
+        }
+      ],
+      "shippingDetails": {
+        "direccion": "cra 90A bis #87a27",
+        "casa": "casa",
+        "telefono": "5731455667892",
+        "state": "Bogotá"
+      }
+    },
+    {
+      "id": "pedido-1728338731839",
+      "cliente": "María  Gómez",
+      "fecha": "2024-10-07",
+      "estado": "En proceso",
+      "total": 1200,
+      "products": [
+        {
+          "name": "Bolígrafo Kilométrico 100 Negro",
+          "quantity": 1,
+          "price": "1200"
         }
       ],
       "shippingDetails": {
