@@ -4,22 +4,44 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, Trash2, Search } from 'lucide-react'; // Eliminado 'Edit' y 'Plus'
+import { Package, Trash2, Edit2, Search } from 'lucide-react'; // Añadido 'Edit2' para icono de editar
 import { useCrudContextPedidos } from "../context/CrudContextPedidos";
 
 export default function GestionPedidos() {
-  const { db: pedidos, deleteData, error, loading } = useCrudContextPedidos();
+  const { db: pedidos, updateData, deleteData, error, loading } = useCrudContextPedidos();
 
   const [searchTerm, setSearchTerm] = useState('');
-  
+  const [isEditStatusOpen, setIsEditStatusOpen] = useState(false);
+  const [currentPedido, setCurrentPedido] = useState(null);
+
   // Función para manejar la eliminación de un pedido con confirmación
   const handleDeletePedido = (pedido) => {
-    const confirm = window.confirm(`¿Estás seguro de que deseas cancelar el pedido #${pedido.id}?`);
-    if (confirm) {
+    const confirmDelete = window.confirm(`¿Estás seguro de que deseas cancelar el pedido #${pedido.id}?`);
+    if (confirmDelete) {
       deleteData(pedido.id);
     }
+  };
+
+  // Función para abrir el modal de edición de estado
+  const handleEditStatus = (pedido) => {
+    setCurrentPedido(pedido);
+    setIsEditStatusOpen(true);
+  };
+
+  // Función para manejar la actualización del estado del pedido
+  const handleStatusUpdate = (event) => {
+    event.preventDefault();
+    const form = event.target;
+    const updatedPedido = {
+      ...currentPedido,
+      estado: form.estado.value
+    };
+    updateData(updatedPedido);
+    setIsEditStatusOpen(false);
+    setCurrentPedido(null);
   };
 
   // Función para filtrar pedidos según el término de búsqueda
@@ -80,8 +102,16 @@ export default function GestionPedidos() {
                 </div>
               </CardContent>
               <CardFooter className="bg-muted mt-auto">
-                <div className="flex justify-end w-full">
-                  {/* Botón "Editar Estado" eliminado */}
+                <div className="flex justify-end w-full space-x-2">
+                  {/* Botón "Editar Estado" */}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleEditStatus(pedido)}
+                  >
+                    <Edit2 className="mr-2 h-4 w-4" /> Editar Estado
+                  </Button>
+                  {/* Botón "Cancelar Pedido" */}
                   <Button 
                     variant="destructive" 
                     size="sm" 
@@ -98,9 +128,32 @@ export default function GestionPedidos() {
         )}
       </div>
 
-      {/* Modal para Crear/Editar Pedido eliminado */}
-      {/* Modal para Editar Estado del Pedido eliminado */}
-      {/* Modal de Confirmación para Cancelar Pedido eliminado */}
+      {/* Modal para Editar Estado del Pedido */}
+      <Dialog open={isEditStatusOpen} onOpenChange={setIsEditStatusOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Estado del Pedido</DialogTitle>
+          </DialogHeader>
+          {currentPedido && (
+            <form onSubmit={handleStatusUpdate} className="space-y-4">
+              <div>
+                <Label htmlFor="estado">Estado</Label>
+                <Select id="estado" name="estado" defaultValue={currentPedido.estado} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pendiente">Pendiente</SelectItem>
+                    <SelectItem value="En proceso">En proceso</SelectItem>
+                    <SelectItem value="Entregado">Entregado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full">Actualizar Estado</Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
