@@ -314,11 +314,11 @@
       "id": "2",
       "name": "María ",
       "surname": "Gómez",
-      "email": "maria.gomez@example.co",
+      "email": "maria.gomez@example.com",
       "password": "password456",
       "confirmpassword": "password456",
       "role": "cliente",
-      "direccion": "cra 91A bis #87a27",
+      "direccion": "cra 90A bis #87a27",
       "telefono": "5731455667892",
       "casa": "casa"
     },

@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useContext, createContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { User, MapPin, Package, Edit, Plus } from "lucide-react";
+import { User, MapPin, Package, Edit2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -35,6 +35,7 @@ const CuentaProvider = ({ children }) => {
         ...currentUser,
         name: currentUser.name ? currentUser.name.trim() : "",
         surname: currentUser.surname ? currentUser.surname.trim() : "",
+        // email and telefono are spread via ...currentUser
       });
     }
   }, [currentUser]);
@@ -46,12 +47,9 @@ const CuentaProvider = ({ children }) => {
   );
 };
 
+// Modal para actualizar el perfil del usuario
 const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) => {
   const { updateUser } = useCrudContextForms();
-
-  // Depuración: verificar los valores de las props
-  console.log("UpdateProfileModal - email:", email);
-  console.log("UpdateProfileModal - telefono:", telefono);
 
   // Inicializar newTelefono sin el prefijo '57' si está presente
   const initialTelefono = (telefono && typeof telefono === 'string' && telefono.startsWith('57')) 
@@ -70,7 +68,6 @@ const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) =>
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Actualizando perfil:", { email: newEmail, telefono: `57${newTelefono}` });
 
     // Validar el teléfono antes de enviar
     if (!validatePhone(newTelefono)) {
@@ -152,14 +149,14 @@ const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) =>
   );
 };
 
+// Modal para actualizar la dirección del usuario
 const UpdateAddressModal = ({ address, onUpdate, onClose }) => {
   const { updateUser } = useCrudContextForms();
   const [newAddress, setNewAddress] = useState(address);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Actualizando dirección:", newAddress);
-    
+
     const result = await updateUser({
       direccion: newAddress
     });
@@ -169,7 +166,6 @@ const UpdateAddressModal = ({ address, onUpdate, onClose }) => {
       onClose(); // Cerrar el modal después de la actualización
     }
   };
-  
   
   return (
     <DialogContent className="sm:max-w-[425px]">
@@ -192,14 +188,13 @@ const UpdateAddressModal = ({ address, onUpdate, onClose }) => {
   );
 };
 
-
 // Componente para mostrar y editar el perfil del usuario
 const ProfileContent = () => {
   const { userData, setUserData } = useContext(CuentaContext);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  if (!userData) {
-    return <div>Loading...</div>;
+  if (!userData || !userData.email) {
+    return <div>Cargando...</div>;
   }
 
   const handleUpdate = (newData) => {
@@ -208,7 +203,6 @@ const ProfileContent = () => {
       ...newData, // Combina el objeto anterior con el nuevo
     }));
   };
-
 
   return (
     <Card>
@@ -240,15 +234,15 @@ const ProfileContent = () => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline">
-              <Edit className="mr-2 h-4 w-4" /> Editar
+              <Edit2 className="mr-2 h-4 w-4" /> Editar
             </Button>
           </DialogTrigger>
           <UpdateProfileModal
             email={userData.email}
             telefono={userData.telefono}
-            onUpdate={handleUpdate} // Asegúrate de que esta función maneje correctamente la actualización
+            onUpdate={handleUpdate}
             onClose={() => setIsDialogOpen(false)}
-        />
+          />
         </Dialog>
       </CardFooter>
     </Card>
@@ -261,7 +255,7 @@ const AddressesContent = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   if (!userData) {
-    return <div>Loading...</div>;
+    return <div>Cargando...</div>;
   }
 
   const handleUpdate = (newData) => {
@@ -280,7 +274,11 @@ const AddressesContent = () => {
           <CardTitle className="flex items-center justify-between">
             <span>Direcciones de Envío</span>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild></DialogTrigger>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
               <UpdateAddressModal
                 address=""
                 onUpdate={handleUpdate}
@@ -304,13 +302,13 @@ const AddressesContent = () => {
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
+                        <Edit2 className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
                     <UpdateAddressModal
                       address={address}
                       onUpdate={handleUpdate}
-                      onClose={() => {}}
+                      onClose={() => setIsDialogOpen(false)}
                     />
                   </Dialog>
                 </div>
@@ -325,7 +323,8 @@ const AddressesContent = () => {
       </Card>
     </div>
   );
-          };  
+};
+
 // Componente para mostrar los pedidos del usuario
 const OrdersContent = () => {
   const { userData } = useContext(CuentaContext); // Usamos el contexto para obtener los datos del usuario
@@ -407,26 +406,19 @@ const OrdersContent = () => {
 
 // Componente principal de la cuenta
 export default function Cuenta() {
+  return (
+    <CuentaProvider>
+      <CuentaContent />
+    </CuentaProvider>
+  );
+}
+
+const CuentaContent = () => {
+  const { userData } = useContext(CuentaContext); // Obtener userData desde el contexto
   const [activeSection, setActiveSection] = useState('perfil');
-  const { currentUser } = useCrudContextForms();
-  const [userData, setUserData] = useState({});
-  const [loading, setLoading] = useState(true);
 
   const location = useLocation(); // Para manejar parámetros de consulta
   const navigate = useNavigate(); // Para redirecciones
-
-  useEffect(() => {
-    if (currentUser) {
-      setUserData({
-        name: currentUser.name?.trim() || "",
-        surname: currentUser.surname?.trim() || "",
-        email: currentUser.email || "",
-        telefono: currentUser.telefono || "",
-        direccion: currentUser.direccion || ""
-      });
-      setLoading(false);  // Detenemos el estado de carga
-    }
-  }, [currentUser]);
 
   // Actualiza activeSection según el parámetro de consulta 'section'
   useEffect(() => {
@@ -437,54 +429,54 @@ export default function Cuenta() {
     }
   }, [location.search]); // Vuelve a ejecutar el efecto si cambia el query string
 
+  if (!userData || !userData.email) {
+    return <div>Cargando...</div>;
+  }
+
   return (
-    <CuentaProvider>
-      <div className="min-h-screen bg-background">
-        <HeaderCli /> {/* Reemplazamos el header antiguo con el nuevo HeaderCli */}
+    <div className="min-h-screen bg-background">
+      <HeaderCli /> {/* Reemplazamos el header antiguo con el nuevo HeaderCli */}
 
-        <main className="container mx-auto py-6 px-4 flex flex-col md:flex-row">
-          <div className="md:w-1/3 mb-6 md:mb-0">
-            <h1 className="text-3xl font-bold mb-6">¡Hola, {userData.name}!</h1>
+      <main className="container mx-auto py-6 px-4 flex flex-col md:flex-row">
+        <div className="md:w-1/3 mb-6 md:mb-0">
+          <h1 className="text-3xl font-bold mb-6">¡Hola, {userData.name}!</h1>
 
-            <nav className="space-y-2">
-              <Button
-                variant={activeSection === 'perfil' ? "default" : "ghost"}
-                className="w-full justify-start text-lg"
-                onClick={() => setActiveSection('perfil')}
-              >
-                <User className="mr-2 h-5 w-5" />
-                Perfil
-              </Button>
-              <Button
-                variant={activeSection === 'direcciones' ? "default" : "ghost"}
-                className="w-full justify-start text-lg"
-                onClick={() => setActiveSection('direcciones')}
-              >
-                <MapPin className="mr-2 h-5 w-5" />
-                Direcciones
-              </Button>
-              <Button
-                variant={activeSection === 'pedidos' ? "default" : "ghost"}
-                className="w-full justify-start text-lg"
-                onClick={() => setActiveSection('pedidos')}
-              >
-                <Package className="mr-2 h-5 w-5" />
-                Pedidos
-              </Button>
-            </nav>
-          </div>
+          <nav className="space-y-2">
+            <Button
+              variant={activeSection === 'perfil' ? "default" : "ghost"}
+              className="w-full justify-start text-lg"
+              onClick={() => setActiveSection('perfil')}
+            >
+              <User className="mr-2 h-5 w-5" />
+              Perfil
+            </Button>
+            <Button
+              variant={activeSection === 'direcciones' ? "default" : "ghost"}
+              className="w-full justify-start text-lg"
+              onClick={() => setActiveSection('direcciones')}
+            >
+              <MapPin className="mr-2 h-5 w-5" />
+              Direcciones
+            </Button>
+            <Button
+              variant={activeSection === 'pedidos' ? "default" : "ghost"}
+              className="w-full justify-start text-lg"
+              onClick={() => setActiveSection('pedidos')}
+            >
+              <Package className="mr-2 h-5 w-5" />
+              Pedidos
+            </Button>
+          </nav>
+        </div>
 
-          <div className="md:w-2/3 md:pl-6">
-            {activeSection === 'perfil' && <ProfileContent />}
-            {activeSection === 'direcciones' && <AddressesContent />}
-            {activeSection === 'pedidos' && <OrdersContent />}
-          </div>
-        </main>
+        <div className="md:w-2/3 md:pl-6">
+          {activeSection === 'perfil' && <ProfileContent />}
+          {activeSection === 'direcciones' && <AddressesContent />}
+          {activeSection === 'pedidos' && <OrdersContent />}
+        </div>
+      </main>
 
-        <Footer /> {/* Usa el componente Footer importado aquí */}
-      </div>
-    </CuentaProvider>
+      <Footer /> {/* Usa el componente Footer importado aquí */}
+    </div>
   );
 }
-
-export { CuentaProvider };
