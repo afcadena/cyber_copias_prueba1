@@ -7,11 +7,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, Trash2, Edit2, Search } from 'lucide-react'; // Añadido 'Edit2' para icono de editar
+import { Package, Trash2, Edit2, Search } from 'lucide-react';
 import { useCrudContextPedidos } from "../context/CrudContextPedidos";
+import { useProducts } from "../context/CrudContextInventario"; // Importa el hook para productos
 
 export default function GestionPedidos() {
   const { db: pedidos, updateData, deleteData, error, loading } = useCrudContextPedidos();
+  const { db: products, loading: loadingProducts } = useProducts(); // Obtén los productos desde el contexto de inventario
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isEditStatusOpen, setIsEditStatusOpen] = useState(false);
@@ -54,8 +56,19 @@ export default function GestionPedidos() {
 
   const filteredPedidos = pedidos.filter(filterPedidos);
 
+// Función para obtener la imagen del producto basado en el nombre del producto
+const getProductImageByName = (productName) => {
+  const product = products.find(p => p.name === productName); // Busca el producto por nombre
+  if (product && product.imageUrl && product.imageUrl.length > 0) {
+    return product.imageUrl[0];
+  }
+  // Imagen de respaldo si no se encuentra
+  return "https://via.placeholder.com/64";
+};
+
   return (
     <div className="container mx-auto p-4">
+      {/* Encabezado */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestión de Pedidos</h1>
         <div className="flex items-center space-x-4">
@@ -72,56 +85,75 @@ export default function GestionPedidos() {
         </div>
       </div>
 
+      {/* Mensajes de Error y Carga */}
       {error && <p className="text-red-500">Hubo un error: {error.statusText}</p>}
       {loading && <p>Cargando pedidos...</p>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Lista de Pedidos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPedidos.length > 0 ? (
           filteredPedidos.map((pedido) => (
-            <Card key={pedido.id} className="overflow-hidden flex flex-col">
-              <CardHeader className="bg-primary text-primary-foreground">
-                <CardTitle className="flex justify-between items-center">
-                  <span>Pedido #{pedido.id}</span>
-                  <Package className="h-6 w-6" />
-                </CardTitle>
-                <CardDescription className="text-primary-foreground/80">{pedido.fecha}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1 pt-6">
-                <p><strong>Cliente:</strong> {pedido.cliente}</p>
-                <p><strong>Estado:</strong> {pedido.estado}</p>
-                <p><strong>Total:</strong> ${pedido.total.toFixed(2)}</p>
-                <div className="mt-4">
-                  <strong>Productos:</strong>
-                  <ul className="list-disc list-inside">
-                    {pedido.products && pedido.products.map((product, index) => (
-                      <li key={index}>
-                        {product.name} - Cantidad: {product.quantity}, Precio: ${parseFloat(product.price || 0).toFixed(2)}
-                      </li>
-                    ))}
-                  </ul>
+          <Card key={pedido.id} className="overflow-hidden flex flex-col shadow-md">
+            {/* Cabecera del Pedido */}
+            <CardHeader className="bg-primary text-primary-foreground">
+              <CardTitle className="flex justify-between items-center">
+                <span>Pedido #{pedido.id}</span>
+                <Package className="h-6 w-6" />
+              </CardTitle>
+              <CardDescription className="text-primary-foreground/80">{pedido.fecha}</CardDescription>
+            </CardHeader>
+
+            {/* Contenido del Pedido */}
+            <CardContent className="flex-1 pt-6">
+              <p><strong>Cliente:</strong> {pedido.cliente}</p>
+              <p><strong>Estado:</strong> {pedido.estado}</p>
+              <p><strong>Total:</strong> ${parseFloat(pedido.total || 0).toFixed(2)}</p>
+
+              {/* Lista de Productos */}
+              <div className="mt-4">
+                <strong>Productos:</strong>
+                <div className="mt-2 space-y-4">
+                  {pedido.products && pedido.products.map((product, index) => (
+                    <div key={index} className="flex items-center space-x-4">
+                      {/* Imagen del Producto */}
+                      <img 
+                        src={getProductImageByName(product.name)} 
+                        alt={product.name} 
+                        className="w-16 h-16 object-cover rounded-md border"
+                        loading="lazy"
+                      />
+                      {/* Detalles del Producto */}
+                      <div>
+                        <p className="font-medium">{product.name}</p>
+                        <p className="text-sm text-gray-500">Cantidad: {product.quantity}</p>
+                        <p className="text-sm text-gray-500">Precio: ${parseFloat(product.price || 0).toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-              <CardFooter className="bg-muted mt-auto">
-                <div className="flex justify-end w-full space-x-2">
-                  {/* Botón "Editar Estado" */}
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleEditStatus(pedido)}
-                  >
-                    <Edit2 className="mr-2 h-4 w-4" /> Editar Estado
-                  </Button>
-                  {/* Botón "Cancelar Pedido" */}
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    onClick={() => handleDeletePedido(pedido)}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> Cancelar Pedido
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
+              </div>
+            </CardContent>
+
+            {/* Pie del Pedido */}
+            <CardFooter className="bg-muted mt-auto">
+              <div className="flex justify-end w-full space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleEditStatus(pedido)}
+                >
+                  <Edit2 className="mr-2 h-4 w-4" /> Editar Estado
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={() => handleDeletePedido(pedido)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Cancelar Pedido
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
           ))
         ) : (
           <p className="col-span-full text-center text-gray-500">No hay pedidos que mostrar.</p>

@@ -467,11 +467,11 @@
   ],
   "pedidos": [
     {
-      "id": "5db0",
+      "id": "pedido-1728336837074",
       "cliente": "María  Gómez",
-      "fecha": "2024-10-01",
+      "fecha": "2024-10-07",
       "estado": "En proceso",
-      "total": 10785,
+      "total": 200875,
       "products": [
         {
           "name": "Sobres x 5 Fifa Copa América 2024 PANINI 23204",
@@ -487,12 +487,22 @@
           "name": "ALBUM RETAIL COPA AMERICA 2024 PANINI",
           "quantity": 1,
           "price": "10300"
+        },
+        {
+          "name": "Plumígrafos punta media 0.7mm vintage x24",
+          "quantity": 1,
+          "price": "70190"
+        },
+        {
+          "name": "Marcadores Dobles Set De 80 Colores Base De Alcohol",
+          "quantity": 1,
+          "price": "119900"
         }
       ],
       "shippingDetails": {
-        "direccion": "cra 89A bis #87a27",
+        "direccion": "cra 90A bis #87a27",
         "casa": "casa",
-        "telefono": "32537482343",
+        "telefono": "5731455667892",
         "state": "Bogotá"
       }
     }

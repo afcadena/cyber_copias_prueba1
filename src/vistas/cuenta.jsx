@@ -480,3 +480,5 @@ const CuentaContent = () => {
     </div>
   );
 }
+
+export { CuentaProvider };

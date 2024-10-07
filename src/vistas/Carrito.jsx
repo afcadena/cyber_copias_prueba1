@@ -109,13 +109,18 @@ export default function CarritoDeCompras() {
 
   const handleConfirmPurchase = async () => {
     setIsSubmitting(true);
+  
     const products = cart.map((product) => ({
       name: product.name,
       quantity: product.quantity,
-      price: product.price.toString(), // Asegurarse de que sea string para coincidir con el ejemplo
+      price: product.price.toString(),
     }));
-
+  
+    // Genera un ID para el pedido (puede ser generado localmente o del lado del servidor)
+    const pedidoId = `pedido-${Date.now()}`; // Un ID único simple basado en el tiempo
+  
     const pedido = {
+      id: pedidoId,  // Agregamos el ID al pedido
       cliente: `${currentUser.name} ${currentUser.surname}`, // Combina nombre y apellido
       fecha: new Date().toISOString().split("T")[0],
       estado: "En proceso",
@@ -128,12 +133,12 @@ export default function CarritoDeCompras() {
         state: formData.state,
       },
     };
-
+  
     try {
-      // Crear el pedido
-      await createPedido(pedido); // Utiliza el contexto para crear el pedido
-
-      // Actualizar los datos del usuario si están vacíos o si han cambiado
+      // Crear el pedido usando el contexto
+      await createPedido(pedido);
+  
+      // Actualizar datos del usuario si es necesario
       const updatedUserData = {};
       if (!currentUser.direccion || currentUser.direccion !== formData.direccion) {
         updatedUserData.direccion = formData.direccion;
@@ -144,25 +149,22 @@ export default function CarritoDeCompras() {
       if (!currentUser.telefono || currentUser.telefono !== formData.telefono) {
         updatedUserData.telefono = formData.telefono;
       }
-
+  
       if (Object.keys(updatedUserData).length > 0) {
-        // Si hay datos para actualizar, realiza la solicitud
         await axios.patch(`http://localhost:3000/users/${currentUser.id}`, updatedUserData);
-
-        // Opcional: Actualizar el contexto de usuario si tienes una función para hacerlo
         if (updateUser) {
           updateUser(updatedUserData);
         }
       }
-
+  
       setIsOpen(false);
       setShowSuccessModal(true);
-
+  
       setTimeout(() => {
         setShowSuccessModal(false);
         clearCart();
-        navigate("/cuenta"); // Redirigir al usuario a la página principal o donde prefieras
-      }, 5000); // Reducido a 5 segundos para mejor experiencia de usuario
+        navigate(`/cuenta?section=pedidos&pedidoId=${pedidoId}`); // Redirige pasando el ID del pedido
+      }, 5000);
     } catch (error) {
       console.error("Error al procesar la compra o actualizar los datos del usuario:", error);
       alert("Ocurrió un error al procesar tu pedido. Por favor, intenta nuevamente.");
@@ -170,7 +172,7 @@ export default function CarritoDeCompras() {
       setIsSubmitting(false);
     }
   };
-
+    
   const handleCloseSuccessModal = () => {
     clearCart();
     setShowSuccessModal(false);
