@@ -231,7 +231,9 @@ const ProfileContent = () => {
         
         <div className="space-y-2">
           <Label>Teléfono</Label>
-          <p>{userData.telefono}</p>
+          <p>
+            +57 {userData.telefono ? userData.telefono.slice(2) : ""}
+          </p>
         </div>
       </CardContent>
       <CardFooter>

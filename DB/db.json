@@ -318,8 +318,8 @@
       "password": "password456",
       "confirmpassword": "password456",
       "role": "cliente",
-      "direccion": "cra 90A bis #87a27",
-      "telefono": "5730229604106",
+      "direccion": "cra 91A bis #87a27",
+      "telefono": "5731455667892",
       "casa": "casa"
     },
     {
@@ -466,53 +466,6 @@
     }
   ],
   "pedidos": [
-    {
-      "id": "9d78",
-      "cliente": "Julian Romero",
-      "fecha": "2024-09-14",
-      "estado": "En proceso",
-      "total": 640,
-      "products": [
-        {
-          "name": "Resma tamaño carta x500 hojas DISPAPELES",
-          "quantity": 4,
-          "price": "160"
-        }
-      ]
-    },
-    {
-      "id": "c890",
-      "cliente": "Julian Prieto",
-      "fecha": "2024-09-14",
-      "estado": "En proceso",
-      "total": 80490,
-      "products": [
-        {
-          "name": "ALBUM RETAIL COPA AMERICA 2024 PANINI",
-          "quantity": 1,
-          "price": 10300
-        },
-        {
-          "name": "Plumígrafos punta media 0.7mm vintage x24",
-          "quantity": 1,
-          "price": 70190
-        }
-      ]
-    },
-    {
-      "id": "db4b",
-      "cliente": "Julian Prieto",
-      "fecha": "2024-09-14",
-      "estado": "En proceso",
-      "total": 2200,
-      "products": [
-        {
-          "name": "Borrador Nata Grande PELIKAN",
-          "quantity": 2,
-          "price": 1100
-        }
-      ]
-    },
     {
       "id": "5db0",
       "cliente": "María  Gómez",

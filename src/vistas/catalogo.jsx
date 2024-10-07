@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom'; 
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,16 +9,18 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Checkbox } from "@/components/ui/checkbox";
 import { SearchIcon, ShoppingCartIcon, StarIcon } from 'lucide-react';
 
-import Header from "./header"; // Header normal
-import HeaderCliente from "./headerCli"; // Header para usuarios logueados
+import Header from "./header";
+import HeaderCliente from "./headerCli";
 import Footer from "./footer";
 
-import { useCrudContextForms } from "../context/CrudContextForms"; // Importar el contexto
-import { useCart } from '../context/CartContext'; // Importar el contexto del carrito
+import { useCrudContextForms } from "../context/CrudContextForms";
+import { useCart } from '../context/CartContext';
 
+// Define available categories
 const categories = ["Todos", "Escritura", "Cuadernos", "Papel", "Arte", "Accesorios", "Coleccionables"];
 
 export default function Catalog() {
+  // State declarations
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Todos");
@@ -26,29 +28,32 @@ export default function Catalog() {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
 
-  const navigate = useNavigate(); 
+  // Hooks
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const initialCategory = searchParams.get("category") || "Todos"; // Obtiene la categoría de la URL
+  const initialCategory = searchParams.get("category") || "Todos";
 
-  // Extraer currentUser del contexto de autenticación
   const { currentUser } = useCrudContextForms();
-
-  // Extraer funciones del contexto del carrito
   const { addToCart } = useCart();
 
+  const categoriesRef = useRef(null);
+  const mainContentRef = useRef(null);
+
+  // Effect to set initial category and scroll to top
   useEffect(() => {
-    setCategoryFilter(initialCategory); // Establece el filtro de categoría inicial
+    setCategoryFilter(initialCategory);
+    window.scrollTo(0, 0);
   }, [initialCategory]);
 
+  // Effect to fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch("http://localhost:3000/products");
-        if (!response.ok) { // Manejo de errores
+        if (!response.ok) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
-        console.log("Productos cargados:", data); // Depuración
         setProducts(data);
       } catch (error) {
         console.error("Error al cargar productos:", error);
@@ -57,108 +62,129 @@ export default function Catalog() {
     fetchProducts();
   }, []);
 
+  // Filter and sort products based on user selection
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (categoryFilter === "Todos" || product.category === categoryFilter)
   ).sort((a, b) => {
     if (sortOrder === "priceLowToHigh") return a.price - b.price;
     if (sortOrder === "priceHighToLow") return b.price - a.price;
+    if (sortOrder === "bestSellers") return b.sales - a.sales;
+    if (sortOrder === "newest") return new Date(b.releaseDate) - new Date(a.releaseDate);
     return 0;
   });
 
+  // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const handleProductClick = (product) => {
-    navigate(`/producto/${product.id}`); 
+  // Function to handle pagination
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
   };
 
-  useEffect(() => {
-    setCategoryFilter(initialCategory); // Establece el filtro de categoría inicial
-    window.scrollTo(0, 0); // Desplazar hacia arriba
-  }, [initialCategory]);
+  // Function to handle product click
+  const handleProductClick = (product) => {
+    navigate(`/producto/${product.id}`);
+  };
 
+  // Function to handle category change
   const handleCategoryChange = (category) => {
     setCategoryFilter(category);
-    setCurrentPage(1); // Resetea la página actual al seleccionar una categoría
-    window.scrollTo(0, 0); // Desplazar hacia arriba
+    setCurrentPage(1);
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
   };
 
+  // Function to handle adding product to cart
   const handleAddToCart = (product) => {
-    addToCart(product); // Agregar el producto al carrito
+    addToCart(product);
   };
 
-  console.log('Usuario actual:', currentUser); // Depuración
+  // Function to get product count for each category
+  const getCategoryProductCount = (category) => {
+    return products.filter(product => category === "Todos" || product.category === category).length;
+  };
 
   return (
-    <>
-      {/* Depuración del estado de autenticación */}
-      {console.log('User logged in:', currentUser ? true : false)}
+    <div className="flex flex-col min-h-screen">
+      {/* Header */}
       {currentUser ? <HeaderCliente /> : <Header />}
       
-      <div className="flex flex-col md:flex-row gap-8 p-6 bg-gray-100">
-        <aside className="md:w-64">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">Categorías</h3>
-            <ul className="space-y-2">
-              {categories.map((category) => (
-                <li key={category}>
-                  <div className="flex items-center">
-                    <Checkbox
-                      id={category}
-                      checked={categoryFilter === category}
-                      onCheckedChange={() => handleCategoryChange(category)}
-                    />
-                    <label htmlFor={category} className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      {category}
-                    </label>
-                  </div>
-                </li>
-              ))}
-            </ul>
+      <div className="flex-1 flex flex-col md:flex-row bg-gray-100">
+        {/* Sidebar with filters */}
+        <aside className="md:w-64 md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:overflow-y-auto bg-white p-6">
+          <h3 className="text-lg font-semibold mb-4">Filtros</h3>
+          <div className="mb-6">
+            <Input 
+              placeholder="Buscar productos..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+            />
           </div>
+          <h4 className="font-medium mb-2">Categorías</h4>
+          <ul className="space-y-2">
+            {categories.map((category) => (
+              <li key={category}>
+                <div className="flex items-center">
+                  <Checkbox
+                    id={category}
+                    checked={categoryFilter === category}
+                    onCheckedChange={() => handleCategoryChange(category)}
+                  />
+                  <label htmlFor={category} className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {category} ({getCategoryProductCount(category)})
+                  </label>
+                </div>
+              </li>
+            ))}
+          </ul>
         </aside>
 
-        <main className="flex-1">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
-              <div className="flex items-center w-full sm:w-auto">
-                <Input 
-                  placeholder="Buscar productos..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="max-w-sm"
-                />
-                <SearchIcon className="w-5 h-5 -ml-8 text-gray-500" />
+        {/* Main content area */}
+        <main className="flex-1 p-6" ref={mainContentRef}>
+          <div className="bg-white rounded-lg shadow-sm">
+            {/* Product count and sort options */}
+            <div className="p-6 flex justify-between items-center border-b">
+              <h2 className="text-lg font-semibold">
+                {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''} encontrado{filteredProducts.length !== 1 ? 's' : ''}
+                {categoryFilter !== "Todos" ? ` en ${categoryFilter}` : ''}
+              </h2>
+              <div className="flex items-center">
+                <Select value={sortOrder} onValueChange={setSortOrder}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recommended">Recomendados</SelectItem>
+                    <SelectItem value="priceHighToLow">Mayor precio</SelectItem>
+                    <SelectItem value="priceLowToHigh">Menor precio</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Select value={sortOrder} onValueChange={setSortOrder}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Ordenar por" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recommended">Recomendados</SelectItem>
-                  <SelectItem value="priceLowToHigh">Precio: Menor a Mayor</SelectItem>
-                  <SelectItem value="priceHighToLow">Precio: Mayor a Menor</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Product grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {currentProducts.map((product) => (
                 <Card 
                   key={product.id} 
-                  className="flex flex-col justify-between cursor-pointer"
+                  className="flex flex-col justify-between cursor-pointer group transition-transform duration-200 hover:scale-105"
                   onClick={() => handleProductClick(product)} 
                 >
-                  <CardHeader className="p-4">
+                  <div className="relative w-full">
                     <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-contain" />
-                  </CardHeader>
-                  <CardContent className="p-4">
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-200" />
+                  </div>
+                  <CardContent className="p-4 flex-grow">
                     <CardTitle className="text-sm font-medium line-clamp-2 mb-2">{product.name}</CardTitle>
+                    <p className="text-sm text-gray-500 mb-2">{product.author}</p>
                     <div className="flex items-center mb-2">
                       {[...Array(5)].map((_, i) => (
                         <StarIcon key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
@@ -179,40 +205,43 @@ export default function Catalog() {
             </div>
 
             {/* Pagination */}
-            <Pagination className="mt-8">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    href="#" 
-                    onClick={() => paginate(currentPage - 1)}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-                {[...Array(Math.ceil(filteredProducts.length / productsPerPage))].map((_, index) => (
-                  <PaginationItem key={index}>
-                    <PaginationLink 
+            <div className="p-6 border-t">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
                       href="#" 
-                      onClick={() => paginate(index + 1)}
-                      isActive={currentPage === index + 1}
-                    >
-                      {index + 1}
-                    </PaginationLink>
+                      onClick={() => paginate(currentPage - 1)}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
                   </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext 
-                    href="#" 
-                    onClick={() => paginate(currentPage + 1)}
-                    className={currentPage === Math.ceil(filteredProducts.length / productsPerPage) ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                  {[...Array(Math.ceil(filteredProducts.length / productsPerPage))].map((_, index) => (
+                    <PaginationItem key={index}>
+                      <PaginationLink 
+                        href="#" 
+                        onClick={() => paginate(index + 1)}
+                        isActive={currentPage === index + 1}
+                      >
+                        {index + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext 
+                      href="#" 
+                      onClick={() => paginate(currentPage + 1)}
+                      className={currentPage === Math.ceil(filteredProducts.length / productsPerPage) ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
         </main>
       </div>
 
+      {/* Footer */}
       <Footer />
-    </>
+    </div>
   );
 }

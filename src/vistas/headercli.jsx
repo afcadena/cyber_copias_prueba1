@@ -1,3 +1,5 @@
+// src/components/HeaderCliente.jsx
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -114,6 +116,15 @@ export default function HeaderCliente() {
     setShowModal(false);
   };
 
+  // Nueva función para manejar el clic en "Continuar a la Compra"
+  const handleContinueShopping = () => {
+    if (cart.length === 0) {
+      alert("El carrito está vacío. Añade productos para continuar la compra.");
+    } else {
+      navigate("/previa");
+    }
+  };
+
   // Cerrar carrito al cambiar de ruta
   useEffect(() => {
     if (!isCartAccessible && isCartOpen) {
@@ -141,20 +152,20 @@ export default function HeaderCliente() {
               <Search className="w-5 h-5 text-gray-400" />
             </button>
           </div>
-              {/* Lista de sugerencias */}
-              {filteredSuggestions.length > 0 && (
-              <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-2 max-h-48 overflow-y-auto">
-                {filteredSuggestions.map((product) => (
-                  <li 
-                    key={product.id} 
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleProductClick(product)}
-                  >
-                    {product.name}
-                  </li>
-                ))}
-              </ul>
-            )}
+          {/* Lista de sugerencias */}
+          {filteredSuggestions.length > 0 && (
+            <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-2 max-h-48 overflow-y-auto">
+              {filteredSuggestions.map((product) => (
+                <li 
+                  key={product.id} 
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleProductClick(product)}
+                >
+                  {product.name}
+                </li>
+              ))}
+            </ul>
+          )}
         </form>
 
         <nav className="flex items-center space-x-6">
@@ -271,9 +282,13 @@ export default function HeaderCliente() {
               <span className="text-lg font-semibold">Subtotal</span>
               <span className="text-lg font-semibold">${subtotal.toFixed(2)}</span>
             </div>
-            <button onClick={() => navigate("/previa")} className="bg-primary text-white w-full py-2 rounded hover:bg-blue-600">
-                Continuar a la Compra
-              </button>
+            <button 
+              onClick={handleContinueShopping} 
+              className={`bg-primary text-white w-full py-2 rounded ${cart.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
+              disabled={cart.length === 0}
+            >
+              Continuar a la Compra
+            </button>
           </div>
         </div>
       </div>
