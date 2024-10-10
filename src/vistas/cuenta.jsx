@@ -18,6 +18,7 @@ import Footer from "./footer";
 import { useCrudContextForms } from '../context/CrudContextForms';
 import HeaderCli from './headercli'; // Asegúrate de que la ruta sea correcta
 import axios from 'axios'; // Asegúrate de tener axios instalado
+import { useProducts } from "../context/CrudContextInventario";
 
 // Crear el contexto para la cuenta
 const CuentaContext = createContext();
@@ -275,9 +276,6 @@ const AddressesContent = () => {
             <span>Direcciones de Envío</span>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Plus className="h-4 w-4" />
-                </Button>
               </DialogTrigger>
               <UpdateAddressModal
                 address=""
@@ -327,16 +325,15 @@ const AddressesContent = () => {
 
 // Componente para mostrar los pedidos del usuario
 const OrdersContent = () => {
-  const { userData } = useContext(CuentaContext); // Usamos el contexto para obtener los datos del usuario
-  const [pedidos, setPedidos] = useState([]); // Aquí se almacenan los pedidos
+  const { userData } = useContext(CuentaContext);
+  const [pedidos, setPedidos] = useState([]);
+  const { db: products } = useProducts(); // Traer los productos del contexto
 
   useEffect(() => {
-    // Aquí haces una petición a tu API o base de datos para obtener los pedidos
     const fetchPedidos = async () => {
       try {
-        const response = await fetch('http://localhost:3000/pedidos'); // Cambia la URL a la de tu API
+        const response = await fetch('http://localhost:3000/pedidos');
         const data = await response.json();
-        console.log("Pedidos:", data); // Para verificar los pedidos
         setPedidos(data);
       } catch (error) {
         console.error("Error al obtener los pedidos:", error);
@@ -350,15 +347,17 @@ const OrdersContent = () => {
     return <div>Cargando...</div>;
   }
 
-  // Filtrar los pedidos por el cliente autenticado usando nombre completo
-  const nombreCompleto = `${userData.name} ${userData.surname}`.replace(/\s+/g, ' ').trim();
-  console.log("Nombre Completo para filtrar pedidos:", nombreCompleto); // Depuración
+  // Función para obtener la URL de la imagen del producto
+  const getProductImageByName = (productName) => {
+    const product = products.find(p => p.name === productName);
+    return product?.imageUrl?.[0] || "https://via.placeholder.com/64"; // URL por defecto si no se encuentra la imagen
+  };
 
+  const nombreCompleto = `${userData.name} ${userData.surname}`.replace(/\s+/g, ' ').trim();
+  
   const pedidosFiltrados = pedidos.filter(pedido => 
     pedido.cliente.replace(/\s+/g, ' ').trim() === nombreCompleto
   );
-
-  console.log("Pedidos Filtrados:", pedidosFiltrados); // Depuración
 
   return (
     <Card>
@@ -378,13 +377,23 @@ const OrdersContent = () => {
                 <p><strong>Total:</strong> ${pedido.total.toLocaleString('es-CO')}</p>
                 <div className="mt-4">
                   <strong>Productos:</strong>
-                  <ul className="list-disc list-inside">
+                  <div className="mt-2 space-y-4">
                     {pedido.products.map((product, index) => (
-                      <li key={index}>
-                        {product.name} - Cantidad: {product.quantity}, Precio: ${parseFloat(product.price).toLocaleString('es-CO')}
-                      </li>
+                      <div key={index} className="flex items-center space-x-4">
+                        <img 
+                          src={getProductImageByName(product.name)} 
+                          alt={product.name} 
+                          className="w-16 h-16 object-cover rounded-md border"
+                          loading="lazy"
+                        />
+                        <div>
+                          <p className="font-medium">{product.name}</p>
+                          <p className="text-sm text-gray-500">Cantidad: {product.quantity}</p>
+                          <p className="text-sm text-gray-500">Precio: ${parseFloat(product.price).toLocaleString('es-CO')}</p>
+                        </div>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
                 <div className="mt-4">
                   <strong>Detalles de Envío:</strong>
@@ -397,7 +406,7 @@ const OrdersContent = () => {
             </Card>
           ))
         ) : (
-          <p>No tienes pedidos recientes.</p>
+          <p>No hay pedidos para mostrar.</p>
         )}
       </CardContent>
     </Card>

@@ -470,7 +470,7 @@
       "id": "pedido-1728336837074",
       "cliente": "María  Gómez",
       "fecha": "2024-10-07",
-      "estado": "En Proceso",
+      "estado": "En preparación",
       "total": 200875,
       "products": [
         {
@@ -510,7 +510,7 @@
       "id": "pedido-1728337814929",
       "cliente": "María  Gómez",
       "fecha": "2024-10-07",
-      "estado": "En proceso",
+      "estado": "En preparación",
       "total": 160,
       "products": [
         {
@@ -530,7 +530,7 @@
       "id": "pedido-1728338731839",
       "cliente": "María  Gómez",
       "fecha": "2024-10-07",
-      "estado": "En proceso",
+      "estado": "En preparación",
       "total": 1200,
       "products": [
         {
