@@ -13,9 +13,11 @@ const CrudProvider = ({ children }) => {
   const api = helpHttp();
   const url = "http://localhost:3000/products";
 
-  useEffect(() => {
+  // Función para obtener todos los productos
+  const getData = async () => {
     setLoading(true);
-    api.get(url).then((res) => {
+    try {
+      const res = await api.get(url);
       if (!res.err) {
         setDb(res);
         setError(null);
@@ -23,44 +25,63 @@ const CrudProvider = ({ children }) => {
         setDb(null);
         setError(res);
       }
-      setLoading(false);
-    });
+    } catch (error) {
+      setError(error);
+      setDb(null);
+    }
+    setLoading(false);
+  };
+
+  // Obtener los datos al montar el componente
+  useEffect(() => {
+    getData();
   }, [url]);
 
-  const createData = (data) => {
-    data.id = Date.now();
+  // Función para crear un nuevo producto
+  const createData = async (data) => {
+    data.id = Date.now().toString(); // Asegurar que el ID es una cadena
+    // Asegurarnos de que imageUrl es un arreglo
+    if (typeof data.imageUrl === "string") {
+      data.imageUrl = [data.imageUrl];
+    }
+
     let options = {
       body: data,
       headers: { "content-type": "application/json" },
     };
 
-    api.post(url, options).then((res) => {
-      if (!res.err) {
-        setDb((prevDb) => [...prevDb, res]); // Utiliza el estado anterior
-      } else {
-        setError(res);
-      }
-    });
+    const res = await api.post(url, options);
+    if (!res.err) {
+      setDb((prevDb) => [...prevDb, res]); // Utiliza el estado anterior
+    } else {
+      setError(res);
+    }
   };
 
-  const updateData = (data) => {
+  // Función para actualizar un producto
+  const updateData = async (data) => {
     const endpoint = `${url}/${data.id}`;
+    // Asegurarnos de que imageUrl es un arreglo
+    if (typeof data.imageUrl === "string") {
+      data.imageUrl = [data.imageUrl];
+    }
+
     let options = {
       body: data,
       headers: { "content-type": "application/json" },
     };
 
-    api.put(endpoint, options).then((res) => {
-      if (!res.err) {
-        const newData = db.map((el) => (el.id === data.id ? data : el));
-        setDb(newData);
-      } else {
-        setError(res);
-      }
-    });
+    const res = await api.put(endpoint, options);
+    if (!res.err) {
+      const newData = db.map((el) => (el.id === data.id ? res : el));
+      setDb(newData);
+    } else {
+      setError(res);
+    }
   };
 
-  const deleteData = (id) => {
+  // Función para eliminar un producto
+  const deleteData = async (id) => {
     const isDelete = window.confirm(
       `¿Estás seguro de eliminar el registro con el id '${id}'?`
     );
@@ -71,14 +92,13 @@ const CrudProvider = ({ children }) => {
         headers: { "content-type": "application/json" },
       };
 
-      api.del(endpoint, options).then((res) => {
-        if (!res.err) {
-          const newData = db.filter((el) => el.id !== id);
-          setDb(newData);
-        } else {
-          setError(res);
-        }
-      });
+      const res = await api.del(endpoint, options);
+      if (!res.err) {
+        const newData = db.filter((el) => el.id !== id);
+        setDb(newData);
+      } else {
+        setError(res);
+      }
     }
   };
 
@@ -92,6 +112,7 @@ const CrudProvider = ({ children }) => {
     setDataToEdit,
     updateData,
     deleteData,
+    getData, // Exponer getData
   };
 
   return <CrudContext.Provider value={data}>{children}</CrudContext.Provider>;

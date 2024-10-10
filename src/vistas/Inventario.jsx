@@ -45,85 +45,90 @@
       }
     };
 
-const handleAddProduct = () => {
-  // Verificar si todos los campos están completos
-  if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newProduct.image) {
-    setErrorMessage("Todos los campos deben ser completados.");
-    setIsErrorDialogOpen(true);
-    return;
-  }
+    const handleAddProduct = () => {
+      if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newProduct.image) {
+        setErrorMessage("Todos los campos deben ser completados.");
+        setIsErrorDialogOpen(true);
+        return;
+      }
+    
+      const price = parseFloat(newProduct.price);
+      let stock = parseInt(newProduct.stock);
+    
+      if (isNaN(price) || price < 0) {
+        setErrorMessage("El precio debe ser un número positivo.");
+        setIsErrorDialogOpen(true);
+        return;
+      }
+    
+      if (isNaN(stock) || stock < 0) {
+        setErrorMessage("El stock debe ser un número entero positivo.");
+        setIsErrorDialogOpen(true);
+        return;
+      }
+    
+      // Si el stock es menor a 5, cambiar el estado a "low"
+      const status = stock < 5 ? "low" : "active";
+    
+      const productToAdd = {
+        ...newProduct,
+        id: Date.now(),
+        price,
+        stock,
+        status,
+        ratings: 0,
+        reviews: 0,
+      };
+    
+      createData(productToAdd);
+    
+      setNewProduct({
+        name: "",
+        category: "",
+        price: "",
+        stock: "",
+        status: "active",
+        image: "",
+      });
+    };
+    
 
-  // Verificar si el precio y el stock son números válidos y no negativos
-  const price = parseFloat(newProduct.price);
-  const stock = parseInt(newProduct.stock);
-
-  if (isNaN(price) || price < 0) {
-    setErrorMessage("El precio debe ser un número positivo.");
-    setIsErrorDialogOpen(true);
-    return;
-  }
-
-  if (isNaN(stock) || stock < 0) {
-    setErrorMessage("El stock debe ser un número entero positivo.");
-    setIsErrorDialogOpen(true);
-    return;
-  }
-
-  const productToAdd = {
-    ...newProduct,
-    id: Date.now(),
-    price,
-    stock,
-    status: "active",
-    ratings: 0,
-    reviews: 0,
-  };
-  createData(productToAdd);
-  setNewProduct({
-    name: "",
-    category: "",
-    price: "",
-    stock: "",
-    status: "active",
-    image: "",
-  });
-};
-
-const handleSaveEdit = () => {
-  if (editingProduct) {
-    if (!editingProduct.name || !editingProduct.category || !editingProduct.price || !editingProduct.stock || !editingProduct.image) {
-      setErrorMessage("Todos los campos deben ser completados.");
-      setIsErrorDialogOpen(true);
-      return;
-    }
-
-    // Verificar si el precio y el stock son números válidos y no negativos
-    const price = parseFloat(editingProduct.price);
-    const stock = parseInt(editingProduct.stock);
-
-    if (isNaN(price) || price < 0) {
-      setErrorMessage("El precio debe ser un número positivo.");
-      setIsErrorDialogOpen(true);
-      return;
-    }
-
-    if (isNaN(stock) || stock < 0) {
-      setErrorMessage("El stock debe ser un número entero positivo.");
-      setIsErrorDialogOpen(true);
-      return;
-    }
-
-    updateData({ ...editingProduct, price, stock });
-    setEditingProduct(null);
-    setIsSuccessDialogOpen(true);
-
-    setTimeout(() => {
-      setIsSuccessDialogOpen(false);
-    }, 2000);
-  }
-};
-
-
+    const handleSaveEdit = () => {
+      if (editingProduct) {
+        if (!editingProduct.name || !editingProduct.category || !editingProduct.price || !editingProduct.stock || !editingProduct.image) {
+          setErrorMessage("Todos los campos deben ser completados.");
+          setIsErrorDialogOpen(true);
+          return;
+        }
+    
+        const price = parseFloat(editingProduct.price);
+        let stock = parseInt(editingProduct.stock);
+    
+        if (isNaN(price) || price < 0) {
+          setErrorMessage("El precio debe ser un número positivo.");
+          setIsErrorDialogOpen(true);
+          return;
+        }
+    
+        if (isNaN(stock) || stock < 0) {
+          setErrorMessage("El stock debe ser un número entero positivo.");
+          setIsErrorDialogOpen(true);
+          return;
+        }
+    
+        // Si el stock es menor a 5, cambiar el estado a "low"
+        const status = stock < 5 ? "low" : "active";
+    
+        updateData({ ...editingProduct, price, stock, status });
+        setEditingProduct(null);
+        setIsSuccessDialogOpen(true);
+    
+        setTimeout(() => {
+          setIsSuccessDialogOpen(false);
+        }, 2000);
+      }
+    };
+    
     return (
       <div className="space-y-4 p-4 max-w-6xl mx-auto">
         <div className="flex justify-between items-center">

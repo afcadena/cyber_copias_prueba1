@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Package, Trash2, Edit2, Search } from 'lucide-react';
@@ -15,14 +15,21 @@ export default function GestionPedidos() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isEditStatusOpen, setIsEditStatusOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [currentPedido, setCurrentPedido] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newEstado, setNewEstado] = useState('');
 
   const handleDeletePedido = (pedido) => {
-    const confirmDelete = window.confirm(`¿Estás seguro de que deseas cancelar el pedido #${pedido.id}?`);
-    if (confirmDelete) {
-      deleteData(pedido.id);
+    setCurrentPedido(pedido);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const confirmDeletePedido = () => {
+    if (currentPedido) {
+      deleteData(currentPedido.id);
+      setIsDeleteConfirmOpen(false);
+      setCurrentPedido(null);
     }
   };
 
@@ -63,17 +70,15 @@ export default function GestionPedidos() {
     return product?.imageUrl?.[0] || "https://via.placeholder.com/64";
   };
 
-
   const formatPhoneNumber = (phoneNumber) => {
     if (phoneNumber.startsWith('57')) {
-      return phoneNumber.slice(2); // Elimina los dos primeros caracteres
+      return phoneNumber.slice(2);
     }
-    return phoneNumber; // Retorna el número original si no empieza con "57"
+    return phoneNumber;
   };
   
   return (
     <div className="container mx-auto p-4">
-      {/* Encabezado */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestión de Pedidos</h1>
         <div className="flex items-center space-x-4">
@@ -92,7 +97,6 @@ export default function GestionPedidos() {
       {error && <p className="text-red-500">Hubo un error: {error.statusText}</p>}
       {loading && <p>Cargando pedidos...</p>}
 
-      {/* Lista de Pedidos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPedidos.length > 0 ? (
           filteredPedidos.map((pedido) => (
@@ -125,58 +129,57 @@ export default function GestionPedidos() {
                   </Button>
                 </div>
               </CardFooter>
-
             </Card>
           ))
         ) : (
           <p className="col-span-full text-center text-gray-500">No hay pedidos que mostrar.</p>
         )}
       </div>
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-  <DialogContent className="max-w-md">
-    <DialogHeader>
-      <DialogTitle>Detalles del Pedido #{currentPedido?.id}</DialogTitle>
-    </DialogHeader>
-    {currentPedido && (
-      <div>
-        <p><strong>Cliente:</strong> {currentPedido.cliente}</p>
-        <p><strong>Estado:</strong> {currentPedido.estado}</p>
-        <p><strong>Total:</strong> ${parseFloat(currentPedido.total || 0).toFixed(2)}</p>
-        
-        {currentPedido.shippingDetails && (
-          <>
-            <p><strong>Dirección:</strong> {currentPedido.shippingDetails.direccion}</p>
-            <p><strong>Teléfono:</strong> {formatPhoneNumber(currentPedido.shippingDetails.telefono)}</p>
-            <p><strong>Casa:</strong> {currentPedido.shippingDetails.casa}</p>
-          </>
-        )}
 
-        <div className="mt-4">
-          <strong>Productos:</strong>
-          <div className="mt-2 space-y-4">
-            {currentPedido.products?.map((product, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <img 
-                  src={getProductImageByName(product.name)} 
-                  alt={product.name} 
-                  className="w-16 h-16 object-cover rounded-md border"
-                  loading="lazy"
-                />
-                <div>
-                  <p className="font-medium">{product.name}</p>
-                  <p className="text-sm text-gray-500">Cantidad: {product.quantity}</p>
-                  <p className="text-sm text-gray-500">Precio: ${parseFloat(product.price || 0).toFixed(2)}</p>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Detalles del Pedido #{currentPedido?.id}</DialogTitle>
+          </DialogHeader>
+          {currentPedido && (
+            <div>
+              <p><strong>Cliente:</strong> {currentPedido.cliente}</p>
+              <p><strong>Estado:</strong> {currentPedido.estado}</p>
+              <p><strong>Total:</strong> ${parseFloat(currentPedido.total || 0).toFixed(2)}</p>
+              
+              {currentPedido.shippingDetails && (
+                <>
+                  <p><strong>Dirección:</strong> {currentPedido.shippingDetails.direccion}</p>
+                  <p><strong>Teléfono:</strong> {formatPhoneNumber(currentPedido.shippingDetails.telefono)}</p>
+                  <p><strong>Casa:</strong> {currentPedido.shippingDetails.casa}</p>
+                </>
+              )}
+
+              <div className="mt-4">
+                <strong>Productos:</strong>
+                <div className="mt-2 space-y-4">
+                  {currentPedido.products?.map((product, index) => (
+                    <div key={index} className="flex items-center space-x-4">
+                      <img 
+                        src={getProductImageByName(product.name)} 
+                        alt={product.name} 
+                        className="w-16 h-16 object-cover rounded-md border"
+                        loading="lazy"
+                      />
+                      <div>
+                        <p className="font-medium">{product.name}</p>
+                        <p className="text-sm text-gray-500">Cantidad: {product.quantity}</p>
+                        <p className="text-sm text-gray-500">Precio: ${parseFloat(product.price || 0).toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )}
-  </DialogContent>
-</Dialog>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
-      {/* Modal para editar estado del pedido */}
       <Dialog open={isEditStatusOpen} onOpenChange={setIsEditStatusOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -203,6 +206,25 @@ export default function GestionPedidos() {
               </div>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Cancelación de Pedido</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas cancelar el pedido #{currentPedido?.id}? Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmDeletePedido}>
+              Confirmar Cancelación
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

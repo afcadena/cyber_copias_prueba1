@@ -8,12 +8,14 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useCrudContextForms } from "../context/CrudContextForms";
 import { useCrudContextPedidos } from "../context/CrudContextPedidos"; // Importa el contexto de pedidos
+import { useProducts } from '../context/CrudContextInventario'; // Importa el hook del contexto de productos
 import axios from 'axios'; // Asegúrate de tener axios instalado
 
 export default function CarritoDeCompras() {
   const { cart, clearCart } = useCart();
   const { currentUser, updateUser } = useCrudContextForms(); // Asegúrate de que `updateUser` está disponible
   const { createData: createPedido } = useCrudContextPedidos(); // Desestructura la función para crear pedidos
+  const { getData } = useProducts(); // Obtener la función getData del contexto de productos
   const [isOpen, setIsOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
@@ -114,14 +116,16 @@ export default function CarritoDeCompras() {
       name: product.name,
       quantity: product.quantity,
       price: product.price.toString(),
+      id: product.id, // Asegúrate de incluir el ID
+      stock: product.stock, // Incluye el stock actual
     }));
   
-    // Genera un ID para el pedido (puede ser generado localmente o del lado del servidor)
-    const pedidoId = `pedido-${Date.now()}`; // Un ID único simple basado en el tiempo
+    // Genera un ID para el pedido
+    const pedidoId = `pedido-${Date.now()}`;
   
     const pedido = {
-      id: pedidoId,  // Agregamos el ID al pedido
-      cliente: `${currentUser.name} ${currentUser.surname}`, // Combina nombre y apellido
+      id: pedidoId,
+      cliente: `${currentUser.name} ${currentUser.surname}`,
       fecha: new Date().toISOString().split("T")[0],
       estado: "En proceso",
       total: total,
@@ -137,6 +141,23 @@ export default function CarritoDeCompras() {
     try {
       // Crear el pedido usando el contexto
       await createPedido(pedido);
+  
+      // Actualizar el stock de cada producto en la API
+      const updateStockPromises = cart.map(async (product) => {
+        const newStock = product.stock - product.quantity;
+        if (newStock < 0) {
+          throw new Error(`Stock insuficiente para el producto: ${product.name}`);
+        }
+        return axios.patch(`http://localhost:3000/products/${product.id}`, {
+          stock: newStock,
+        });
+      });
+  
+      // Esperar a que todas las actualizaciones de stock se completen
+      await Promise.all(updateStockPromises);
+  
+      // Refrescar los datos del inventario
+      await getData(); // Llamar a getData para obtener los datos actualizados
   
       // Actualizar datos del usuario si es necesario
       const updatedUserData = {};
@@ -163,7 +184,7 @@ export default function CarritoDeCompras() {
       setTimeout(() => {
         setShowSuccessModal(false);
         clearCart();
-        navigate(`/cuenta?section=pedidos&pedidoId=${pedidoId}`); // Redirige pasando el ID del pedido
+        navigate(`/cuenta?section=pedidos&pedidoId=${pedidoId}`);
       }, 5000);
     } catch (error) {
       console.error("Error al procesar la compra o actualizar los datos del usuario:", error);
@@ -289,7 +310,10 @@ export default function CarritoDeCompras() {
                 {cart.map((producto) => (
                   <div key={producto.id} className="flex justify-between items-center border-b border-gray-600 pb-4">
                     <div className="flex items-center space-x-4">
-                      <img src={producto.imageUrl} alt={producto.name} className="w-16 h-16 object-cover rounded" />
+                      {/* Asegurarse de que imageUrl es un arreglo */}
+                      {producto.imageUrl && producto.imageUrl.length > 0 && (
+                        <img src={producto.imageUrl[0]} alt={producto.name} className="w-16 h-16 object-cover rounded" />
+                      )}
                       <div>
                         <p className="font-semibold">{producto.name}</p>
                         <p className="font-semibold">Cantidad: {producto.quantity}</p>
