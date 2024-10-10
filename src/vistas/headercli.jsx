@@ -1,5 +1,3 @@
-// src/components/HeaderCliente.jsx
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -20,8 +18,8 @@ import { useCart } from "../context/CartContext";
 
 export default function HeaderCliente() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [allProducts, setAllProducts] = useState([]); // Almacena todos los productos
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]); // Almacena las sugerencias filtradas
+  const [allProducts, setAllProducts] = useState([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
@@ -31,23 +29,21 @@ export default function HeaderCliente() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Definir las rutas donde el carrito no debe ser accesible
   const excludedPaths = ["/carrito", "/previa"];
   const isCartAccessible = !excludedPaths.some(path => location.pathname.startsWith(path));
+  const isCatalogo = location.pathname === "/catalogo";
 
-  // Obtener todos los productos cuando el componente se monta
   useEffect(() => {
     fetch("http://localhost:3000/products")
       .then(response => response.json())
       .then(data => {
-        setAllProducts(data); // Guardar todos los productos
+        setAllProducts(data);
       })
       .catch(error => {
         console.error("Error fetching products:", error);
       });
   }, []);
 
-  // Filtrar las sugerencias en función del término de búsqueda
   useEffect(() => {
     if (searchTerm.length > 0) {
       const filtered = allProducts.filter(product =>
@@ -55,19 +51,18 @@ export default function HeaderCliente() {
       );
       setFilteredSuggestions(filtered);
     } else {
-      setFilteredSuggestions([]); // Limpiar sugerencias si no hay término de búsqueda
+      setFilteredSuggestions([]);
     }
   }, [searchTerm, allProducts]);
 
   const handleProductClick = (product) => {
     navigate(`/producto/${product.id}`);
-    setFilteredSuggestions([]); // Limpiar sugerencias después de hacer clic
+    setFilteredSuggestions([]);
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
     console.log("Searching for:", searchTerm);
-    // Lógica adicional para manejar la búsqueda (redirigir o mostrar resultados).
   };
 
   const toggleCart = () => {
@@ -75,11 +70,7 @@ export default function HeaderCliente() {
   };
 
   const handleAccountClick = () => {
-    if (currentUser) {
-      navigate('/cuenta'); // Redirige a la cuenta si hay usuario
-    } else {
-      navigate('/login'); // Redirige a la página de login si no hay usuario
-    }
+    navigate('/cuenta');
   };
 
   const handlePedidosClick = () => {
@@ -90,10 +81,8 @@ export default function HeaderCliente() {
     const product = allProducts.find(p => p.id === productId);
   
     if (product) {
-      if (newQuantity <= product.stock) {
-        if (newQuantity >= 1) {
-          updateQuantity(productId, newQuantity);
-        }
+      if (newQuantity <= product.stock && newQuantity >= 1) {
+        updateQuantity(productId, newQuantity);
       }
     } else {
       console.error("Producto no encontrado");
@@ -116,7 +105,6 @@ export default function HeaderCliente() {
     setShowModal(false);
   };
 
-  // Nueva función para manejar el clic en "Continuar a la Compra"
   const handleContinueShopping = () => {
     if (cart.length === 0) {
       alert("El carrito está vacío. Añade productos para continuar la compra.");
@@ -125,7 +113,6 @@ export default function HeaderCliente() {
     }
   };
 
-  // Cerrar carrito al cambiar de ruta
   useEffect(() => {
     if (!isCartAccessible && isCartOpen) {
       setIsCartOpen(false);
@@ -139,34 +126,39 @@ export default function HeaderCliente() {
           <Link to="/homecli" className="text-xl font-bold text-primary">CyberCopias</Link>
         </div>
 
-        <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4 relative">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              className="w-full py-2 pl-10 pr-4 text-gray-700 bg-white border rounded-full focus:outline-none focus:border-primary"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button type="submit" className="absolute inset-y-0 left-0 flex items-center pl-3">
-              <Search className="w-5 h-5 text-gray-400" />
-            </button>
+        {isCatalogo ? (
+          <div className="flex-1 max-w-md mx-4 flex items-center justify-center">
+            <h2 className="text-lg font-semibold text-gray-700">Explora nuestro catálogo</h2>
           </div>
-          {/* Lista de sugerencias */}
-          {filteredSuggestions.length > 0 && (
-            <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-2 max-h-48 overflow-y-auto">
-              {filteredSuggestions.map((product) => (
-                <li 
-                  key={product.id} 
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => handleProductClick(product)}
-                >
-                  {product.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </form>
+        ) : (
+          <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4 relative">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Buscar productos..."
+                className="w-full py-2 pl-10 pr-4 text-gray-700 bg-white border rounded-full focus:outline-none focus:border-primary"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button type="submit" className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <Search className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            {filteredSuggestions.length > 0 && (
+              <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-2 max-h-48 overflow-y-auto">
+                {filteredSuggestions.map((product) => (
+                  <li 
+                    key={product.id} 
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleProductClick(product)}
+                  >
+                    {product.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </form>
+        )}
 
         <nav className="flex items-center space-x-6">
           <Link to="/catalogo" className="flex flex-col items-center hover:text-primary">
@@ -188,7 +180,6 @@ export default function HeaderCliente() {
               )}
             </button>
           )}
-
           <button onClick={handleAccountClick} className="flex flex-col items-center hover:text-primary">
             <User className="h-5 w-5" />
             <span className="text-xs mt-1">Cuenta</span>
@@ -200,7 +191,6 @@ export default function HeaderCliente() {
         </nav>
       </header>
 
-      {/* Modal de confirmación de cierre de sesión */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm mx-auto z-50">
@@ -224,8 +214,7 @@ export default function HeaderCliente() {
         </div>
       )}
 
-     {/* Sidebar del carrito */}
-     <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
+      <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
         <div className="flex flex-col h-full">
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="text-lg font-semibold">Carrito</h2>
@@ -260,7 +249,7 @@ export default function HeaderCliente() {
                       <button 
                         onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                         className="text-gray-500 hover:text-gray-700"
-                        disabled={item.quantity >= item.stock}  // Desactivar el botón si se alcanza el stock
+                        disabled={item.quantity >= item.stock}
                       >
                         <Plus className="h-4 w-4" />
                       </button>
