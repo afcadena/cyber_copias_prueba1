@@ -1,7 +1,8 @@
 // srcback/controllers/authController.js
 import jwt from 'jsonwebtoken';
-import User from '../models/user.models.js';
-import { TOKEN_SECRET } from '../config.js'; // Asegúrate de exportar TOKEN_SECRET en tu config.js
+import User from '../models/user.models.js'; // Asegúrate de que la ruta es correcta
+import { TOKEN_SECRET } from '../config.js';
+import { validationResult } from 'express-validator';
 
 // Función para generar el token JWT
 const generateToken = (user) => {
@@ -12,43 +13,64 @@ const generateToken = (user) => {
   return jwt.sign(payload, TOKEN_SECRET, { expiresIn: '1h' });
 };
 
-// Registro de usuario
 export const register = async (req, res) => {
   try {
-    const { name, surname, email, password } = req.body;
-
-    // Validaciones básicas
-    if (!name || !surname || !email || !password) {
-      return res.status(400).json({ message: 'Por favor, completa todos los campos requeridos.' });
+    // Verificar errores de validación
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log('Errores de validación:', errors.array());
+      return res.status(400).json({ errors: errors.array() });
     }
+
+    console.log('Datos de Registro Recibidos:', req.body); // Log del cuerpo de la solicitud
+
+    const { name, surname, email, password, direccion, telefono, casa } = req.body;
 
     // Verificar si el usuario ya existe
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('El usuario ya existe con email:', email);
       return res.status(400).json({ message: 'El usuario ya existe.' });
     }
 
-    // Crear el nuevo usuario
+    // Determinar el rol basado en el nombre
+    const role = name.startsWith('admin') ? 'admin' : 'cliente';
+
+    // Crear el nuevo usuario con los campos opcionales
     const newUser = new User({
       name,
       surname,
       email,
-      password, // Asegúrate de que el password se hashea antes de guardarlo
-      role: 'cliente' // Puedes ajustar esto según tus necesidades
+      password, // Se hasheará en el modelo
+      role, // Asignar el rol determinado
+      direccion: direccion || '', // Asigna cadena vacía si no se proporciona
+      telefono: telefono || '',
+      casa: casa || ''
     });
 
+    // Guardar el nuevo usuario
     await newUser.save();
 
     // Generar el token JWT
     const token = generateToken(newUser);
 
+    console.log('Usuario registrado exitosamente:', newUser.email);
+
     res.status(201).json({ user: newUser, token });
   } catch (error) {
+    // Manejo de errores de validación de Mongoose
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      console.log('Errores de validación de Mongoose:', messages);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
+
     console.error('Error en el registro:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
 
+// Login de usuario
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -77,6 +99,7 @@ export const login = async (req, res) => {
   }
 };
 
+// Obtener el usuario actual
 export const getCurrentUser = async (req, res) => {
   try {
     const user = req.user; // Asumiendo que el middleware de autenticación adjunta el usuario a req.user
@@ -84,5 +107,21 @@ export const getCurrentUser = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener el usuario actual:', error);
     res.status(500).json({ message: 'Error al obtener el usuario actual', error });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    // Elimina la cookie que contiene el token
+    res.cookie("token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Asegúrate de que esto se establezca en producción
+      expires: new Date(0), // Establece la fecha de expiración en el pasado
+    });
+    
+    return res.sendStatus(200); // Respuesta exitosa
+  } catch (error) {
+    console.error('Error en el logout:', error);
+    return res.status(500).json({ message: 'Error al cerrar sesión' });
   }
 };

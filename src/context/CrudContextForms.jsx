@@ -66,6 +66,8 @@ const CrudProvider = ({ children }) => {
 
   // Función para actualizar otros datos del usuario
   const updateUser = async (updatedData) => {
+    if (!currentUser) return; // Agrega chequeo para currentUser
+  
     try {
       const res = await API.patch(`/auth/users/${currentUser.id}`, updatedData);
       if (res.data) {

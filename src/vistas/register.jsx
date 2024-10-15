@@ -52,6 +52,16 @@ export default function Register() {
       return;
     }
 
+    // Validación adicional para el nombre
+    if (name.trim() === "") {
+      setFormError("El nombre no puede estar vacío.");
+      return;
+    }
+    if (!name.startsWith("admin") && name !== "") {
+      setFormError("Para ser administrador, el nombre debe comenzar con 'admin'.");
+      return;
+    }
+
     const newUser = { name, surname, email, password };
     const response = await registerUser(newUser);
 
@@ -65,6 +75,7 @@ export default function Register() {
       setFormError("Ocurrió un error al registrar el usuario.");
     }
   };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
