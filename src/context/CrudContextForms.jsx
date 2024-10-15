@@ -1,128 +1,91 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { helpHttp } from "../helpers/helpHttp";
+// src/context/CrudContextForms.js
+import { createContext, useContext, useState } from "react";
+import API from '../api/api'; // Importar la instancia de Axios
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
 
 export const CrudContextForms = createContext();
 
 const CrudProvider = ({ children }) => {
-  const [db, setDb] = useState([]);
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(() => {
     const savedUser = localStorage.getItem("currentUser");
     return savedUser ? JSON.parse(savedUser) : null;
   });
-  const [currentUserAddress, setCurrentUserAddress] = useState(currentUser ? currentUser.direccion : null);
   const navigate = useNavigate();
 
-  const api = helpHttp();
-  const url = "http://localhost:3000/users";
-
-  useEffect(() => {
-    api.get(url).then((res) => {
-      if (!res.err) {
-        setDb(Array.isArray(res) ? res : []);
-        setError(null);
-      } else {
-        setDb([]);
-        setError(res);
-      }
-    });
-  }, [url]);
-
+  // Función para registrar un nuevo usuario
   const registerUser = async (userData) => {
     try {
-      const newUserData = {
-        ...userData,
-        id: String(Date.now()),  // Generar id como cadena
-        role: "cliente",
-        direccion: "",  // Agregar campo vacio
-        telefono: "", 
-        casa: ""  // Agregar campo vacio
-      };
-
-      const res = await api.post(url, { body: newUserData, headers: { "content-type": "application/json" } });
-      if (!res.err) {
-        setDb([...db, res]);
-        setCurrentUser(res);
-        localStorage.setItem("currentUser", JSON.stringify(res));
-        return res;
-      } else {
-        setError(res);
-        console.error("Error al registrar el usuario:", res);
-        return null;
+      const res = await API.post('/auth/register', userData);
+      if (res.data) {
+        setCurrentUser(res.data.user);
+        localStorage.setItem("currentUser", JSON.stringify(res.data.user));
+        localStorage.setItem("token", res.data.token);
+        return res.data;
       }
-    } catch (error) {
-      setError(error);
-      console.error("Error de red al registrar usuario:", error);
+    } catch (err) {
+      setError(err.response?.data || err);
+      console.error("Error al registrar el usuario:", err);
       return null;
     }
   };
 
+  // Función para iniciar sesión
   const loginUser = async (email, password) => {
-    if (!Array.isArray(db)) {
-      setError({ err: true, status: 500, statusText: "Error en la base de datos de usuarios" });
-      return null;
-    }
-
-    if (!email || !password) {
-      setError({ err: true, status: 400, statusText: "Faltan credenciales" });
-      return null;
-    }
-
-    const user = db.find((user) => user.email === email && user.password === password);
-
-    if (user) {
-      setCurrentUser(user);
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      return user;
-    } else {
-      setError({ err: true, status: 401, statusText: "Credenciales inválidas" });
+    try {
+      const res = await API.post('/auth/login', { email, password });
+      if (res.data) {
+        setCurrentUser(res.data.user);
+        localStorage.setItem("currentUser", JSON.stringify(res.data.user));
+        localStorage.setItem("token", res.data.token);
+        return res.data.user;
+      }
+    } catch (err) {
+      setError(err.response?.data || err);
+      console.error("Error al iniciar sesión:", err);
       return null;
     }
   };
 
+  // Función para cerrar sesión
   const logoutUser = () => {
     setCurrentUser(null);
     localStorage.removeItem("currentUser");
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
+  // Función para actualizar la dirección del usuario
   const updateUserAddress = (newAddress) => {
-    const updatedUser = { ...currentUser, direccion: newAddress };
-    setCurrentUser(updatedUser);
-    setCurrentUserAddress(newAddress);
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    if (currentUser) {
+      const updatedUser = { ...currentUser, direccion: newAddress };
+      setCurrentUser(updatedUser);
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    }
   };
 
+  // Función para actualizar otros datos del usuario
   const updateUser = async (updatedData) => {
     try {
-      const response = await axios.patch(`http://localhost:3000/users/${currentUser.id}`, updatedData, {
-        headers: { "Content-Type": "application/json" }
-      });
-  
-      if (response.data) {
-        const updatedUser = { ...currentUser, ...response.data };
+      const res = await API.patch(`/auth/users/${currentUser.id}`, updatedData);
+      if (res.data) {
+        const updatedUser = { ...currentUser, ...res.data.user };
         setCurrentUser(updatedUser);
         localStorage.setItem("currentUser", JSON.stringify(updatedUser));
         console.log("Usuario actualizado:", updatedUser);
       }
-    } catch (error) {
-      console.error("Error actualizando usuario:", error);
-      setError(error);
+    } catch (err) {
+      setError(err.response?.data || err);
+      console.error("Error actualizando usuario:", err);
     }
   };
-  
-  
 
   const data = {
-    db,
     error,
     loginUser,
     registerUser,
     logoutUser,
     currentUser,
-    currentUserAddress,
     updateUserAddress,
     updateUser,
   };
@@ -134,7 +97,7 @@ const CrudProvider = ({ children }) => {
   );
 };
 
-// Renombrar el hook a `useCrudContextForms`
+// Hook personalizado para usar el contexto
 const useCrudContextForms = () => {
   const context = useContext(CrudContextForms);
   if (!context) {

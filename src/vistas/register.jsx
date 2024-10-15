@@ -1,3 +1,4 @@
+// src/vistas/register.js
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,21 +7,21 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useCrudContextForms } from "../context/CrudContextForms";
 import { useNavigate } from 'react-router-dom';
-import Header from './header';  // Asegúrate de que la ruta sea correcta
-import Footer from './footer';  // Asegúrate de que la ruta sea correcta
+import Header from './header';
+import Footer from './footer';
 
 export default function Register() {
   const { registerUser, error } = useCrudContextForms();
   const [name, setName] = useState('');
-  const [surname, setSurname] = useState(''); // Nuevo estado para el apellido
+  const [surname, setSurname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formError, setFormError] = useState(null);
-  const [showSuccess, setShowSuccess] = useState(false);  // Estado para mostrar el mensaje de éxito
-  const navigate = useNavigate();  // Hook para redirigir
+  const [showSuccess, setShowSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const validatePassword = (password) => {
     const minLength = 8;
@@ -40,7 +41,7 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       setFormError("Las contraseñas no coinciden.");
       return;
@@ -51,14 +52,14 @@ export default function Register() {
       return;
     }
 
-    const newUser = { name, surname, email, password }; // Añadir el apellido al objeto del nuevo usuario
+    const newUser = { name, surname, email, password };
     const response = await registerUser(newUser);
 
     if (response) {
-      setShowSuccess(true);  // Muestra el mensaje de éxito
+      setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-        navigate('/login');  // Redirige a la página de login después de 3 segundos
+        navigate('/login');
       }, 3000);
     } else {
       setFormError("Ocurrió un error al registrar el usuario.");
@@ -67,7 +68,7 @@ export default function Register() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <Header />  {/* Añadido Header */}
+      <Header />
 
       <main className="flex-grow flex items-center justify-center py-12">
         <Card className="w-full max-w-md">
@@ -78,7 +79,11 @@ export default function Register() {
           <CardContent>
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
-                {(formError || error) && <p className="text-red-500">{formError || error.statusText}</p>}
+                {(formError || error) && (
+                  <p className="text-red-500">
+                    {formError || error.message || error.response?.data?.message || 'Ocurrió un error inesperado.'}
+                  </p>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="name">Nombre</Label>
                   <Input
@@ -89,7 +94,7 @@ export default function Register() {
                   />  
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="surname">Apellidos</Label> {/* Campo para el apellido */}
+                  <Label htmlFor="surname">Apellidos</Label>
                   <Input
                     id="surname"
                     value={surname}
@@ -166,7 +171,7 @@ export default function Register() {
           </CardContent>
           <CardFooter className="flex justify-center">
             <p className="text-sm text-gray-600">
-              ¿Ya tienes una cuenta? <a href="./login" className="text-blue-600 hover:underline">Inicia Sesión</a>
+              ¿Ya tienes una cuenta? <a href="/login" className="text-blue-600 hover:underline">Inicia Sesión</a>
             </p>
           </CardFooter>
         </Card>
@@ -182,7 +187,7 @@ export default function Register() {
         )}
       </main>
 
-      <Footer />  {/* Añadido Footer */}
+      <Footer />
     </div>
   );
 }
