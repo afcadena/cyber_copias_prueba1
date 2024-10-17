@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,19 +16,19 @@ import Footer from "./footer";
 import { useCrudContextForms } from "../context/CrudContextForms";
 import { useCart } from '../context/CartContext';
 
+import CrudContext from '../context/CrudContextInventario';
+
+
 // Define available categories
 const categories = ["Todos", "Escritura", "Cuadernos", "Papel", "Arte", "Accesorios", "Coleccionables"];
 
 export default function Catalog() {
-  // State declarations
-  const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Todos");
   const [sortOrder, setSortOrder] = useState("recommended");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
 
-  // Hooks
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get("category") || "Todos";
@@ -36,37 +36,20 @@ export default function Catalog() {
   const { currentUser } = useCrudContextForms();
   const { addToCart } = useCart();
 
+  const { db: products, loading, error } = useContext(CrudContext);  // Acceder a los productos del contexto
   const categoriesRef = useRef(null);
   const mainContentRef = useRef(null);
 
-  // Effect to set initial category and scroll to top
   useEffect(() => {
     setCategoryFilter(initialCategory);
     window.scrollTo(0, 0);
   }, [initialCategory]);
 
-  // Effect to fetch products from API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/products");
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-        setProducts(data);
-      } catch (error) {
-        console.error("Error al cargar productos:", error);
-      }
-    };
-    fetchProducts();
-  }, []);
-
-  // Filter and sort products based on user selection
-  const filteredProducts = products.filter(product => 
+  // Filtrar y ordenar productos basados en la búsqueda del usuario
+  const filteredProducts = (products || []).filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (categoryFilter === "Todos" || product.category === categoryFilter)
-  ).sort((a, b) => {
+).sort((a, b) => {
     if (sortOrder === "priceLowToHigh") return a.price - b.price;
     if (sortOrder === "priceHighToLow") return b.price - a.price;
     if (sortOrder === "bestSellers") return b.sales - a.sales;
@@ -74,12 +57,10 @@ export default function Catalog() {
     return 0;
   });
 
-  // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = filteredProducts?.slice(indexOfFirstProduct, indexOfLastProduct);
 
-  // Function to handle pagination
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
     if (mainContentRef.current) {
@@ -87,12 +68,10 @@ export default function Catalog() {
     }
   };
 
-  // Function to handle product click
   const handleProductClick = (product) => {
-    navigate(`/producto/${product.id}`);
+    navigate(`/producto/${product._id}`);
   };
 
-  // Function to handle category change
   const handleCategoryChange = (category) => {
     setCategoryFilter(category);
     setCurrentPage(1);
@@ -101,16 +80,13 @@ export default function Catalog() {
     }
   };
 
-  // Function to handle adding product to cart
   const handleAddToCart = (product) => {
     addToCart(product);
   };
 
-  // Function to get product count for each category
   const getCategoryProductCount = (category) => {
-    return products.filter(product => category === "Todos" || product.category === category).length;
+    return products?.filter(product => category === "Todos" || product.category === category).length;
   };
-
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}

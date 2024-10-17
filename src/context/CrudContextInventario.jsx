@@ -1,82 +1,54 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { helpHttp } from "../helpers/helpHttp";
+import API from '../api/api'; // Importar la instancia de Axios
 
 const CrudContext = createContext();
 
-// Proveedor del contexto
 const CrudProvider = ({ children }) => {
   const [db, setDb] = useState(null);
   const [dataToEdit, setDataToEdit] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const api = helpHttp();
-  const url = "http://localhost:3000/products";
+  const url = "/products"; // Nueva URL base de la API de productos
 
   // Función para obtener todos los productos
   const getData = async () => {
     setLoading(true);
     try {
-      const res = await api.get(url);
-      if (!res.err) {
-        setDb(res);
-        setError(null);
-      } else {
-        setDb(null);
-        setError(res);
-      }
+      const res = await API.get(url); // Usamos API de axios
+      setDb(res.data); // El resultado de axios está en res.data
+      setError(null);
     } catch (error) {
-      setError(error);
+      setError(error.response ? error.response.data : error.message);
       setDb(null);
     }
     setLoading(false);
   };
 
-  // Obtener los datos al montar el componente
   useEffect(() => {
     getData();
-  }, [url]);
+  }, []);
 
   // Función para crear un nuevo producto
   const createData = async (data) => {
-    data.id = Date.now().toString(); // Asegurar que el ID es una cadena
-    // Asegurarnos de que imageUrl es un arreglo
-    if (typeof data.imageUrl === "string") {
-      data.imageUrl = [data.imageUrl];
-    }
-
-    let options = {
-      body: data,
-      headers: { "content-type": "application/json" },
-    };
-
-    const res = await api.post(url, options);
-    if (!res.err) {
-      setDb((prevDb) => [...prevDb, res]); // Utiliza el estado anterior
-    } else {
-      setError(res);
+    // En MongoDB, el id se genera automáticamente
+    try {
+      const res = await API.post(url, data); // Creando producto en MongoDB
+      setDb((prevDb) => [...prevDb, res.data]); // Actualizar db con el nuevo producto
+    } catch (error) {
+      setError(error.response ? error.response.data : error.message);
     }
   };
 
   // Función para actualizar un producto
   const updateData = async (data) => {
-    const endpoint = `${url}/${data.id}`;
-    // Asegurarnos de que imageUrl es un arreglo
-    if (typeof data.imageUrl === "string") {
-      data.imageUrl = [data.imageUrl];
-    }
-
-    let options = {
-      body: data,
-      headers: { "content-type": "application/json" },
-    };
-
-    const res = await api.put(endpoint, options);
-    if (!res.err) {
-      const newData = db.map((el) => (el.id === data.id ? res : el));
+    const endpoint = `${url}/${data._id}`; // MongoDB usa `_id` en lugar de `id`
+    try {
+      const res = await API.put(endpoint, data); // Actualizamos el producto
+      const newData = db.map((el) => (el._id === data._id ? res.data : el));
       setDb(newData);
-    } else {
-      setError(res);
+    } catch (error) {
+      setError(error.response ? error.response.data : error.message);
     }
   };
 
@@ -88,16 +60,12 @@ const CrudProvider = ({ children }) => {
 
     if (isDelete) {
       const endpoint = `${url}/${id}`;
-      const options = {
-        headers: { "content-type": "application/json" },
-      };
-
-      const res = await api.del(endpoint, options);
-      if (!res.err) {
-        const newData = db.filter((el) => el.id !== id);
+      try {
+        await API.delete(endpoint); // Eliminamos el producto
+        const newData = db.filter((el) => el._id !== id);
         setDb(newData);
-      } else {
-        setError(res);
+      } catch (error) {
+        setError(error.response ? error.response.data : error.message);
       }
     }
   };
@@ -112,7 +80,7 @@ const CrudProvider = ({ children }) => {
     setDataToEdit,
     updateData,
     deleteData,
-    getData, // Exponer getData
+    getData,
   };
 
   return <CrudContext.Provider value={data}>{children}</CrudContext.Provider>;
