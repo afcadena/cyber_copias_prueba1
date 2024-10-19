@@ -34,7 +34,7 @@ export default function HeaderCliente() {
   const isCatalogo = location.pathname === "/catalogo";
 
   useEffect(() => {
-    fetch("http://localhost:3000/products")
+    fetch("http://localhost:4000/api/products") // URL correcta para tu API
       .then(response => response.json())
       .then(data => {
         setAllProducts(data);
@@ -56,7 +56,7 @@ export default function HeaderCliente() {
   }, [searchTerm, allProducts]);
 
   const handleProductClick = (product) => {
-    navigate(`/producto/${product.id}`);
+    navigate(`/producto/${product._id}`); // Cambiar a _id
     setFilteredSuggestions([]);
   };
 
@@ -78,7 +78,7 @@ export default function HeaderCliente() {
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    const product = allProducts.find(p => p.id === productId);
+    const product = allProducts.find(p => p._id === productId); // Cambiar a _id
   
     if (product) {
       if (newQuantity <= product.stock && newQuantity >= 1) {
@@ -214,7 +214,7 @@ export default function HeaderCliente() {
         </div>
       )}
 
-      <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
+        <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
         <div className="flex flex-col h-full">
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="text-lg font-semibold">Carrito</h2>
@@ -228,9 +228,9 @@ export default function HeaderCliente() {
             ) : (
               <ul className="space-y-4">
                 {cart.map((item) => (
-                  <li key={item.id} className="flex items-center justify-between py-2 border-b">
+                  <li key={item._id} className="flex items-center justify-between py-2 border-b">
                     <div className="flex items-center space-x-4">
-                      <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover" />
+                      <img src={item.imageUrl[0]} alt={item.name} className="w-16 h-16 object-cover" />
                       <div>
                         <p className="font-medium">{item.name}</p>
                         <p className="text-sm text-gray-500">${(parseFloat(item.price) || 0).toFixed(2)}</p>
@@ -238,7 +238,7 @@ export default function HeaderCliente() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <button 
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)} 
+                        onClick={() => handleQuantityChange(item._id, item.quantity - 1)} 
                         className={`text-gray-500 hover:text-gray-700 ${item.quantity === 1 ? 'cursor-not-allowed opacity-50' : ''}`}
                         disabled={item.quantity === 1}
                         aria-disabled={item.quantity === 1}
@@ -247,14 +247,14 @@ export default function HeaderCliente() {
                       </button>
                       <span className="text-sm">{item.quantity}</span>
                       <button 
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
                         className="text-gray-500 hover:text-gray-700"
                         disabled={item.quantity >= item.stock}
                       >
                         <Plus className="h-4 w-4" />
                       </button>
                       <button 
-                        onClick={() => removeFromCart(item.id)} 
+                        onClick={() => removeFromCart(item._id)} 
                         className="text-gray-500 hover:text-red-500 ml-2" 
                         aria-label={`Eliminar ${item.name} del carrito`}
                       >
@@ -268,7 +268,7 @@ export default function HeaderCliente() {
           </div>
           <div className="p-4 border-t">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-lg font-semibold">Subtotal</span>
+              <span className="text-lg font-semibold">Subtotal:</span>
               <span className="text-lg font-semibold">${subtotal.toFixed(2)}</span>
             </div>
             <button 

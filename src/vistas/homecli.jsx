@@ -1,6 +1,5 @@
-// src/components/HomePage.jsx
 import React, { useState, useEffect } from 'react';
-import HeaderCliente from './headercli';
+import Header from './headercli';
 import Footer from './footer';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import AutoPlay from "embla-carousel-autoplay";
 import { SearchIcon, ShoppingCartIcon, StarIcon } from 'lucide-react';
 import { ChevronRight } from "heroicons-react";
-import { useNavigate } from 'react-router-dom'; // Importar useNavigate
+import { useNavigate } from 'react-router-dom';
 import escrituraImage from '../assets/images/escritura.jpg';
 import arteImage from '../assets/images/arte.jpg';
 import accesoriosImage from '../assets/images/accesorios.jpg';
@@ -19,7 +18,9 @@ import heroImage1 from '../assets/images/hero1.jpg';
 import heroImage2 from '../assets/images/hero2.jpg';
 import heroImage3 from '../assets/images/hero3.jpg';
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext'; // Importa el useCart
+import { useCart } from '../context/CartContext';
+
+const API_URL = "http://localhost:4000/api"; // Agrega tu URL base aquí
 
 const HomePage = () => {
   const categories = [
@@ -50,13 +51,13 @@ const HomePage = () => {
   ];
 
   const [products, setProducts] = useState([]);
-  const navigate = useNavigate(); // Inicializar useNavigate
-  const { addToCart } = useCart(); // Obtén la función addToCart del contexto
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/products");
+        const response = await fetch(`${API_URL}/products`); // Usar la constante API_URL
         const data = await response.json();
         setProducts(data);
       } catch (error) {
@@ -67,23 +68,24 @@ const HomePage = () => {
   }, []);
 
   const handleAddToCart = (product, event) => {
-    event.stopPropagation(); // Detiene la propagación del evento
-    addToCart(product); // Usa la función del contexto
+    event.stopPropagation();
+    addToCart(product);
     console.log(`Added product ${product.name} to cart`);
   };
 
   const handleProductClick = (product) => {
-    // Redirige a la página de producto con el ID del producto como parámetro
-    navigate(`/producto/${product.id}`); 
-  };
+    console.log(`Navigating to product with ID: ${product._id}`); // Asegúrate de usar el campo correcto
+    navigate(`/producto/${product._id}`); 
+};
+
 
   const handleCategoryClick = (category) => {
     navigate(`/catalogo?category=${category}`);
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-x-hidden">
-      <HeaderCliente />
+      <Header />
 
       {/* Hero Carousel */}
       <div className="w-full">
@@ -131,7 +133,7 @@ const HomePage = () => {
                   <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/4">
                     <Card
                       className="flex flex-col justify-between cursor-pointer"
-                      onClick={() => handleCategoryClick(category.name)} // Redirigir al catálogo
+                      onClick={() => handleCategoryClick(category.name)}
                     >
                       <CardContent className="p-4 flex flex-col items-center">
                         <img src={category.image} alt={category.name} className="w-32 h-32 object-cover mb-2" />
@@ -185,7 +187,7 @@ const HomePage = () => {
                       <CardFooter className="p-4 pt-0">
                         <Button 
                           className="w-full" 
-                          onClick={(event) => handleAddToCart(product, event)} // Pasar el evento
+                          onClick={(event) => handleAddToCart(product, event)}
                         >
                           <ShoppingCartIcon className="w-4 h-4 mr-2" />
                           Agregar al carrito
