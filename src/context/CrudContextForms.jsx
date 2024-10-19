@@ -77,7 +77,7 @@ const CrudProvider = ({ children }) => {
   
       // Hacer la solicitud PATCH con el token en los encabezados
       const response = await axios.patch(
-        `http://localhost:4000/api/auth/users/${userId}`,
+        `http://localhost:4000/api/auth/users/${userId}`, // Usa el ID correcto aquí
         userData,
         {
           headers: {
@@ -87,11 +87,11 @@ const CrudProvider = ({ children }) => {
       );
   
       console.log('Usuario actualizado correctamente:', response.data);
+      return response.data;
     } catch (error) {
       console.error('Error actualizando usuario:', error);
     }
   };
-  
 
 
 

@@ -75,6 +75,16 @@ export const updateUser = async (req, res) => {
   const updateData = req.body; // Los datos que deseas actualizar
 
   try {
+    // Validar que el ID proporcionado es válido
+    if (!id) {
+      return res.status(400).json({ message: 'ID del usuario es requerido.' });
+    }
+
+    // Si se proporciona una nueva contraseña, hashearla antes de guardar
+    if (updateData.password) {
+      updateData.password = await hashPassword(updateData.password); // Asegúrate de tener una función hashPassword
+    }
+
     // Buscar y actualizar al usuario por su ID
     const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
 
@@ -87,6 +97,10 @@ export const updateUser = async (req, res) => {
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error('Error al actualizar el usuario:', error);
+    // Manejo de errores más específico
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: 'Errores de validación.', errors: error.errors });
+    }
     res.status(500).json({ message: 'Error al actualizar el usuario.', error });
   }
 };

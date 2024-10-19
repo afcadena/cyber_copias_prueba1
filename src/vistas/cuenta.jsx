@@ -50,7 +50,7 @@ const CuentaProvider = ({ children }) => {
 
 // Modal para actualizar el perfil del usuario
 const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) => {
-  const { updateUser } = useCrudContextForms();
+  const { updateUser, currentUser } = useCrudContextForms(); // Obtener currentUser aquí
 
   // Inicializar newTelefono sin el prefijo '57' si está presente
   const initialTelefono = (telefono && typeof telefono === 'string' && telefono.startsWith('57')) 
@@ -69,24 +69,33 @@ const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) =>
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Verificar que currentUser esté definido y tenga un _id
+    if (!currentUser || !currentUser._id) {
+      console.error("No hay un usuario actual definido o no tiene un ID.");
+      return; // Salir si no hay usuario o no tiene ID
+    }
+  
     // Validar el teléfono antes de enviar
     if (!validatePhone(newTelefono)) {
-      setPhoneError("El teléfono debe comenzar con '3' y tener exactamente 11 dígitos.");
-      return;
+        setPhoneError("El teléfono debe comenzar con '3' y tener exactamente 11 dígitos.");
+        return;
     } else {
-      setPhoneError("");
+        setPhoneError("");
     }
-
-    // Combina los datos existentes con los nuevos
-    const result = await updateUser({
-      email: newEmail,
-      telefono: `57${newTelefono}` // Almacenar con el prefijo '57'
-    });
-
-    if (result) {
-      onUpdate({ email: newEmail, telefono: `57${newTelefono}` });
-      onClose();
+  
+    try {
+      const result = await updateUser(currentUser._id, {  // Usa _id en lugar de id
+          email: newEmail,
+          telefono: `57${newTelefono}`, // Almacenar con el prefijo '57'
+      });
+  
+      if (result) {
+          onUpdate({ email: newEmail, telefono: `57${newTelefono}` });
+          onClose();
+      }
+    } catch (error) {
+      console.error("Error actualizando usuario:", error);
     }
   };
 
@@ -150,21 +159,25 @@ const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) =>
   );
 };
 
-// Modal para actualizar la dirección del usuario
-const UpdateAddressModal = ({ address, onUpdate, onClose }) => {
+const UpdateAddressModal = ({ address, onUpdate, onClose, currentUser }) => {  // Asegúrate de recibir currentUser
   const { updateUser } = useCrudContextForms();
   const [newAddress, setNewAddress] = useState(address);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const result = await updateUser({
+    if (!currentUser || !currentUser._id) {
+      console.error("No hay un usuario actual definido o no tiene un ID.");
+      return;
+    }
+
+    const result = await updateUser(currentUser._id, {  // Asegúrate de pasar el ID del usuario aquí
       direccion: newAddress
     });
 
     if (result) {
-      onUpdate({ direccion: newAddress }); // Llama a onUpdate aquí
-      onClose(); // Cerrar el modal después de la actualización
+      onUpdate({ direccion: newAddress });
+      onClose();
     }
   };
   
@@ -246,9 +259,8 @@ const ProfileContent = () => {
   );
 };
 
-// Componente para mostrar y editar las direcciones del usuario
 const AddressesContent = () => {
-  const { userData, setUserData } = useContext(CuentaContext);
+  const { userData, setUserData } = useContext(CuentaContext); // Supongo que userData contiene el currentUser
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   if (!userData) {
@@ -277,6 +289,7 @@ const AddressesContent = () => {
                 address=""
                 onUpdate={handleUpdate}
                 onClose={() => setIsDialogOpen(false)}
+                currentUser={userData} // Pasa el usuario actual aquí
               />
             </Dialog>
           </CardTitle>
@@ -303,6 +316,7 @@ const AddressesContent = () => {
                       address={address}
                       onUpdate={handleUpdate}
                       onClose={() => setIsDialogOpen(false)}
+                      currentUser={userData} // Pasa el usuario actual aquí también
                     />
                   </Dialog>
                 </div>

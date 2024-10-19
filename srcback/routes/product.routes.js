@@ -4,7 +4,8 @@ import {
   getProducts,
   getProductById,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  addReview // Importar la nueva función
 } from '../controllers/product.controller.js';
 
 const router = express.Router();
@@ -19,9 +20,12 @@ router.get('/:id', getProductById);
 router.post('/', createProduct);
 
 // Actualizar un producto por ID
-router.patch('/:id', updateProduct);
+router.put('/:id', updateProduct);
 
 // Eliminar un producto por ID
 router.delete('/:id', deleteProduct);
+
+// Nueva ruta para agregar reseñas
+router.post('/:id/reviews', addReview); // Ruta para agregar reseñas
 
 export default router;

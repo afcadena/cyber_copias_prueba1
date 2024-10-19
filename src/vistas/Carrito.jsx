@@ -127,7 +127,7 @@ export default function CarritoDeCompras() {
             if (newStock < 0) {
                 throw new Error(`Stock insuficiente para el producto: ${product.name}`);
             }
-            return axios.patch(`http://localhost:4000/api/products/${product._id}`, {
+            return axios.put(`http://localhost:4000/api/products/${product._id}`, {
                 stock: newStock,
             });
         });

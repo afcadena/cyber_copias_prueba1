@@ -13,8 +13,17 @@ const ProductSchema = new mongoose.Schema({
     validate: [arrayLimit, '{PATH} excede el límite de 5 imágenes'],
     required: [true, 'Se requiere al menos una URL de imagen']
   },
-  rating: { type: Number, default: 0, min: [0, 'La calificación no puede ser negativa'], max: [5, 'La calificación máxima es 5'] },
-  reviews: { type: Number, default: 0, min: [0, 'Las reseñas no pueden ser negativas'] },
+  rating: { 
+    type: Number, 
+    default: 0, 
+    min: [0, 'La calificación no puede ser negativa'], 
+    max: [5, 'La calificación máxima es 5'] 
+  },
+  reviews: { 
+    type: Number, 
+    default: 0, 
+    min: [0, 'Las reseñas no pueden ser negativas'] 
+  },
   stock: { 
     type: Number, 
     required: [true, 'El stock es obligatorio'], 
@@ -26,7 +35,13 @@ const ProductSchema = new mongoose.Schema({
     default: 'active' 
   },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
+  userReviews: [{ // Agregar el campo para las reseñas de los usuarios
+    user: { type: String, required: true }, // Nombre del usuario
+    rating: { type: Number, required: true, min: 0, max: 5 }, // Calificación del usuario
+    review: { type: String, required: true }, // Reseña del usuario
+    createdAt: { type: Date, default: Date.now } // Fecha de la reseña
+  }]
 });
 
 // Middleware para actualizar automáticamente el campo `updatedAt` antes de cada 'save'

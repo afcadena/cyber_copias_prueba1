@@ -77,3 +77,34 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar el producto' });
   }
 };
+
+// Agregar una reseña y calificación
+export const addReview = async (req, res) => {
+  const { id } = req.params; // ID del producto
+  const { user, rating, review } = req.body; // Datos de la reseña
+
+  try {
+    // Buscar el producto
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+
+    // Actualizar la calificación y reseñas
+    const updatedReviews = product.reviews + 1;
+    const updatedRating = ((product.rating * product.reviews) + rating) / updatedReviews;
+
+    // Agregar la nueva reseña al arreglo de reseñas
+    product.userReviews.push({ user, rating, review });
+    product.rating = updatedRating;
+    product.reviews = updatedReviews;
+
+    // Guardar el producto actualizado
+    await product.save();
+
+    res.status(200).json(product);
+  } catch (error) {
+    console.error('Error al agregar la reseña:', error);
+    res.status(500).json({ message: 'Error al agregar la reseña' });
+  }
+};

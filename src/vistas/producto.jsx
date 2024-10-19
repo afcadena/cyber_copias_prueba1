@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StarIcon, ShoppingCartIcon } from 'lucide-react';
@@ -22,7 +21,7 @@ export default function ProductDetail() {
   const [ratingMessage, setRatingMessage] = useState('');
   const [reviewText, setReviewText] = useState('');
   const { currentUser } = useCrudContextForms();
-  const { db: products } = useContext(CrudContext);  
+  const { db: products, updateData } = useContext(CrudContext); // Asegúrate de obtener updateData
 
   useEffect(() => {
     const fetchProduct = () => {
@@ -36,7 +35,7 @@ export default function ProductDetail() {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [id, products]);
 
   const handleAddToCart = () => {
     if (product) {
@@ -63,10 +62,8 @@ export default function ProductDetail() {
     };
 
     try {
-      // Aquí haces una petición a tu backend (MongoDB) para actualizar la información del producto
-      const updatedProduct = products?.find((product) => product._id === id,);  // Actualizar con la ruta correcta de MongoDB
-
-      setProduct(updatedProduct);
+      // Aquí llamas a updateData
+      await updateData(updatedProduct);
       setRatingMessage('Gracias por tu reseña.');
       setUserRating(null);
       setReviewText('');
@@ -78,19 +75,14 @@ export default function ProductDetail() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
       {currentUser ? <HeaderCliente /> : <Header />}
-
       <main className="flex-1 p-6">
         {error ? <p className="text-red-500">{error}</p> : null}
         {product && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Imagen principal */}
             <div className="flex flex-col">
               <img src={mainImage} alt={product.name} className="w-full h-96 object-contain mb-4" />
             </div>
-
-            {/* Información del producto */}
             <div>
               <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
               <p className="text-gray-700 mb-2">{product.author}</p>
@@ -102,21 +94,14 @@ export default function ProductDetail() {
               </div>
               <p className="text-xl font-bold mb-4">${product.price.toLocaleString()}</p>
               <Badge variant="secondary" className="mb-4">{product.category}</Badge>
-
-              {/* Agregar al carrito */}
               <Button className="w-full mb-4" onClick={handleAddToCart}>
                 <ShoppingCartIcon className="w-4 h-4 mr-2" />
                 Agregar al carrito
               </Button>
-
               {message && <p className="text-green-500 mb-4">{message}</p>}
-
-              {/* Formulario de reseña */}
               <div className="mt-6">
                 <h3 className="text-lg font-semibold mb-2">Dejar una reseña</h3>
-
                 {currentUser ? (
-                  // Si el usuario está autenticado, mostramos el formulario de reseña
                   <div>
                     <div className="flex items-center mb-4">
                       {[...Array(5)].map((_, i) => (
@@ -140,16 +125,13 @@ export default function ProductDetail() {
                     {ratingMessage && <p className="text-green-500 mt-2">{ratingMessage}</p>}
                   </div>
                 ) : (
-                  // Si no está autenticado, mostramos un mensaje o un enlace para iniciar sesión
                   <p className="text-red-500">Por favor, inicia sesión para dejar una reseña.</p>
                 )}
               </div>
-
             </div>
           </div>
         )}
       </main>
-
       <Footer />
     </div>
   );

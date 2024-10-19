@@ -42,12 +42,13 @@ const CrudProvider = ({ children }) => {
 
   // Función para actualizar un producto
   const updateData = async (data) => {
-    const endpoint = `${url}/${data._id}`; // MongoDB usa `_id` en lugar de `id`
+    const endpoint = `${url}/${data._id}`;
     try {
-      const res = await API.put(endpoint, data); // Actualizamos el producto
+      const res = await API.put(endpoint, data);
       const newData = db.map((el) => (el._id === data._id ? res.data : el));
       setDb(newData);
     } catch (error) {
+      console.error('Error al actualizar producto:', error); // Agrega esta línea para depurar
       setError(error.response ? error.response.data : error.message);
     }
   };
