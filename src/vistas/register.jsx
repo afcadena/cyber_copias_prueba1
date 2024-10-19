@@ -41,30 +41,26 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (password !== confirmPassword) {
       setFormError("Las contraseñas no coinciden.");
       return;
     }
-
+  
     if (!validatePassword(password)) {
       setFormError("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.");
       return;
     }
-
+  
     // Validación adicional para el nombre
     if (name.trim() === "") {
       setFormError("El nombre no puede estar vacío.");
       return;
     }
-    if (!name.startsWith("admin") && name !== "") {
-      setFormError("Para ser administrador, el nombre debe comenzar con 'admin'.");
-      return;
-    }
-
+  
     const newUser = { name, surname, email, password };
     const response = await registerUser(newUser);
-
+  
     if (response) {
       setShowSuccess(true);
       setTimeout(() => {
@@ -75,7 +71,6 @@ export default function Register() {
       setFormError("Ocurrió un error al registrar el usuario.");
     }
   };
-
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
