@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, getCurrentUser,logout } from '../controllers/auth.controller.js';
+import { register, login, getCurrentUser, logout, updateUser } from '../controllers/auth.controller.js'; // Importa el controlador updateUser
 import { body, validationResult } from 'express-validator';
 import authMiddleware from '../middlewares/auth.middlewares.js';
 
@@ -20,17 +20,19 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.log("Errores de validación:", errors.array()); // Para depuración
+      console.log("Errores de validación:", errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
     
-    // Llama a la función register aquí
     await register(req, res);
   }
 );
 
 router.post('/login', login);
-router.get('/me', authMiddleware, getCurrentUser); // Ejemplo para obtener el usuario actual
+router.get('/me', authMiddleware, getCurrentUser); 
 router.post('/logout', logout); 
+
+// Nueva ruta para actualizar los datos del usuario
+router.patch('/users/:id', authMiddleware, updateUser); // Ruta para actualizar usuario autenticado
 
 export default router;

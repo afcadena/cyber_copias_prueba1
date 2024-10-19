@@ -4,6 +4,8 @@ import { Search, X, ShoppingCart, Book, User, Heart, Minus, Plus, Trash } from "
 import { useCrudContextForms } from "../context/CrudContextForms";
 import { useCart } from "../context/CartContext";
 
+
+
 export default function Header() {
   const [searchTerm, setSearchTerm] = useState("");
   const [allProducts, setAllProducts] = useState([]);
@@ -11,7 +13,7 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const { currentUser } = useCrudContextForms();
-  const { cart = [], updateQuantity, removeFromCart } = useCart();
+  const { cart = [], addToCart, updateQuantity, removeFromCart } = useCart();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,7 +24,7 @@ export default function Header() {
   const isCatalogo = location.pathname === "/catalogo";
 
   useEffect(() => {
-    fetch("http://localhost:3000/products")
+    fetch("http://localhost:4000/api/products") // URL correcta para tu API
       .then(response => response.json())
       .then(data => {
         setAllProducts(data);
@@ -44,7 +46,7 @@ export default function Header() {
   }, [searchTerm, allProducts]);
 
   const handleProductClick = (product) => {
-    navigate(`/producto/${product.id}`);
+    navigate(`/producto/${product._id}`); // Cambiar a _id
     setFilteredSuggestions([]);
   };
 
@@ -65,7 +67,7 @@ export default function Header() {
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    const product = allProducts.find(p => p.id === productId);
+    const product = allProducts.find(p => p._id === productId); // Cambiar a _id
   
     if (product) {
       if (newQuantity <= product.stock && newQuantity >= 1) {
@@ -91,6 +93,7 @@ export default function Header() {
       navigate("/previa");
     }
   };
+
 
   return (
     <>
@@ -119,7 +122,7 @@ export default function Header() {
                 <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-2 max-h-48 overflow-y-auto">
                   {filteredSuggestions.map((product) => (
                     <li 
-                      key={product.id} 
+                      key={product._id} 
                       className="p-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => handleProductClick(product)}
                     >
@@ -169,7 +172,7 @@ export default function Header() {
             ) : (
               <ul className="space-y-4">
                 {cart.map((item) => (
-                  <li key={item.id} className="flex items-center justify-between py-2 border-b">
+                  <li key={item._id} className="flex items-center justify-between py-2 border-b">
                     <div className="flex items-center space-x-4">
                       <img src={item.imageUrl[0]} alt={item.name} className="w-16 h-16 object-cover" />
                       <div>
@@ -179,7 +182,7 @@ export default function Header() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <button 
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)} 
+                        onClick={() => handleQuantityChange(item._id, item.quantity - 1)} 
                         className={`text-gray-500 hover:text-gray-700 ${item.quantity === 1 ? 'cursor-not-allowed opacity-50' : ''}`}
                         disabled={item.quantity === 1}
                         aria-disabled={item.quantity === 1}
@@ -188,14 +191,14 @@ export default function Header() {
                       </button>
                       <span className="text-sm">{item.quantity}</span>
                       <button 
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
                         className="text-gray-500 hover:text-gray-700"
                         disabled={item.quantity >= item.stock}
                       >
                         <Plus className="h-4 w-4" />
                       </button>
                       <button 
-                        onClick={() => removeFromCart(item.id)} 
+                        onClick={() => removeFromCart(item._id)} 
                         className="text-gray-500 hover:text-red-500 ml-2" 
                         aria-label={`Eliminar ${item.name} del carrito`}
                       >

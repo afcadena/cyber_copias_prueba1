@@ -111,89 +111,65 @@ export default function CarritoDeCompras() {
 
   const handleConfirmPurchase = async () => {
     setIsSubmitting(true);
-  
+
     const products = cart.map((product) => ({
-      name: product.name,
-      quantity: product.quantity,
-      price: product.price.toString(),
-      id: product.id, // Asegúrate de incluir el ID
-      stock: product.stock, // Incluye el stock actual
+        name: product.name,
+        quantity: product.quantity,
+        price: product.price.toString(),
+        id: product._id,
+        stock: product.stock,
     }));
-  
-    // Genera un ID para el pedido
-    const pedidoId = `pedido-${Date.now()}`;
-  
-    const pedido = {
-      id: pedidoId,
-      cliente: `${currentUser.name} ${currentUser.surname}`,
-      fecha: new Date().toISOString().split("T")[0],
-      estado: "En proceso",
-      total: total,
-      products: products,
-      shippingDetails: {
-        direccion: formData.direccion,
-        casa: formData.casa,
-        telefono: formData.telefono,
-        state: formData.state,
-      },
-    };
-  
+
     try {
-      // Crear el pedido usando el contexto
-      await createPedido(pedido);
-  
-      // Actualizar el stock de cada producto en la API
-      const updateStockPromises = cart.map(async (product) => {
-        const newStock = product.stock - product.quantity;
-        if (newStock < 0) {
-          throw new Error(`Stock insuficiente para el producto: ${product.name}`);
-        }
-        return axios.patch(`http://localhost:3000/products/${product.id}`, {
-          stock: newStock,
+        // Actualizar el stock de cada producto en la API
+        const updateStockPromises = cart.map(async (product) => {
+            const newStock = product.stock - product.quantity;
+            if (newStock < 0) {
+                throw new Error(`Stock insuficiente para el producto: ${product.name}`);
+            }
+            return axios.patch(`http://localhost:4000/api/products/${product._id}`, {
+                stock: newStock,
+            });
         });
-      });
-  
-      // Esperar a que todas las actualizaciones de stock se completen
-      await Promise.all(updateStockPromises);
-  
-      // Refrescar los datos del inventario
-      await getData(); // Llamar a getData para obtener los datos actualizados
-  
-      // Actualizar datos del usuario si es necesario
-      const updatedUserData = {};
-      if (!currentUser.direccion || currentUser.direccion !== formData.direccion) {
-        updatedUserData.direccion = formData.direccion;
-      }
-      if (!currentUser.casa || currentUser.casa !== formData.casa) {
-        updatedUserData.casa = formData.casa;
-      }
-      if (!currentUser.telefono || currentUser.telefono !== formData.telefono) {
-        updatedUserData.telefono = formData.telefono;
-      }
-  
-      if (Object.keys(updatedUserData).length > 0) {
-        await axios.patch(`http://localhost:3000/users/${currentUser.id}`, updatedUserData);
-        if (updateUser) {
-          updateUser(updatedUserData);
+
+        await Promise.all(updateStockPromises);
+
+        if (!currentUser?._id) {
+            throw new Error("No se pudo obtener el ID del usuario.");
         }
-      }
-  
-      setIsOpen(false);
-      setShowSuccessModal(true);
-  
-      setTimeout(() => {
-        setShowSuccessModal(false);
-        clearCart();
-        navigate(`/cuenta?section=pedidos&pedidoId=${pedidoId}`);
-      }, 5000);
+
+        // Actualizar la información del usuario
+        await updateUser(currentUser._id, {
+            direccion: formData.direccion,
+            casa: formData.casa,
+            telefono: formData.telefono,
+        });
+
+        // Crear el pedido
+        const pedidoData = {
+            userId: currentUser._id,
+            email: currentUser.email, // Asegúrate de que el email esté disponible
+            total: total,
+            products: products, // Aquí estás pasando el array de productos
+            direccion: formData.direccion,
+            casa: formData.casa,
+            telefono: formData.telefono,
+            state: "pendiente", // O el estado que prefieras
+        };
+
+        await createPedido(pedidoData); // Asegúrate de que `createPedido` esté correctamente implementado
+
+        // Mostrar el modal de éxito después de confirmar la compra
+        setShowSuccessModal(true);
     } catch (error) {
-      console.error("Error al procesar la compra o actualizar los datos del usuario:", error);
-      alert("Ocurrió un error al procesar tu pedido. Por favor, intenta nuevamente.");
+        console.error("Error al procesar la compra o actualizar los datos del usuario:", error);
+        alert("Ocurrió un error al procesar tu pedido. Por favor, intenta nuevamente.");
     } finally {
-      setIsSubmitting(false);
+        setIsSubmitting(false);
     }
-  };
-    
+};
+
+
   const handleCloseSuccessModal = () => {
     clearCart();
     setShowSuccessModal(false);

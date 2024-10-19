@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
-import { helpHttp } from '../helpers/helpHttp';
+import API from '../api/api'; // Usamos la instancia de Axios
 
 // Crear el contexto
 const CrudContextPedidos = createContext();
@@ -11,74 +11,67 @@ export function CrudProviderPedidos({ children }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const api = helpHttp();
-  const url = 'http://localhost:3000/pedidos'; // URL del endpoint de pedidos
+  const url = '/pedidos'; // URL base de la API de pedidos
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const res = await api.get(url);
-      if (!res.err) {
-        setDb(res);
+      try {
+        const res = await API.get(url);
+        setDb(res.data); // Axios almacena los datos en res.data
         setError(null);
-      } else {
-        setDb([]); // Limpiar la base de datos en caso de error
-        setError(res);
+      } catch (error) {
+        setDb([]); // Limpiar db en caso de error
+        setError(error.response ? error.response.data : error.message);
       }
       setLoading(false);
     };
 
-    fetchData(); // Llamar a la función para obtener datos
+    fetchData(); // Llamar a la función para obtener los datos
+  }, [url]);
 
-  }, [url]); // Solo la URL como dependencia necesaria
+  const createData = async (data) => {
+    try {
+      const pedidoData = {
+        userId: data.userId, // ID del usuario
+        email: data.email, // Email del cliente
+        total: data.total, // Total del pedido
+        products: data.products, // Array de productos
+        direccion: data.direccion, // Dirección de envío
+        casa: data.casa, // Casa de envío
+        telefono: data.telefono, // Teléfono de contacto
+        state: data.state, // Estado de envío
+      };
+  
+      const res = await API.post(url, pedidoData); // Crear nuevo pedido
+      setDb((prevDb) => [...prevDb, res.data]); // Actualizar db con el nuevo pedido
+    } catch (error) {
+      console.error('Error al crear el pedido:', error.response ? error.response.data : error.message); // Log del error detallado
+      setError(error.response ? error.response.data : error.message);
+    }
+  };
+  
 
-  const createData = (data) => {
-    const options = {
-      body: data,
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    api.post(url, options).then((res) => {
-      if (!res.err) {
-        setDb((prevDb) => [...prevDb, res]); // Actualizar el estado de manera segura
-      } else {
-        setError(res);
-      }
-    });
+  const updateData = async (data) => {
+    const endpoint = `${url}/${data._id}`; // MongoDB usa _id en lugar de id
+    try {
+      const res = await API.put(endpoint, data); // Actualizar el pedido
+      setDb((prevDb) => prevDb.map((el) => (el._id === data._id ? res.data : el)));
+    } catch (error) {
+      setError(error.response ? error.response.data : error.message);
+    }
   };
 
-  const updateData = (data) => {
-    const endpoint = `${url}/${data.id}`;
-    const options = {
-      body: data,
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    api.put(endpoint, options).then((res) => {
-      if (!res.err) {
-        setDb((prevDb) => prevDb.map((el) => (el.id === data.id ? res : el))); // Actualizar el estado de manera segura
-      } else {
-        setError(res);
-      }
-    });
-  };
-
-  const deleteData = (id) => {
+  const deleteData = async (id) => {
     const endpoint = `${url}/${id}`;
-    const options = {
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    api.del(endpoint, options).then((res) => {
-      if (!res.err) {
-        setDb((prevDb) => prevDb.filter((el) => el.id !== id)); // Actualizar el estado de manera segura
-      } else {
-        setError(res);
-      }
-    });
+    try {
+      await API.delete(endpoint); // Eliminar pedido
+      setDb((prevDb) => prevDb.filter((el) => el._id !== id)); // Actualizar db después de eliminar
+    } catch (error) {
+      setError(error.response ? error.response.data : error.message);
+    }
   };
 
-  // Proveer el contexto a los componentes hijos
   return (
     <CrudContextPedidos.Provider value={{ db, createData, updateData, deleteData, dataToEdit, setDataToEdit, error, loading }}>
       {children}
@@ -89,5 +82,4 @@ export function CrudProviderPedidos({ children }) {
 // Hook personalizado para usar el contexto
 export const useCrudContextPedidos = () => useContext(CrudContextPedidos);
 
-// Exportar el contexto para su uso en otros archivos
 export default CrudContextPedidos;

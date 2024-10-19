@@ -50,27 +50,17 @@ export const getProductById = async (req, res) => {
 
 // Actualizar un producto
 export const updateProduct = async (req, res) => {
+  const { id } = req.params; // Asegúrate de recibir el id correcto del producto
   try {
-    const { id } = req.params;
-    const { name, category, price, imageUrl, stock, status } = req.body;
-    
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      { name, category, price, imageUrl, stock, status },
-      { new: true } // Retorna el producto actualizado
-    );
-    
+    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, { new: true });
     if (!updatedProduct) {
       return res.status(404).json({ message: 'Producto no encontrado' });
     }
-
     res.status(200).json(updatedProduct);
   } catch (error) {
-    console.error('Error al actualizar el producto:', error);
-    res.status(500).json({ message: 'Error al actualizar el producto' });
+    res.status(500).json({ message: 'Error al actualizar el producto', error });
   }
 };
-
 // Eliminar un producto
 export const deleteProduct = async (req, res) => {
   try {

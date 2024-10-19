@@ -2,6 +2,7 @@
 import { createContext, useContext, useState } from "react";
 import API from '../api/api'; // Importar la instancia de Axios
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 export const CrudContextForms = createContext();
 
@@ -64,23 +65,35 @@ const CrudProvider = ({ children }) => {
     }
   };
 
-  // Función para actualizar otros datos del usuario
-  const updateUser = async (updatedData) => {
-    if (!currentUser) return; // Agrega chequeo para currentUser
-  
+
+  const updateUser = async (userId, userData) => {
     try {
-      const res = await API.patch(`/auth/users/${currentUser.id}`, updatedData);
-      if (res.data) {
-        const updatedUser = { ...currentUser, ...res.data.user };
-        setCurrentUser(updatedUser);
-        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-        console.log("Usuario actualizado:", updatedUser);
+      // Obtener el token del localStorage
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        throw new Error("No se encontró un token de autenticación. El usuario no está autenticado.");
       }
-    } catch (err) {
-      setError(err.response?.data || err);
-      console.error("Error actualizando usuario:", err);
+  
+      // Hacer la solicitud PATCH con el token en los encabezados
+      const response = await axios.patch(
+        `http://localhost:4000/api/auth/users/${userId}`,
+        userData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Agregar el token en los encabezados
+          },
+        }
+      );
+  
+      console.log('Usuario actualizado correctamente:', response.data);
+    } catch (error) {
+      console.error('Error actualizando usuario:', error);
     }
   };
+  
+
+
 
   const data = {
     error,

@@ -70,6 +70,27 @@ export const register = async (req, res) => {
   }
 };
 
+export const updateUser = async (req, res) => {
+  const { id } = req.params; // ID del usuario a actualizar
+  const updateData = req.body; // Los datos que deseas actualizar
+
+  try {
+    // Buscar y actualizar al usuario por su ID
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
+
+    // Si el usuario no existe, devolver un error 404
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+
+    // Devolver el usuario actualizado
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error('Error al actualizar el usuario:', error);
+    res.status(500).json({ message: 'Error al actualizar el usuario.', error });
+  }
+};
+
 // Login de usuario
 export const login = async (req, res) => {
   try {

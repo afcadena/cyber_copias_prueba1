@@ -36,7 +36,7 @@ export default function Catalog() {
   const { currentUser } = useCrudContextForms();
   const { addToCart } = useCart();
 
-  const { db: products, loading, error } = useContext(CrudContext);  // Acceder a los productos del contexto
+  const { db: products, loading, error } = useContext(CrudContext); // Acceder a los productos del contexto
   const categoriesRef = useRef(null);
   const mainContentRef = useRef(null);
 
@@ -46,17 +46,10 @@ export default function Catalog() {
   }, [initialCategory]);
 
   // Filtrar y ordenar productos basados en la búsqueda del usuario
-  const filteredProducts = (products || []).filter(product => 
+  const filteredProducts = Array.isArray(products) ? products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (categoryFilter === "Todos" || product.category === categoryFilter)
-).sort((a, b) => {
-    if (sortOrder === "priceLowToHigh") return a.price - b.price;
-    if (sortOrder === "priceHighToLow") return b.price - a.price;
-    if (sortOrder === "bestSellers") return b.sales - a.sales;
-    if (sortOrder === "newest") return new Date(b.releaseDate) - new Date(a.releaseDate);
-    return 0;
-  });
-
+  ) : [];
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts?.slice(indexOfFirstProduct, indexOfLastProduct);
@@ -149,8 +142,8 @@ export default function Catalog() {
             {/* Product grid */}
             <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {currentProducts.map((product) => (
-                <Card 
-                  key={product.id} 
+                <Card key={product._id}
+
                   className="flex flex-col justify-between cursor-pointer group transition-transform duration-200 hover:scale-105"
                   onClick={() => handleProductClick(product)} 
                 >

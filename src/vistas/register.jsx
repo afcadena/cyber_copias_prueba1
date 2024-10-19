@@ -1,4 +1,3 @@
-// src/vistas/register.js
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +20,7 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formError, setFormError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [justRegistered, setJustRegistered] = useState(false);
   const navigate = useNavigate();
 
   const validatePassword = (password) => {
@@ -52,22 +52,13 @@ export default function Register() {
       return;
     }
   
-    // Validación adicional para el nombre
-    if (name.trim() === "") {
-      setFormError("El nombre no puede estar vacío.");
-      return;
-    }
-  
     const newUser = { name, surname, email, password };
     const response = await registerUser(newUser);
   
     if (response) {
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        navigate('/login');
-      }, 3000);
-    } else {
+      setJustRegistered(true); // Establecer que el usuario acaba de registrarse
+      navigate('/login', { replace: true });
+    }else {
       setFormError("Ocurrió un error al registrar el usuario.");
     }
   };

@@ -19,18 +19,24 @@ export default function Login() {
   const [userRole, setUserRole] = useState(null); 
   const navigate = useNavigate();
   const location = useLocation(); 
+  const [justRegistered, setJustRegistered] = useState(false);
+
   const from = location.state?.from || '/homecli'; 
 
   useEffect(() => {
     if (currentUser) {
-      // Si currentUser cambia y es un admin, redirige inmediatamente.
+      if (justRegistered) {
+        // No redirijas inmediatamente si el usuario acaba de registrarse
+        localStorage.removeItem('justRegistered'); // Limpiar el estado
+        return;
+      }
       if (currentUser.role === 'admin') {
         navigate('/admin');
       } else {
         navigate(from);
       }
     }
-  }, [currentUser, navigate, from]);
+  }, [currentUser, navigate, from, justRegistered]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

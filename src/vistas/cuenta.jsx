@@ -189,7 +189,6 @@ const UpdateAddressModal = ({ address, onUpdate, onClose }) => {
   );
 };
 
-// Componente para mostrar y editar el perfil del usuario
 const ProfileContent = () => {
   const { userData, setUserData } = useContext(CuentaContext);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -201,7 +200,7 @@ const ProfileContent = () => {
   const handleUpdate = (newData) => {
     setUserData((prevUserData) => ({
       ...prevUserData,
-      ...newData, // Combina el objeto anterior con el nuevo
+      ...newData,
     }));
   };
 
@@ -223,12 +222,9 @@ const ProfileContent = () => {
           <Label>Email</Label>
           <p>{userData.email}</p>
         </div>
-        
         <div className="space-y-2">
           <Label>Teléfono</Label>
-          <p>
-            +57 {userData.telefono ? userData.telefono.slice(2) : ""}
-          </p>
+          <p>+57 {userData.telefono ? userData.telefono.slice(2) : ""}</p>
         </div>
       </CardContent>
       <CardFooter>
@@ -323,18 +319,17 @@ const AddressesContent = () => {
   );
 };
 
-// Componente para mostrar los pedidos del usuario
 const OrdersContent = () => {
   const { userData } = useContext(CuentaContext);
   const [pedidos, setPedidos] = useState([]);
-  const { db: products } = useProducts(); // Traer los productos del contexto
+  const { db: products } = useProducts();
 
   useEffect(() => {
     const fetchPedidos = async () => {
       try {
-        const response = await fetch('http://localhost:3000/pedidos');
-        const data = await response.json();
-        setPedidos(data);
+        const response = await axios.get('http://localhost:4000/api/pedidos');
+        console.log("Pedidos obtenidos:", response.data);
+        setPedidos(response.data);
       } catch (error) {
         console.error("Error al obtener los pedidos:", error);
       }
@@ -355,8 +350,9 @@ const OrdersContent = () => {
 
   const nombreCompleto = `${userData.name} ${userData.surname}`.replace(/\s+/g, ' ').trim();
   
+  // Filtrar pedidos basados en el cliente
   const pedidosFiltrados = pedidos.filter(pedido => 
-    pedido.cliente.replace(/\s+/g, ' ').trim() === nombreCompleto
+    pedido.cliente.replace(/\s+/g, ' ').trim() === userData.email // Cambia a userData.email si quieres filtrar por email
   );
 
   return (
@@ -367,13 +363,13 @@ const OrdersContent = () => {
       <CardContent>
         {pedidosFiltrados.length > 0 ? (
           pedidosFiltrados.map((pedido) => (
-            <Card key={pedido.id} className="mb-4">
+            <Card key={pedido._id} className="mb-4">
               <CardHeader>
-                <CardTitle>Pedido #{pedido.id}</CardTitle>
+                <CardTitle>Pedido #{pedido._id}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p><strong>Estado:</strong> {pedido.estado}</p>
-                <p><strong>Fecha:</strong> {pedido.fecha}</p>
+                <p><strong>Fecha:</strong> {new Date(pedido.fecha).toLocaleDateString("es-CO")}</p> {/* Formato de fecha */}
                 <p><strong>Total:</strong> ${pedido.total.toLocaleString('es-CO')}</p>
                 <div className="mt-4">
                   <strong>Productos:</strong>
@@ -400,7 +396,7 @@ const OrdersContent = () => {
                   <p><strong>Dirección:</strong> {pedido.shippingDetails?.direccion || "No disponible"}</p>
                   <p><strong>Casa/Apartamento:</strong> {pedido.shippingDetails?.casa || "No disponible"}</p>
                   <p><strong>Teléfono:</strong> {pedido.shippingDetails?.telefono || "No disponible"}</p>
-                  <p><strong>Estado:</strong> {pedido.shippingDetails?.state || "No disponible"}</p>
+                  <p><strong>Estado de Envío:</strong> {pedido.shippingDetails?.state || "No disponible"}</p>
                 </div>
               </CardContent>
             </Card>
@@ -412,6 +408,7 @@ const OrdersContent = () => {
     </Card>
   );
 };
+
 
 // Componente principal de la cuenta
 export default function Cuenta() {

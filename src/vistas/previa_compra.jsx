@@ -15,37 +15,46 @@ export default function CartPreview() {
   const { currentUser } = useCrudContextForms(); 
   const navigate = useNavigate();  
 
+  // Calcular el subtotal y total
   const subtotal = cart ? cart.reduce((total, product) => total + product.price * product.quantity, 0) : 0;
   const total = subtotal;
 
   const [showModal, setShowModal] = useState(false);
 
+  // Manejo de la cantidad de productos
   const handleQuantityChange = (productId, newQuantity) => {
-    const product = db.find(item => item.id === productId); 
+    const product = db.find(item => item._id === productId);  // Cambiar a _id para MongoDB
 
-    if (newQuantity < 1) {
+    if (!product) {
+      console.error("Producto no encontrado");
       return;
     }
 
-    if (product && newQuantity > product.stock) {
+    if (newQuantity < 1) {
+      return; // No permitir cantidad menor a 1
+    }
+
+    if (newQuantity > product.stock) {
       console.log("No hay suficiente stock disponible");
-      return;
+      return; // Verificar que la cantidad no exceda el stock disponible
     }
 
     updateQuantity(productId, newQuantity);
   };
 
+  // Continuar con la compra
   const handleContinuePurchase = () => {
     if (!currentUser || currentUser.role !== 'cliente') {
       setShowModal(true);
       setTimeout(() => {
         navigate('/login', { state: { from: '/carrito' } });
-      }, 10000); // Redirige después de 10 segundos
+      }, 10000); // Redirigir después de 10 segundos
     } else {
       navigate('/carrito');
     }
   };
 
+  // Redirigir al catálogo
   const handleGoToCatalog = () => {
     navigate('/catalogo'); // Redirige al catálogo
   };
@@ -69,7 +78,7 @@ export default function CartPreview() {
             </CardHeader>
             <CardContent className="space-y-4">
               {cart && cart.length > 0 ? cart.map((product) => (
-                <div key={product.id} className="flex items-center space-x-4 py-2 border-b">
+                <div key={product._id} className="flex items-center space-x-4 py-2 border-b"> {/* Cambiar id a _id */}
                   <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded" />
                   <div className="flex-grow">
                     <h3 className="font-semibold text-gray-800">{product.name}</h3>
@@ -80,7 +89,7 @@ export default function CartPreview() {
                       size="sm"
                       variant="outline"
                       className="bg-transparent border-gray-400 text-gray-800"
-                      onClick={() => handleQuantityChange(product.id, product.quantity - 1)}
+                      onClick={() => handleQuantityChange(product._id, product.quantity - 1)}  // Cambiar id a _id
                       disabled={product.quantity <= 1}
                     >
                       <Minus className="h-4 w-4" />
@@ -90,7 +99,8 @@ export default function CartPreview() {
                       size="sm"
                       variant="outline"
                       className="bg-transparent border-gray-400 text-gray-800"
-                      onClick={() => handleQuantityChange(product.id, product.quantity + 1)}
+                      onClick={() => handleQuantityChange(product._id, product.quantity + 1)}  // Cambiar id a _id
+                      disabled={product.quantity >= product.stock}  // Verificar que no exceda el stock
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -98,7 +108,7 @@ export default function CartPreview() {
                       size="sm"
                       variant="outline"
                       className="bg-transparent border-gray-400 text-gray-800"
-                      onClick={() => removeFromCart(product.id)}
+                      onClick={() => removeFromCart(product._id)}  // Cambiar id a _id
                     >
                       Eliminar
                     </Button>

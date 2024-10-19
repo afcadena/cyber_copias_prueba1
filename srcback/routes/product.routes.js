@@ -19,7 +19,7 @@ router.get('/:id', getProductById);
 router.post('/', createProduct);
 
 // Actualizar un producto por ID
-router.put('/:id', updateProduct);
+router.patch('/:id', updateProduct);
 
 // Eliminar un producto por ID
 router.delete('/:id', deleteProduct);
