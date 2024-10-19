@@ -50,9 +50,20 @@ export default function Catalog() {
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (categoryFilter === "Todos" || product.category === categoryFilter)
   ) : [];
+  
+  // Ordenar productos en base a la opción seleccionada
+  const sortedProducts = filteredProducts.sort((a, b) => {
+    if (sortOrder === "priceHighToLow") {
+      return b.price - a.price; // Mayor precio a menor
+    } else if (sortOrder === "priceLowToHigh") {
+      return a.price - b.price; // Menor precio a mayor
+    }
+    return 0; // Sin cambios si es "Recomendados"
+  });
+  
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts?.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
