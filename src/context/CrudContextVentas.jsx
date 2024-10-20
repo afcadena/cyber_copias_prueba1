@@ -1,5 +1,7 @@
+// src/context/CrudContextVentas.js
+
 import { createContext, useState, useEffect, useContext } from 'react';
-import { helpHttp } from '../helpers/helpHttp';
+import API from '../api/api'; // Importar la instancia de API
 
 // Crear el contexto
 const CrudContextVentas = createContext();
@@ -11,71 +13,58 @@ export function CrudProviderVentas({ children }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const api = helpHttp();
-  const url = 'http://localhost:3000/ventas'; // URL del endpoint de ventas
-
   useEffect(() => {
-    setLoading(true);
-    api.get(url).then((res) => {
-      if (!res.err) {
-        setDb(res);
-        setError(null);
-      } else {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await API.get('/ventas');
+        setDb(response.data);
+      } catch (error) {
+        setError(error);
         setDb([]);
-        setError(res);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
-  }, [url]);
-
-  const createData = (data) => {
-    const options = {
-      body: data,
-      headers: { 'Content-Type': 'application/json' },
     };
 
-    api.post(url, options).then((res) => {
-      if (!res.err) {
-        setDb((prevDb) => [...prevDb, res]);
-      } else {
-        setError(res);
-      }
-    });
+    fetchData();
+  }, []);
+
+  const createData = async (data) => {
+    try {
+      const response = await API.post('/ventas', data);
+      setDb((prevDb) => [...prevDb, response.data]);
+    } catch (error) {
+      setError(error);
+    }
   };
 
-  const updateData = (data) => {
-    const endpoint = `${url}/${data.id}`;
-    const options = {
-      body: data,
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    api.put(endpoint, options).then((res) => {
-      if (!res.err) {
-        const updatedDb = db.map((el) => (el.id === data.id ? data : el));
-        setDb(updatedDb);
-      } else {
-        setError(res);
-      }
-    });
+  const updateData = async (data) => {
+    const endpoint = `/ventas/${data.id}`;
+    try {
+      const response = await API.put(endpoint, data);
+      const updatedDb = db.map((el) => (el.id === data.id ? response.data : el));
+      setDb(updatedDb);
+    } catch (error) {
+      setError(error);
+    }
   };
 
-  const deleteData = (id) => {
-    const endpoint = `${url}/${id}`;
-    const options = {
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    api.del(endpoint, options).then((res) => {
-      if (!res.err) {
-        const updatedDb = db.filter((el) => el.id !== id);
-        setDb(updatedDb);
-      } else {
-        setError(res);
+  const deleteData = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:4000/api/ventas/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al eliminar la venta');
       }
-    });
+      // Actualiza el estado para eliminar la venta de la lista localmente si es necesario
+      console.log(`Venta con ID ${id} eliminada con éxito.`);
+    } catch (error) {
+      console.error('Error al eliminar la venta:', error);
+    }
   };
-
+  
   // Proveer el contexto a los componentes hijos
   return (
     <CrudContextVentas.Provider value={{ db, createData, updateData, deleteData, dataToEdit, setDataToEdit, error, loading }}>

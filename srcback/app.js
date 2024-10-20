@@ -8,6 +8,7 @@ import cartRoutes from './routes/cart.routes.js';
 import productRoutes from './routes/product.routes.js';
 import pedidoRoutes from './routes/pedido.routes.js';
 import proveedorRoutes from './routes/provider.routes.js';
+import ventaRoutes from './routes/venta.routes.js'; // Importar las rutas de ventas
 
 
 const app = express();
@@ -26,6 +27,8 @@ app.use('/api/cart', cartRoutes); // Ruta para carritox
 app.use('/api/products', productRoutes); // Ruta para productos
 app.use('/api/pedidos', pedidoRoutes); // Asignar las rutas de pedidos a /api/pedidos
 app.use('/api/providers', proveedorRoutes);
+// Usar las rutas de ventas
+app.use('/api/ventas', ventaRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
