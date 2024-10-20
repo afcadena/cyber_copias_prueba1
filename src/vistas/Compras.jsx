@@ -1,11 +1,12 @@
-import { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, CalendarDays, TrendingUp, Plus, Edit, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DollarSign, CalendarDays, TrendingUp, Plus, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import CrudContextInventario from '../context/CrudContextInventario'; 
 import CrudContextCompras from '../context/CrudContextCompras'; 
 import CrudContextProveedores from '../context/CrudContextProveedores'; 
@@ -21,6 +22,11 @@ export default function GestionCompras() {
   const [productos, setProductos] = useState([]);
   const [compraToDelete, setCompraToDelete] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filterTerm, setFilterTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
   useEffect(() => {
     console.log('Productos Inventario:', productosInventario);
@@ -46,7 +52,7 @@ export default function GestionCompras() {
 
   const confirmDelete = () => {
     if (compraToDelete) {
-      deleteData(compraToDelete.id);
+      deleteData(compraToDelete._id);
       setIsConfirmDeleteOpen(false);
     }
   };
@@ -60,7 +66,7 @@ export default function GestionCompras() {
   };
 
   const handleProductSelect = (id, productoId) => {
-    const selectedProduct = productosInventario.find(prod => prod.id === productoId);
+    const selectedProduct = productosInventario.find(prod => prod._id === productoId);
     if (selectedProduct) {
       setProductos(productos.map(producto =>
         producto.id === id
@@ -83,17 +89,27 @@ export default function GestionCompras() {
     ? comprasCompletadas.reduce((sum, compra) => sum + compra.total, 0) / comprasCompletadas.length
     : 0;
 
+  const totalProductos = useMemo(() => {
+    return productos.reduce((sum, producto) => sum + (producto.cantidad * producto.precio), 0);
+  }, [productos]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const proveedorId = formData.get('proveedor');
     const fecha = formData.get('fecha');
-    const total = productos.reduce((sum, p) => sum + p.cantidad * p.precio, 0);
 
-    if (proveedorId && fecha && total > 0) {
-      const compraData = { proveedorId, fecha, total, productos, estado: 'Completada' };
+    if (proveedorId && fecha && totalProductos > 0) {
+      const compraData = {
+        proveedor: proveedorId,
+        fecha: new Date(fecha).toISOString(),
+        total: totalProductos,
+        productos,
+        estado: 'Completada'
+      };
+
       if (currentCompra) {
-        updateData({ ...currentCompra, ...compraData });
+        updateData({ ...currentCompra, ...compraData, _id: currentCompra._id });
       } else {
         createData(compraData);
       }
@@ -104,169 +120,260 @@ export default function GestionCompras() {
     }
   };
 
+  const sortedCompras = React.useMemo(() => {
+    let sortableCompras = [...compras];
+    if (sortConfig.key !== null) {
+      sortableCompras.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableCompras;
+  }, [compras, sortConfig]);
+
+  const filteredCompras = sortedCompras.filter(compra =>
+    compra._id.toLowerCase().includes(filterTerm.toLowerCase()) ||
+    compra.fecha.toLowerCase().includes(filterTerm.toLowerCase()) ||
+    compra.total.toString().includes(filterTerm)
+  );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCompras = filteredCompras.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
   return (
-    <div className="container mx-auto p-6 overflow-hidden">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-extrabold flex items-center">
-          <DollarSign className="mr-3 h-9 w-9" />
+    <div className="container mx-auto p-6 space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold flex items-center">
+          <DollarSign className="mr-2 h-8 w-8" />
           Gestión de Compras
         </h1>
-        <div className="flex items-center space-x-6">
-          <Button onClick={handleNewCompra} className="bg-blue-600 text-white hover:bg-blue-700">
-            <Plus className="mr-2 h-5 w-5" /> Nueva Compra
-          </Button>
+        <Button onClick={handleNewCompra} className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Plus className="mr-2 h-4 w-4" /> Nueva Compra
+        </Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Compras Totales</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${totalCompras.toFixed(2)}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Promedio de Compras</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${promedioCompras.toFixed(2)}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Última Compra</CardTitle>
+            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {compras.length > 0 ? new Date(compras[compras.length - 1].fecha).toLocaleDateString() : 'N/A'}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="bg-background rounded-md border">
+        <div className="p-4 flex items-center justify-between">
+          <Input
+            type="text"
+            placeholder="Filtrar Compras..."
+            value={filterTerm}
+            onChange={(e) => setFilterTerm(e.target.value)}
+            className="max-w-sm"
+          />
+          <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Compras por página" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5 por página</SelectItem>
+              <SelectItem value="10">10 por página</SelectItem>
+              <SelectItem value="20">20 por página</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-3 mb-8">
-        <Card className="bg-white shadow-lg border border-gray-200 overflow-hidden">
-          <CardHeader className="flex items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-md font-semibold">Compras Totales</CardTitle>
-            <DollarSign className="h-5 w-5 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">${totalCompras.toFixed(2)}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-lg border border-gray-200 overflow-hidden">
-          <CardHeader className="flex items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-md font-semibold">Promedio de Compras</CardTitle>
-            <TrendingUp className="h-5 w-5 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">${promedioCompras.toFixed(2)}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-lg border border-gray-200 overflow-hidden">
-          <CardHeader className="flex items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-md font-semibold">Última Compra</CardTitle>
-            <CalendarDays className="h-5 w-5 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">{compras[compras.length - 1]?.fecha || 'N/A'}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Proveedor</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead className="cursor-pointer" onClick={() => requestSort('_id')}>ID</TableHead>
+              <TableHead className="cursor-pointer" onClick={() => requestSort('fecha')}>Fecha</TableHead>
+              <TableHead className="cursor-pointer" onClick={() => requestSort('total')}>Total</TableHead>
+              <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {compras.map((compra) => {
-              const proveedor = proveedores.find(p => p.id === compra.proveedorId);
-              return (
-                <TableRow key={compra.id} className="hover:bg-gray-50">
-                  <TableCell className="font-medium">{compra.id}</TableCell>
-                  <TableCell>{compra.fecha}</TableCell>
-                  <TableCell>{proveedor ? proveedor.nombre : 'Desconocido'}</TableCell>
-                  <TableCell>${compra.total.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button onClick={() => handleEditCompra(compra)} className="bg-blue-600 text-white hover:bg-blue-700 mr-2">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button onClick={() => handleDeleteCompra(compra)} className="bg-red-600 text-white hover:bg-red-700">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {currentCompras.map(compra => (
+              <TableRow key={compra._id}>
+                <TableCell className="font-medium">{compra._id}</TableCell>
+                <TableCell>{new Date(compra.fecha).toLocaleDateString()}</TableCell>
+                <TableCell>${compra.total.toFixed(2)}</TableCell>
+                <TableCell>
+                  <Button onClick={() => handleEditCompra(compra)} variant="ghost" size="sm" className="mr-2">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button onClick={() => handleDeleteCompra(compra)} variant="ghost" size="sm">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
-      </div>
-
-      {/* Modal de Confirmación de Eliminación */}
-      <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
-        <DialogContent className="flex flex-col justify-center items-center p-6">
-          <DialogHeader>
-            <DialogTitle>Confirmar Eliminación</DialogTitle>
-          </DialogHeader>
-          <p className="text-lg mb-4">¿Estás seguro de que deseas eliminar esta compra?</p>
-          <div className="flex space-x-4">
-            <Button onClick={confirmDelete} className="bg-red-600 text-white hover:bg-red-700">
-              Eliminar
+        <div className="flex items-center justify-between p-4">
+          <p className="text-sm text-muted-foreground">
+            Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, filteredCompras.length)} de {filteredCompras.length} compras
+          </p>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button onClick={() => setIsConfirmDeleteOpen(false)} className="bg-gray-600 text-white hover:bg-gray-700">
-              Cancelar
+            {Array.from({ length: Math.ceil(filteredCompras.length / itemsPerPage) }).map((_, index) => (
+              <Button
+                key={index}
+                variant={currentPage === index + 1 ? "default" : "outline"}
+                size="sm"
+                onClick={() => paginate(index + 1)}
+              >
+                {index + 1}
+              </Button>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === Math.ceil(filteredCompras.length / itemsPerPage)}
+            >
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
 
-      {/* Modal de Compra */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="w-full max-w-4xl p-6">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>{currentCompra ? 'Editar Compra' : 'Nueva Compra'}</DialogTitle>
           </DialogHeader>
-          {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="proveedor" className="block mb-2">Proveedor</Label>
-                <select name="proveedor" id="proveedor" className="border border-gray-300 rounded-lg p-2 w-full" defaultValue={currentCompra?.proveedorId || ''}>
-                  <option value="">Seleccionar Proveedor</option>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="proveedor">Proveedor</Label>
+              <Select name="proveedor" defaultValue={currentCompra ? currentCompra.proveedor : ''}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione un proveedor" />
+                </SelectTrigger>
+                <SelectContent>
                   {proveedores.map(proveedor => (
-                    <option key={proveedor.id} value={proveedor.id}>{proveedor.nombre}</option>
+                    <SelectItem key={proveedor._id} value={proveedor._id}>{proveedor.nombre}</SelectItem>
                   ))}
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="fecha" className="block mb-2">Fecha</Label>
-                <Input type="date" name="fecha" id="fecha" defaultValue={currentCompra?.fecha || ''} />
-              </div>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="my-6">
-              <h2 className="text-lg font-bold mb-4">Productos</h2>
-              <div className="space-y-4">
-                {productos.map(producto => (
-                  <div key={producto.id} className="flex items-center space-x-4 border-b border-gray-200 pb-4">
-                    <select
-                      value={producto.productoId}
-                      onChange={(e) => handleProductSelect(producto.id, e.target.value)}
-                      className="border border-gray-300 rounded-lg p-2 w-1/3"
-                    >
-                      <option value="">Seleccionar Producto</option>
+
+            <div className="space-y-2">
+              <Label htmlFor="fecha">Fecha</Label>
+              <Input 
+                type="date" 
+                id="fecha" 
+                name="fecha" 
+                defaultValue={currentCompra ? new Date(currentCompra.fecha).toISOString().slice(0, 10) : ''} 
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Productos</Label>
+              {productos.map(producto => (
+                <div key={producto.id} className="flex items-center space-x-2 mb-2">
+                  <Select value={producto.productoId} onValueChange={(value) => handleProductSelect(producto.id, value)}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Seleccione un producto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      
                       {productosInventario.map(prod => (
-                        <option key={prod.id} value={prod.id}>{prod.name}</option>
+                        <SelectItem key={prod._id} value={prod._id}>{prod.name}</SelectItem>
                       ))}
-                    </select>
-                    <Input
-                      type="number"
-                      value={producto.cantidad}
-                      onChange={(e) => handleQuantityChange(producto.id, e.target.value)}
-                      className="border border-gray-300 rounded-lg p-2 w-1/4"
-                      min="1"
-                    />
-                    <div className="w-1/4 text-center">
-                      ${producto.precio.toFixed(2)}
-                    </div>
-                    <Button onClick={() => handleRemoveProduct(producto.id)} className="bg-red-600 text-white hover:bg-red-700">
-                      Eliminar
-                    </Button>
-                  </div>
-                ))}
-                <Button onClick={handleAddProduct} className="bg-green-600 text-white hover:bg-green-700 mt-4">
-                  Añadir Producto
-                </Button>
-              </div>
-            </div>
-            <div className="text-right mt-6">
-              <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700">
-                {currentCompra ? 'Actualizar Compra' : 'Guardar Compra'}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    value={producto.cantidad}
+                    onChange={(e) => handleQuantityChange(producto.id, e.target.value)}
+                    min="1"
+                    className="w-20"
+                  />
+                  <span className="w-24 text-right">${(producto.cantidad * producto.precio).toFixed(2)}</span>
+                  <Button type="button" variant="destructive" size="sm" onClick={() => handleRemoveProduct(producto.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" onClick={handleAddProduct} variant="outline" size="sm">
+                <Plus className="h-4 w-4 mr-2" /> Agregar Producto
               </Button>
             </div>
+
+            <div className="flex justify-between items-center pt-4 border-t">
+              <span className="font-semibold">Total:</span>
+              <span className="text-xl font-bold">${totalProductos.toFixed(2)}</span>
+            </div>
+
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">Guardar</Button>
+            </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Eliminación</DialogTitle>
+          </DialogHeader>
+          <p>¿Estás seguro de que deseas eliminar esta compra?</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Eliminar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -9,6 +9,7 @@ import productRoutes from './routes/product.routes.js';
 import pedidoRoutes from './routes/pedido.routes.js';
 import proveedorRoutes from './routes/provider.routes.js';
 import ventaRoutes from './routes/venta.routes.js'; // Importar las rutas de ventas
+import comprasRouter from './routes/compra.routes.js'
 
 
 const app = express();
@@ -29,7 +30,7 @@ app.use('/api/pedidos', pedidoRoutes); // Asignar las rutas de pedidos a /api/pe
 app.use('/api/providers', proveedorRoutes);
 // Usar las rutas de ventas
 app.use('/api/ventas', ventaRoutes);
-
+app.use('/api/compras', comprasRouter);
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.send('¡API funcionando correctamente!');

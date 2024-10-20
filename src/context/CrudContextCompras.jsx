@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
-import { helpHttp } from '../helpers/helpHttp';
+import API from '../api/api'; // Importa la configuración de Axios
 
 const CrudContextCompras = createContext();
 
@@ -9,69 +9,54 @@ export function CrudProviderCompras({ children }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const api = helpHttp();
-  const url = 'http://localhost:3000/compras';
+  const url = '/compras'; // Ruta relativa, ya que la baseURL está configurada en API
 
   useEffect(() => {
     setLoading(true);
-    api.get(url).then((res) => {
-      if (!res.err) {
-        setDb(res);
+    API.get(url)
+      .then((res) => {
+        setDb(res.data); // Accedemos a la data directamente del response
         setError(null);
-      } else {
+      })
+      .catch((err) => {
+        setError(err);
         setDb([]);
-        setError(res);
-      }
-      setLoading(false);
-    });
+      })
+      .finally(() => setLoading(false));
   }, [url]);
 
   const createData = (data) => {
-    const options = {
-      body: data,
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    api.post(url, options).then((res) => {
-      if (!res.err) {
-        setDb((prevDb) => [...prevDb, res]);
-      } else {
-        setError(res);
-      }
-    });
+    API.post(url, data)
+      .then((res) => {
+        setDb((prevDb) => [...prevDb, res.data]); // Se añade la nueva compra
+      })
+      .catch((err) => {
+        setError(err);
+      });
   };
 
   const updateData = (data) => {
-    const endpoint = `${url}/${data.id}`;
-    const options = {
-      body: data,
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    api.put(endpoint, options).then((res) => {
-      if (!res.err) {
-        const updatedDb = db.map((el) => (el.id === data.id ? data : el));
+    const endpoint = `${url}/${data._id}`;
+    API.put(endpoint, data)
+      .then((res) => {
+        const updatedDb = db.map((el) => (el._id === data._id ? data : el));
         setDb(updatedDb);
-      } else {
-        setError(res);
-      }
-    });
+      })
+      .catch((err) => {
+        setError(err);
+      });
   };
 
   const deleteData = (id) => {
     const endpoint = `${url}/${id}`;
-    const options = {
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    api.del(endpoint, options).then((res) => {
-      if (!res.err) {
-        const updatedDb = db.filter((el) => el.id !== id);
+    API.delete(endpoint)
+      .then(() => {
+        const updatedDb = db.filter((el) => el._id !== id);
         setDb(updatedDb);
-      } else {
-        setError(res);
-      }
-    });
+      })
+      .catch((err) => {
+        setError(err);
+      });
   };
 
   return (
