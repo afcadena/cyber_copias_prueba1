@@ -15,35 +15,25 @@ const generateToken = (user) => {
 
 export const register = async (req, res) => {
   try {
-    // Verificar errores de validación
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log('Errores de validación:', errors.array());
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    console.log('Datos de Registro Recibidos:', req.body); // Log del cuerpo de la solicitud
-
     const { name, surname, email, password, direccion, telefono, casa } = req.body;
 
     // Verificar si el usuario ya existe
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log('El usuario ya existe con email:', email);
       return res.status(400).json({ message: 'El usuario ya existe.' });
     }
 
     // Determinar el rol basado en el nombre
-    const role = name.startsWith('admin') ? 'admin' : 'cliente';
+    const role = name.toLowerCase().startsWith('admin') ? 'admin' : 'cliente'; // Se asigna 'admin' si el nombre comienza con 'admin'
 
-    // Crear el nuevo usuario con los campos opcionales
+    // Crear el nuevo usuario
     const newUser = new User({
       name,
       surname,
       email,
       password, // Se hasheará en el modelo
-      role, // Asignar el rol determinado
-      direccion: direccion || '', // Asigna cadena vacía si no se proporciona
+      role, // Asignar rol basado en el nombre
+      direccion: direccion || '', 
       telefono: telefono || '',
       casa: casa || ''
     });
@@ -51,22 +41,12 @@ export const register = async (req, res) => {
     // Guardar el nuevo usuario
     await newUser.save();
 
-    // Generar el token JWT
+    // Generar token JWT
     const token = generateToken(newUser);
-
-    console.log('Usuario registrado exitosamente:', newUser.email);
 
     res.status(201).json({ user: newUser, token });
   } catch (error) {
-    // Manejo de errores de validación de Mongoose
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(val => val.message);
-      console.log('Errores de validación de Mongoose:', messages);
-      return res.status(400).json({ message: messages.join(', ') });
-    }
-
-    console.error('Error en el registro:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 

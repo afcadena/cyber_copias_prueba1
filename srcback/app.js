@@ -6,7 +6,8 @@ import { MONGODB_URI } from './config.js'; // Importa MONGODB_URI desde config.j
 import authRoutes from './routes/auth.routes.js';
 import cartRoutes from './routes/cart.routes.js';
 import productRoutes from './routes/product.routes.js';
-import pedidoRoutes from './routes/pedido.routes.js'
+import pedidoRoutes from './routes/pedido.routes.js';
+import proveedorRoutes from './routes/provider.routes.js';
 
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/cart', cartRoutes); // Ruta para carritox
 app.use('/api/products', productRoutes); // Ruta para productos
 app.use('/api/pedidos', pedidoRoutes); // Asignar las rutas de pedidos a /api/pedidos
+app.use('/api/providers', proveedorRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

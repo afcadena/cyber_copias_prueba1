@@ -2,6 +2,7 @@ import express from 'express';
 import { register, login, getCurrentUser, logout, updateUser } from '../controllers/auth.controller.js'; // Importa el controlador updateUser
 import { body, validationResult } from 'express-validator';
 import authMiddleware from '../middlewares/auth.middlewares.js';
+import adminMiddleware from '../middlewares/admin.middleware.js';
 
 const router = express.Router();
 
@@ -34,5 +35,9 @@ router.post('/logout', logout);
 
 // Nueva ruta para actualizar los datos del usuario
 router.patch('/users/:id', authMiddleware, updateUser); // Ruta para actualizar usuario autenticado
+
+router.get('/admin-only', authMiddleware, adminMiddleware, (req, res) => {
+  res.json({ message: 'Ruta solo para administradores' });
+});
 
 export default router;

@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { helpHttp } from "../helpers/helpHttp";
+import API from "../api/api"; // Asegúrate de que la ruta sea correcta
 
 const CrudContextProveedores = createContext();
 
@@ -9,81 +9,58 @@ const CrudProviderProveedores = ({ children }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  let api = helpHttp();
-  let url = "http://localhost:3000/providers"; // URL de la API de proveedores
+  let url = "/providers"; // URL de la API Express/MongoDB
 
   useEffect(() => {
     setLoading(true);
-    api.get(url).then((res) => {
-      if (!res.err) {
-        // Asegúrate de que los IDs estén en formato de cadena
-        const updatedData = res.map((item) => ({
-          ...item,
-          id: item.id.toString(), // Convertir el ID a cadena
-        }));
-        setDb(updatedData);
+    API.get(url)
+      .then((res) => {
+        setDb(res.data.map(item => ({ ...item, id: item._id }))); // Asegúrate de convertir el _id a id
         setError(null);
-      } else {
+      })
+      .catch((err) => {
         setDb([]);
-        setError(res);
-      }
-      setLoading(false);
-    });
+        setError(err.response.data); // Maneja el error adecuadamente
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [url]);
 
   const createData = (data) => {
-    // Asegúrate de que el ID sea una cadena al crear el nuevo registro
-    const newData = {
-      ...data,
-      id: Date.now().toString(), // Convertir el ID a cadena
-    };
-
-    let options = {
-      body: newData,
-      headers: { "content-type": "application/json" },
-    };
-
-    api.post(url, options).then((res) => {
-      if (!res.err) {
-        setDb([...db, res]);
-      } else {
-        setError(res);
-      }
-    });
+    API.post(url, data)
+      .then((res) => {
+        setDb([...db, { ...res.data, id: res.data._id }]); // Asegúrate de agregar el _id
+      })
+      .catch((err) => {
+        setError(err.response.data); // Maneja el error
+      });
   };
 
   const updateData = (data) => {
     let endpoint = `${url}/${data.id}`;
-  
-    let options = {
-      body: data,
-      headers: { "content-type": "application/json" },
-    };
 
-    api.put(endpoint, options).then((res) => {
-      if (!res.err) {
-        let newData = db.map((el) => (el.id === data.id ? res : el));
+    API.put(endpoint, data)
+      .then((res) => {
+        let newData = db.map((el) => (el.id === data.id ? { ...res.data, id: res.data._id } : el));
         setDb(newData);
-      } else {
-        setError(res);
-      }
-    });
+      })
+      .catch((err) => {
+        setError(err.response.data); // Maneja el error
+      });
   };
 
   const deleteData = (id) => {
     let endpoint = `${url}/${id}`;
-    let options = {
-      headers: { "content-type": "application/json" },
-    };
 
-    api.del(endpoint, options).then((res) => {
-      if (!res.err) {
+    API.delete(endpoint)
+      .then(() => {
         let newData = db.filter((el) => el.id !== id);
         setDb(newData);
-      } else {
-        setError(res);
-      }
-    });
+      })
+      .catch((err) => {
+        setError(err.response.data); // Maneja el error
+      });
   };
 
   const data = {

@@ -1,9 +1,9 @@
-// src/context/CrudContextForms.js
 import { createContext, useContext, useState } from "react";
 import API from '../api/api'; // Importar la instancia de Axios
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
+// Crear el contexto
 export const CrudContextForms = createContext();
 
 const CrudProvider = ({ children }) => {
@@ -65,16 +65,16 @@ const CrudProvider = ({ children }) => {
     }
   };
 
-
+  // Función para actualizar al usuario
   const updateUser = async (userId, userData) => {
     try {
       // Obtener el token del localStorage
       const token = localStorage.getItem("token");
-  
+
       if (!token) {
         throw new Error("No se encontró un token de autenticación. El usuario no está autenticado.");
       }
-  
+
       // Hacer la solicitud PATCH con el token en los encabezados
       const response = await axios.patch(
         `http://localhost:4000/api/auth/users/${userId}`, // Usa el ID correcto aquí
@@ -85,7 +85,7 @@ const CrudProvider = ({ children }) => {
           },
         }
       );
-  
+
       console.log('Usuario actualizado correctamente:', response.data);
       return response.data;
     } catch (error) {
@@ -93,8 +93,10 @@ const CrudProvider = ({ children }) => {
     }
   };
 
+  // Verificar si el usuario es administrador
+  const isAdmin = () => currentUser?.role === 'admin';
 
-
+  // Datos que se pasan al contexto
   const data = {
     error,
     loginUser,
@@ -103,6 +105,7 @@ const CrudProvider = ({ children }) => {
     currentUser,
     updateUserAddress,
     updateUser,
+    isAdmin,
   };
 
   return (
