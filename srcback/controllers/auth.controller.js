@@ -26,7 +26,7 @@ export const register = async (req, res) => {
     // Determinar el rol basado en el nombre
     const role = name.toLowerCase().startsWith('admin') ? 'admin' : 'cliente'; // Se asigna 'admin' si el nombre comienza con 'admin'
 
-    // Crear el nuevo usuario
+    // Crear el nuevo usuario con el estado por defecto "Active"
     const newUser = new User({
       name,
       surname,
@@ -35,7 +35,8 @@ export const register = async (req, res) => {
       role, // Asignar rol basado en el nombre
       direccion: direccion || '', 
       telefono: telefono || '',
-      casa: casa || ''
+      casa: casa || '',
+      status: 'Active' // Agregar el estado inicial 'Active'
     });
 
     // Guardar el nuevo usuario
@@ -138,5 +139,37 @@ export const logout = async (req, res) => {
   } catch (error) {
     console.error('Error en el logout:', error);
     return res.status(500).json({ message: 'Error al cerrar sesión' });
+  }
+};
+
+
+
+// Obtener todos los usuarios
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find(); // Consulta para obtener todos los usuarios
+    res.json(users); // Enviar la lista de usuarios en formato JSON
+  } catch (err) {
+    res.status(500).json({ message: err.message }); // Enviar el error en caso de fallo
+  }
+};
+
+
+export const toggleUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Cambiar el estado
+    user.status = user.status === 'Active' ? 'Blocked' : 'Active';
+    await user.save();
+
+    res.json({ message: `El estado del usuario ha sido actualizado a ${user.status}` });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar el estado del usuario' });
   }
 };

@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, Edit, Trash2, Search, Mail, Phone, MapPin } from 'lucide-react';
@@ -31,7 +30,8 @@ export default function GestionProveedores() {
   };
 
   const handleEditProveedor = (proveedor) => {
-    setDataToEdit(proveedor);
+    setCurrentProveedor(proveedor);
+    setIsOpen(true);
   };
 
   const handleDeleteProveedor = (proveedor) => {
@@ -65,6 +65,7 @@ export default function GestionProveedores() {
       createData(newProveedor);
     }
     setIsOpen(false);
+    setCurrentProveedor(null);
   };
 
   const filteredProveedores = proveedores?.filter(proveedor =>
@@ -78,19 +79,19 @@ export default function GestionProveedores() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
         <h1 className="text-3xl font-bold">Gestión de Proveedores</h1>
-        <div className="flex items-center space-x-4">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input 
-              className="pl-10 pr-4 w-64" 
+              className="pl-10 pr-4 w-full" 
               placeholder="Buscar proveedores..." 
               value={searchTerm} 
               onChange={(e) => setSearchTerm(e.target.value)} 
             />
           </div>
-          <Button onClick={handleNewProveedor}>
+          <Button onClick={handleNewProveedor} className="w-full sm:w-auto">
             <UserPlus className="mr-2 h-4 w-4" /> Nuevo Proveedor
           </Button>
         </div>
@@ -158,7 +159,10 @@ export default function GestionProveedores() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) setCurrentProveedor(null);
+      }}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
@@ -171,25 +175,27 @@ export default function GestionProveedores() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="nombre">Nombre</Label>
-              <Input id="nombre" name="nombre" defaultValue={currentProveedor?.nombre || ''} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="contacto">Contacto</Label>
-              <Input id="contacto" name="contacto" defaultValue={currentProveedor?.contacto || ''} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="telefono">Teléfono</Label>
-              <Input id="telefono" name="telefono" defaultValue={currentProveedor?.telefono || ''} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" defaultValue={currentProveedor?.email || ''} />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nombre">Nombre</Label>
+                <Input id="nombre" name="nombre" defaultValue={currentProveedor?.nombre || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contacto">Contacto</Label>
+                <Input id="contacto" name="contacto" defaultValue={currentProveedor?.contacto || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="telefono">Teléfono</Label>
+                <Input id="telefono" name="telefono" defaultValue={currentProveedor?.telefono || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" defaultValue={currentProveedor?.email || ''} />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="direccion">Dirección</Label>
-              <Textarea id="direccion" name="direccion" defaultValue={currentProveedor?.direccion || ''} />
+              <Input id="direccion" name="direccion" defaultValue={currentProveedor?.direccion || ''} />
             </div>
             <DialogFooter>
               <Button type="submit">

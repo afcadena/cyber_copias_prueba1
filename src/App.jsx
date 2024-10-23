@@ -14,19 +14,18 @@ import Register from './vistas/register';
 import ProtectedRoute from './context/protectedRoute';
 import HomeCliente from './vistas/homecli';
 import { CartProvider } from './context/CartContext';
-// Importar las nuevas vistas para administración
 import InventoryManagement from './vistas/Inventario';
 import GestionPedidos from './vistas/Pedidos';
 import GestionProveedores from './vistas/Proveedores';
 import GestionVentas from './vistas/Ventas';
-import GestionCompras from './vistas/Compras'; // Nueva vista
+import GestionCompras from './vistas/Compras';
 import CartPreview from './vistas/previa_compra';
+import GestionUsuarios from './vistas/gestion_usuarios';
 
-// Importar los proveedores de contexto
 import { CrudProviderProveedores } from './context/CrudContextProveedores';
 import { CrudProviderPedidos } from './context/CrudContextPedidos';
-import { CrudProviderCompras } from './context/CrudContextCompras'; // Importar el proveedor de compras
-import { CrudProviderVentas } from './context/CrudContextVentas'; // Importar el proveedor de ventas
+import { CrudProviderCompras } from './context/CrudContextCompras';
+import { CrudProviderVentas } from './context/CrudContextVentas';
 
 import './App.css';
 
@@ -47,7 +46,7 @@ function App() {
                       <Route path="/register" element={<Register />} />
                       <Route path="/catalogo" element={<Catalog />} />
                       <Route path="/carrito" element={<CarritoDeCompras />} />
-                      <Route path="/previa" element={< CartPreview/>} />
+                      <Route path="/previa" element={<CartPreview />} />
                       <Route path="/producto/:id" element={<ProductDetail />} />
 
                       {/* Rutas protegidas del cliente */}
@@ -60,14 +59,15 @@ function App() {
                       {/* Rutas protegidas del admin */}
                       <Route path="/admin" element={
                         <ProtectedRoute role="admin">
-                          <AdminLayout /> {/* AdminLayout maneja todas las rutas de administración */}
+                          <AdminLayout />
                         </ProtectedRoute>
                       }>
                         <Route path="inventario" element={<InventoryManagement />} />
                         <Route path="providers" element={<GestionProveedores />} />
-                        <Route path="orders" element={<GestionPedidos />} />  {/* Pedidos */}
-                        <Route path="purchases" element={<GestionCompras />} /> {/* Compras */}
-                        <Route path="sales" element={<GestionVentas />} />  {/* Ventas */}
+                        <Route path="orders" element={<GestionPedidos />} />
+                        <Route path="purchases" element={<GestionCompras />} />
+                        <Route path="sales" element={<GestionVentas />} />
+                        <Route path="users" element={<GestionUsuarios />} />
                       </Route>
 
                       {/* Ruta protegida de cuenta */}

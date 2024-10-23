@@ -1,9 +1,8 @@
-import { createContext, useContext, useState } from "react";
-import API from '../api/api'; // Importar la instancia de Axios
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import API from '../api/api';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
-// Crear el contexto
 export const CrudContextForms = createContext();
 
 const CrudProvider = ({ children }) => {
@@ -12,6 +11,8 @@ const CrudProvider = ({ children }) => {
     const savedUser = localStorage.getItem("currentUser");
     return savedUser ? JSON.parse(savedUser) : null;
   });
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   // Función para registrar un nuevo usuario
@@ -68,20 +69,18 @@ const CrudProvider = ({ children }) => {
   // Función para actualizar al usuario
   const updateUser = async (userId, userData) => {
     try {
-      // Obtener el token del localStorage
       const token = localStorage.getItem("token");
 
       if (!token) {
         throw new Error("No se encontró un token de autenticación. El usuario no está autenticado.");
       }
 
-      // Hacer la solicitud PATCH con el token en los encabezados
       const response = await axios.patch(
-        `http://localhost:4000/api/auth/users/${userId}`, // Usa el ID correcto aquí
+        `http://localhost:4000/api/auth/users/${userId}`,
         userData,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Agregar el token en los encabezados
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -96,7 +95,55 @@ const CrudProvider = ({ children }) => {
   // Verificar si el usuario es administrador
   const isAdmin = () => currentUser?.role === 'admin';
 
-  // Datos que se pasan al contexto
+  // Obtener todos los usuarios
+  const getAllUsers = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+      const response = await API.get('/auth/users', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUsers(response.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setError(error.message);
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Actualizar el estado del usuario
+const toggleUserStatus = async (userId) => {
+  try {
+    const user = users.find((u) => u._id === userId); // Verifica el campo '_id'
+    
+    if (!user) {
+      throw new Error(`Usuario con ID ${userId} no encontrado`);
+    }
+
+    const updatedStatus = user.status === 'Active' ? 'Blocked' : 'Active';
+    
+    // Actualiza el estado del usuario en la base de datos
+    await API.patch(`/auth/users/${userId}/status`, { status: updatedStatus });
+    
+    // Actualiza el estado del usuario en el frontend
+    setUsers(users.map(u => (u._id === userId ? { ...u, status: updatedStatus } : u)));
+  } catch (err) {
+    setError(err.message || err.response?.data);
+    console.error("Error al actualizar el estado del usuario:", err);
+  }
+};
+
+
+  useEffect(() => {
+    if (currentUser && currentUser.role === 'admin') {
+      getAllUsers();
+    }
+  }, [currentUser]);
+
   const data = {
     error,
     loginUser,
@@ -106,6 +153,10 @@ const CrudProvider = ({ children }) => {
     updateUserAddress,
     updateUser,
     isAdmin,
+    users,
+    getAllUsers,
+    toggleUserStatus,
+    isLoading,
   };
 
   return (
@@ -115,7 +166,6 @@ const CrudProvider = ({ children }) => {
   );
 };
 
-// Hook personalizado para usar el contexto
 const useCrudContextForms = () => {
   const context = useContext(CrudContextForms);
   if (!context) {

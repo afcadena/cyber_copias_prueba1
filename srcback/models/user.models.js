@@ -1,4 +1,3 @@
-// srcback/models/User.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -10,7 +9,8 @@ const UserSchema = new mongoose.Schema({
   role: { type: String, enum: ['cliente', 'admin'], default: 'cliente' },
   direccion: { type: String },
   telefono: { type: String },
-  casa: { type: String }
+  casa: { type: String },
+  status: { type: String, enum: ['Active', 'Blocked'], default: 'Active' } // Campo para bloquear/desbloquear usuarios
 });
 
 // Método para hashear la contraseña antes de guardar
