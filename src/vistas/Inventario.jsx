@@ -1,4 +1,4 @@
-import { useState, useContext, useMemo } from 'react';
+import React, { useState, useContext, useMemo, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PencilIcon, PlusIcon, SearchIcon, ChevronUpIcon, ChevronDownIcon, ChevronsUpDown } from 'lucide-react';
+import { PencilIcon, PlusIcon, SearchIcon, ChevronUpIcon, ChevronDownIcon, ChevronsUpDown, Upload } from 'lucide-react';
 import CrudContext from '../context/CrudContextInventario';
 
 export default function Inventory() {
@@ -24,14 +24,11 @@ export default function Inventory() {
     price: "",
     stock: "",
     status: "active",
+    image: null,
     imageUrl: "",
   });
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  // Sorting state
+  const [itemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
   const filteredProducts = useMemo(() => {
@@ -71,55 +68,84 @@ export default function Inventory() {
     }
   };
 
-  const handleAddProduct = () => {
-    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newProduct.imageUrl) {
-      setErrorMessage("Todos los campos deben ser completados.");
+  const handleImageUpload = useCallback(async (file) => {
+    if (!file) return;
+  
+    const formData = new FormData();
+    formData.append('image', file);
+  
+    try {
+      const response = await fetch('http://localhost:4000/api/products/upload', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al subir la imagen');
+      }
+  
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error('Error al subir la imagen:', error);
+      setErrorMessage(`Error al subir la imagen: ${error.message}`);
+      setIsErrorDialogOpen(true);
+      return null;
+    }
+  }, []);
+
+  const handleAddProduct = async () => {
+    if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.stock || !newProduct.image) {
+      setErrorMessage("Todos los campos son requeridos, incluyendo la imagen.");
       setIsErrorDialogOpen(true);
       return;
     }
   
-    const price = parseFloat(newProduct.price);
-    let stock = parseInt(newProduct.stock);
+    try {
+      const imageUrl = await handleImageUpload(newProduct.image);
+      if (!imageUrl) {
+        throw new Error("Error al subir la imagen");
+      }
   
-    if (isNaN(price) || price < 0) {
-      setErrorMessage("El precio debe ser un número positivo.");
+      const productData = {
+        ...newProduct,
+        imageUrl,
+        price: parseFloat(newProduct.price),
+        stock: parseInt(newProduct.stock),
+        status: parseInt(newProduct.stock) < 5 ? "low" : "active"
+      };
+  
+      const response = await fetch('http://localhost:4000/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al crear el producto');
+      }
+  
+      setNewProduct({
+        name: "",
+        category: "",
+        price: "",
+        stock: "",
+        status: "active",
+        image: null,
+      });
+      setIsSuccessDialogOpen(true);
+    } catch (error) {
+      console.error('Error:', error);
+      setErrorMessage(error.message);
       setIsErrorDialogOpen(true);
-      return;
     }
-  
-    if (isNaN(stock) || stock < 0) {
-      setErrorMessage("El stock debe ser un número entero positivo.");
-      setIsErrorDialogOpen(true);
-      return;
-    }
-  
-    const status = stock < 5 ? "low" : "active";
-  
-    const productToAdd = {
-      ...newProduct,
-      id: Date.now(),
-      price,
-      stock,
-      status,
-      ratings: 0,
-      reviews: 0,
-    };
-  
-    createData(productToAdd);
-  
-    setNewProduct({
-      name: "",
-      category: "",
-      price: "",
-      stock: "",
-      status: "active",
-      imageUrl: "",
-    });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editingProduct) {
-      if (!editingProduct.name || !editingProduct.category || !editingProduct.price || !editingProduct.stock || !editingProduct.imageUrl) {
+      if (!editingProduct.name || !editingProduct.category || !editingProduct.price || !editingProduct.stock) {
         setErrorMessage("Todos los campos deben ser completados.");
         setIsErrorDialogOpen(true);
         return;
@@ -142,13 +168,25 @@ export default function Inventory() {
   
       const status = stock < 5 ? "low" : "active";
   
-      updateData({ ...editingProduct, price, stock, status });
-      setEditingProduct(null);
-      setIsSuccessDialogOpen(true);
-  
-      setTimeout(() => {
-        setIsSuccessDialogOpen(false);
-      }, 2000);
+      try {
+        let imageUrl = editingProduct.imageUrl;
+        if (editingProduct.newImage) {
+          imageUrl = await handleImageUpload(editingProduct.newImage, true);
+          if (!imageUrl) {
+            setErrorMessage("Error al subir la nueva imagen. Por favor, inténtalo de nuevo.");
+            setIsErrorDialogOpen(true);
+            return;
+          }
+        }
+
+        await updateData({ ...editingProduct, price, stock, status, imageUrl });
+        setEditingProduct(null);
+        setIsSuccessDialogOpen(true);
+      } catch (error) {
+        console.error('Error updating product:', error);
+        setErrorMessage("Error al actualizar el producto. Por favor, inténtalo de nuevo.");
+        setIsErrorDialogOpen(true);
+      }
     }
   };
 
@@ -187,7 +225,6 @@ export default function Inventory() {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="category" className="text-right">Categoría</Label>
                 <Select
-                  id="category"
                   value={newProduct.category}
                   onValueChange={(value) => setNewProduct({ ...newProduct, category: value })}
                 >
@@ -226,14 +263,23 @@ export default function Inventory() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="imageUrl" className="text-right">Imagen (URL)</Label>
-                <Input
-                  id="imageUrl"
-                  type="text"
-                  value={newProduct.imageUrl}
-                  onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
-                  className="col-span-3"
-                />
+                <Label htmlFor="image" className="text-right">Imagen</Label>
+                <div className="col-span-3 flex items-center space-x-2">
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setNewProduct({ ...newProduct, image: e.target.files[0] })}
+                    className="hidden"
+                  />
+                  <Label htmlFor="image" className="cursor-pointer flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Subir Imagen
+                  </Label>
+                  {newProduct.image && (
+                    <span className="text-sm text-gray-500">{newProduct.image.name}</span>
+                  )}
+                </div>
               </div>
             </div>
             <DialogFooter>
@@ -287,7 +333,7 @@ export default function Inventory() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[200px] cursor-pointer" onClick={() => requestSort('name')}>
-                Nombre {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ChevronUpIcon className="inline" /> : <ChevronDownIcon className="inline" />)}
+                Nombre {sortConfig.key === 'name'   && (sortConfig.direction === 'ascending' ? <ChevronUpIcon className="inline" /> : <ChevronDownIcon className="inline" />)}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => requestSort('category')}>
                 Categoría {sortConfig.key === 'category' && (sortConfig.direction === 'ascending' ? <ChevronUpIcon className="inline" /> : <ChevronDownIcon className="inline" />)}
@@ -335,7 +381,7 @@ export default function Inventory() {
                       variant={product.status === "active" ? "destructive" : "default"}
                       size="sm"
                     >
-                      {product.status ===   "active" ? "Marcar Bajo stock" : "Marcar Activo"}
+                      {product.status === "active" ? "Marcar Bajo stock" : "Marcar Activo"}
                     </Button>
                   </div>
                 </TableCell>
@@ -399,7 +445,6 @@ export default function Inventory() {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-category" className="text-right">Categoría</Label>
                 <Select
-                  id="edit-category"
                   value={editingProduct.category}
                   onValueChange={(value) => setEditingProduct({ ...editingProduct, category: value })}
                   disabled={editingProduct.status === "low"}
@@ -438,14 +483,25 @@ export default function Inventory() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-image" className="text-right">Imagen (URL)</Label>
-                <Input
-                  id="edit-image"
-                  type="text"
-                  value={editingProduct.imageUrl}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, imageUrl: e.target.value })}
-                  className="col-span-3"
-                />
+                <Label htmlFor="edit-image" className="text-right">Imagen</Label>
+                <div className="col-span-3 flex items-center space-x-2">
+                  <Input
+                    id="edit-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setEditingProduct({ ...editingProduct, newImage: e.target.files[0] })}
+                    className="hidden"
+                  />
+                  <Label htmlFor="edit-image" className="cursor-pointer flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Cambiar Imagen
+                  </Label>
+                  {editingProduct.newImage ? (
+                    <span className="text-sm text-gray-500">{editingProduct.newImage.name}</span>
+                  ) : editingProduct.imageUrl ? (
+                    <img src={editingProduct.imageUrl} alt="Preview" className="w-10 h-10 object-cover rounded" />
+                  ) : null}
+                </div>
               </div>
             </div>
           )}
@@ -462,7 +518,7 @@ export default function Inventory() {
           <DialogHeader>
             <DialogTitle>Éxito</DialogTitle>
           </DialogHeader>
-          <p className="text-green-600">Los cambios se han guardado exitosamente.</p>
+          <p className="text-green-600">La operación se ha completado exitosamente.</p>
         </DialogContent>
       </Dialog>
 

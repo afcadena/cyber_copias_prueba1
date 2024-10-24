@@ -1,31 +1,27 @@
 import express from 'express';
+import multer from 'multer';
 import {
   createProduct,
   getProducts,
   getProductById,
   updateProduct,
   deleteProduct,
-  addReview // Importar la nueva función
+  addReview,
+  uploadImage // Nueva función para manejar la carga de imágenes
 } from '../controllers/product.controller.js';
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
-// Obtener todos los productos
+// Rutas existentes
 router.get('/', getProducts);
-
-// Obtener un producto por ID
 router.get('/:id', getProductById);
-
-// Crear un nuevo producto
 router.post('/', createProduct);
-
-// Actualizar un producto por ID
 router.put('/:id', updateProduct);
-
-// Eliminar un producto por ID
 router.delete('/:id', deleteProduct);
+router.post('/:id/reviews', addReview);
 
-// Nueva ruta para agregar reseñas
-router.post('/:id/reviews', addReview); // Ruta para agregar reseñas
+// Nueva ruta para cargar imágenes
+router.post('/upload', upload.single('image'), uploadImage);
 
 export default router;
