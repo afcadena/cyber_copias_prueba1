@@ -178,9 +178,9 @@ export default function GestionUsuarios() {
                               onClick={() => setUserToBlock(user)}
                             >
                               {user.status === 'Active' ? (
-                                <><Lock className="h-4 w-4 mr-1" /> Bloquear</>
+                                <><Lock className="h-4 w-4 mr-1" /> Inhabilitar</>
                               ) : (
-                                <><Unlock className="h-4 w-4 mr-1" /> Desbloquear</>
+                                <><Unlock className="h-4 w-4 mr-1" /> Habilitar</>
                               )}
                             </Button>
                           </AlertDialogTrigger>

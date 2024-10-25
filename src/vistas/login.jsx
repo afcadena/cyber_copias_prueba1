@@ -53,7 +53,7 @@ export default function Login() {
         } else {
           navigate(from, { replace: true }); // Si es cliente, redirige a la URL previa o a /homecli
         }
-      }, 15000); // Duración de la alerta en milisegundos (15 segundos)
+      }, 5000); // Duración de la alerta en milisegundos (15 segundos)
     } else {
       setFormError("Credenciales incorrectas. Inténtalo de nuevo.");
     }

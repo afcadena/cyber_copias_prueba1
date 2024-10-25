@@ -67,7 +67,7 @@ export default function CarritoDeCompras() {
         break;
       case "telefono":
         errors.telefono = value
-          ? /^3\d{10}$/.test(value)
+          ? /^3\d{9}$/.test(value)
             ? ""
             : "Teléfono inválido (11 dígitos, comenzando con 3)"
           : "Teléfono es requerido";
