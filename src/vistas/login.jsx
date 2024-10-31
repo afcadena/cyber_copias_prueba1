@@ -26,8 +26,7 @@ export default function Login() {
   useEffect(() => {
     if (currentUser) {
       if (justRegistered) {
-        // No redirijas inmediatamente si el usuario acaba de registrarse
-        localStorage.removeItem('justRegistered'); // Limpiar el estado
+        localStorage.removeItem('justRegistered');
         return;
       }
       if (currentUser.role === 'admin') {
@@ -45,15 +44,15 @@ export default function Login() {
     if (user) {
       setUserRole(user.role); 
       setShowWelcome(true);
-      console.log("Usuario autenticado:", user); // Verifica la autenticación
+      console.log("Usuario autenticado:", user);
       setTimeout(() => {
-        setShowWelcome(false); // Ocultar la alerta
+        setShowWelcome(false);
         if (user.role === 'admin') {
-          navigate('/admin'); // Si es admin, redirige al panel de administrador
+          navigate('/admin');
         } else {
-          navigate(from, { replace: true }); // Si es cliente, redirige a la URL previa o a /homecli
+          navigate(from, { replace: true });
         }
-      }, 5000); // Duración de la alerta en milisegundos (15 segundos)
+      }, 5000);
     } else {
       setFormError("Credenciales incorrectas. Inténtalo de nuevo.");
     }
@@ -64,65 +63,65 @@ export default function Login() {
       <Header />
 
       <main className="flex-grow">
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-8">
           <Card className="w-full max-w-md">
             <CardHeader>
-              <CardTitle>Iniciar Sesión</CardTitle>
-              <CardDescription>Ingresa a CyberCopias</CardDescription>
+              <CardTitle className="text-2xl sm:text-3xl">Iniciar Sesión</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Ingresa a CyberCopias</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                  {(formError || error) && <p className="text-red-500">{formError || error.statusText}</p>}
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Correo Electrónico</Label>
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                {(formError || error) && <p className="text-red-500 text-sm sm:text-base">{formError || error.statusText}</p>}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm sm:text-base">Correo Electrónico</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="tu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="text-sm sm:text-base"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm sm:text-base">Contraseña</Label>
+                  <div className="relative">
                     <Input
-                      id="email"
-                      type="email"
-                      placeholder="tu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required
+                      className="text-sm sm:text-base pr-10"
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Contraseña</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-                      </Button>
-                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                    </Button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full mt-6">Iniciar Sesión</Button>
+                <Button type="submit" className="w-full mt-4 sm:mt-6 text-sm sm:text-base">Iniciar Sesión</Button>
               </form>
             </CardContent>
             <CardFooter className="flex justify-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 ¿No tienes una cuenta? <a href="./register" className="text-blue-600 hover:underline">Regístrate</a>
               </p>
             </CardFooter>
           </Card>
 
           {showWelcome && (
-            <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white p-8 rounded shadow-lg">
-                <h2 className="text-xl font-semibold">¡Bienvenido!</h2>
-                <p>Has iniciado sesión con éxito. {userRole === 'admin' ? "Eres un Administrador" : "Eres un Cliente"}</p>
-                <p>Serás redirigido en 15 segundos...</p> {/* Cambié a 15 segundos */}
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 px-4 sm:px-0">
+              <div className="bg-white p-6 sm:p-8 rounded shadow-lg max-w-sm w-full">
+                <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4">¡Bienvenido!</h2>
+                <p className="text-sm sm:text-base mb-2">Has iniciado sesión con éxito. {userRole === 'admin' ? "Eres un Administrador" : "Eres un Cliente"}</p>
+                <p className="text-sm sm:text-base">Serás redirigido en 5 segundos...</p>
               </div>
             </div>
           )}

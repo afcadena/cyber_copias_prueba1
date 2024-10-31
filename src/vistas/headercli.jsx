@@ -11,7 +11,9 @@ import {
   Minus, 
   Plus, 
   LogOut, 
-  Trash 
+  Trash,
+  ArrowLeft,
+  Menu
 } from "lucide-react";
 import { useCrudContextForms } from "../context/CrudContextForms";
 import { useCart } from "../context/CartContext";
@@ -22,6 +24,7 @@ export default function HeaderCliente() {
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { currentUser, logoutUser } = useCrudContextForms();
   const { cart = [], updateQuantity, removeFromCart } = useCart();
@@ -32,9 +35,10 @@ export default function HeaderCliente() {
   const excludedPaths = ["/carrito", "/previa"];
   const isCartAccessible = !excludedPaths.some(path => location.pathname.startsWith(path));
   const isCatalogo = location.pathname === "/catalogo";
+  const isHomeCli = location.pathname === "/homecli";
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/products") // URL correcta para tu API
+    fetch("http://localhost:4000/api/products")
       .then(response => response.json())
       .then(data => {
         setAllProducts(data);
@@ -56,7 +60,7 @@ export default function HeaderCliente() {
   }, [searchTerm, allProducts]);
 
   const handleProductClick = (product) => {
-    navigate(`/producto/${product._id}`); // Cambiar a _id
+    navigate(`/producto/${product._id}`);
     setFilteredSuggestions([]);
   };
 
@@ -78,7 +82,7 @@ export default function HeaderCliente() {
   };
 
   const handleQuantityChange = (productId, newQuantity) => {
-    const product = allProducts.find(p => p._id === productId); // Cambiar a _id
+    const product = allProducts.find(p => p._id === productId);
   
     if (product) {
       if (newQuantity <= product.stock && newQuantity >= 1) {
@@ -113,6 +117,14 @@ export default function HeaderCliente() {
     }
   };
 
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   useEffect(() => {
     if (!isCartAccessible && isCartOpen) {
       setIsCartOpen(false);
@@ -121,76 +133,124 @@ export default function HeaderCliente() {
 
   return (
     <>
-      <header className="flex items-center justify-between px-4 py-2 bg-white shadow-md">
-        <div className="flex items-center">
-          <Link to="/homecli" className="text-xl font-bold text-primary">CyberCopias</Link>
-        </div>
-
-        {isCatalogo ? (
-          <div className="flex-1 max-w-md mx-4 flex items-center justify-center">
-            <h2 className="text-lg font-semibold text-gray-700">Explora nuestro catálogo</h2>
-          </div>
-        ) : (
-          <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4 relative">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                className="w-full py-2 pl-10 pr-4 text-gray-700 bg-white border rounded-full focus:outline-none focus:border-primary"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <button type="submit" className="absolute inset-y-0 left-0 flex items-center pl-3">
-                <Search className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-            {filteredSuggestions.length > 0 && (
-              <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-2 max-h-48 overflow-y-auto">
-                {filteredSuggestions.map((product) => (
-                  <li 
-                    key={product.id} 
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleProductClick(product)}
-                  >
-                    {product.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </form>
-        )}
-
-        <nav className="flex items-center space-x-6">
-          <Link to="/catalogo" className="flex flex-col items-center hover:text-primary">
-            <Book className="h-5 w-5" />
-            <span className="text-xs mt-1">Catálogo</span>
-          </Link>
-          <button onClick={handlePedidosClick} className="flex flex-col items-center hover:text-primary">
-            <Package className="h-5 w-5" />
-            <span className="text-xs mt-1">Pedidos</span>
-          </button>
-          {isCartAccessible && (
-            <button onClick={toggleCart} className="flex flex-col items-center hover:text-primary relative">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="text-xs mt-1">Carrito</span>
-              {cart.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  {cart.length}
-                </span>
+      <header className="bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center">
+              {!isHomeCli && (
+                <button onClick={handleBackClick} className="mr-4 text-gray-600 hover:text-primary">
+                  <ArrowLeft className="h-6 w-6" />
+                </button>
               )}
+              <Link to="/homecli" className="text-xl font-bold text-primary">CyberCopias</Link>
+            </div>
+
+            <div className="hidden md:block flex-1 max-w-md mx-4">
+              {isCatalogo ? (
+                <h2 className="text-lg font-semibold text-gray-700">Explora nuestro catálogo</h2>
+              ) : (
+                <form onSubmit={handleSearch} className="relative">
+                  <input
+                    type="text"
+                    placeholder="Buscar productos..."
+                    className="w-full py-2 pl-10 pr-4 text-gray-700 bg-white border rounded-full focus:outline-none focus:border-primary"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <button type="submit" className="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Search className="w-5 h-5 text-gray-400" />
+                  </button>
+                </form>
+              )}
+            </div>
+
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link to="/catalogo" className="flex flex-col items-center hover:text-primary">
+                <Book className="h-5 w-5" />
+                <span className="text-xs mt-1">Catálogo</span>
+              </Link>
+              <button onClick={handlePedidosClick} className="flex flex-col items-center hover:text-primary">
+                <Package className="h-5 w-5" />
+                <span className="text-xs mt-1">Pedidos</span>
+              </button>
+              {isCartAccessible && (
+                <button onClick={toggleCart} className="flex flex-col items-center hover:text-primary relative">
+                  <ShoppingCart className="h-5 w-5" />
+                  <span className="text-xs mt-1">Carrito</span>
+                  {cart.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                      {cart.length}
+                    </span>
+                  )}
+                </button>
+              )}
+              <button onClick={handleAccountClick} className="flex flex-col items-center hover:text-primary">
+                <User className="h-5 w-5" />
+                <span className="text-xs mt-1">Cuenta</span>
+              </button>
+              <button onClick={handleLogoutClick} className="flex flex-col items-center hover:text-primary">
+                <LogOut className="h-5 w-5" />
+                <span className="text-xs mt-1">Salir</span>
+              </button>
+            </nav>
+
+            <button onClick={toggleMobileMenu} className="md:hidden text-gray-600 hover:text-primary">
+              <Menu className="h-6 w-6" />
             </button>
+          </div>
+
+          {/* Mobile Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden py-4">
+              <form onSubmit={handleSearch} className="mb-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Buscar productos..."
+                    className="w-full py-2 pl-10 pr-4 text-gray-700 bg-white border rounded-full focus:outline-none focus:border-primary"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <button type="submit" className="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Search className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </form>
+              <nav className="flex flex-col space-y-4">
+                <Link to="/catalogo" className="flex items-center hover:text-primary">
+                  <Book className="h-5 w-5 mr-2" />
+                  <span>Catálogo</span>
+                </Link>
+                <button onClick={handlePedidosClick} className="flex items-center hover:text-primary">
+                  <Package className="h-5 w-5 mr-2" />
+                  <span>Pedidos</span>
+                </button>
+                {isCartAccessible && (
+                  <button onClick={toggleCart} className="flex items-center hover:text-primary relative">
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    <span>Carrito</span>
+                    {cart.length > 0 && (
+                      <span className="absolute top-0 -right-2 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                        {cart.length}
+                      </span>
+                    )}
+                  </button>
+                )}
+                <button onClick={handleAccountClick} className="flex items-center hover:text-primary">
+                  <User className="h-5 w-5 mr-2" />
+                  <span>Cuenta</span>
+                </button>
+                <button onClick={handleLogoutClick} className="flex items-center hover:text-primary">
+                  <LogOut className="h-5 w-5 mr-2" />
+                  <span>Salir</span>
+                </button>
+              </nav>
+            </div>
           )}
-          <button onClick={handleAccountClick} className="flex flex-col items-center hover:text-primary">
-            <User className="h-5 w-5" />
-            <span className="text-xs mt-1">Cuenta</span>
-          </button>
-          <button onClick={handleLogoutClick} className="flex flex-col items-center hover:text-primary">
-            <LogOut className="h-5 w-5" />
-            <span className="text-xs mt-1">Salir</span>
-          </button>
-        </nav>
+        </div>
       </header>
 
+      {/* Logout Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm mx-auto z-50">
@@ -214,7 +274,8 @@ export default function HeaderCliente() {
         </div>
       )}
 
-        <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
+      {/* Cart Sidebar */}
+      <div className={`fixed inset-y-0 right-0 w-96 bg-white shadow-xl transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
         <div className="flex flex-col h-full">
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="text-lg font-semibold">Carrito</h2>
@@ -273,7 +334,8 @@ export default function HeaderCliente() {
             </div>
             <button 
               onClick={handleContinueShopping} 
-              className={`bg-primary text-white w-full py-2 rounded ${cart.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
+              className={`bg-primary text-white w-full py-2 rounded ${cart.length === 0 ? 'opacity-50 cursor-not-allowed' : 
+              'hover:bg-blue-600'}`}
               disabled={cart.length === 0}
             >
               Continuar a la Compra

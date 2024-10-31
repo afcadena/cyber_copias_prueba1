@@ -14,7 +14,6 @@ export default function GestionVentas() {
   const { db: productosInventario, loading: inventarioLoading } = useContext(CrudContext);
   const { db: ventasDesdeContext, createData, updateData, deleteData } = useCrudContextVentas();
 
-
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -24,14 +23,12 @@ export default function GestionVentas() {
   const [errorMessage, setErrorMessage] = useState('');
   const [carrito, setCarrito] = useState([]);
   const [fechaVenta, setFechaVenta] = useState(new Date().toISOString().split("T")[0]);
-  const [ventas, setVentas] = useState(ventasDesdeContext || []); // Inicia el estado con los datos desde el contexto
+  const [ventas, setVentas] = useState(ventasDesdeContext || []);
 
-  // New state for pagination, filtering, and sorting
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filterTerm, setFilterTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
-
 
   useEffect(() => {
     fetch('http://localhost:4000/api/ventas')
@@ -63,9 +60,7 @@ export default function GestionVentas() {
   const confirmDelete = async () => {
     if (ventaToDelete) {
       try {
-        // Llama a la función de eliminar en el contexto
-        await deleteData(ventaToDelete); // Asumiendo que deleteData realiza la eliminación en el backend
-        // Actualiza el estado local para eliminar la venta
+        await deleteData(ventaToDelete);
         setVentas(prevVentas => prevVentas.filter(venta => venta._id !== ventaToDelete));
         setIsConfirmDeleteOpen(false);
         setVentaToDelete(null);
@@ -129,49 +124,43 @@ export default function GestionVentas() {
     ? ventasCompletadas.reduce((sum, venta) => sum + venta.total, 0) / ventasCompletadas.length
     : 0;
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      const total = carrito.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
-      const ventaData = {
-        productos: carrito,
-        fecha: new Date(fechaVenta),
-        estado: 'Completada',
-        total: total
-      };
-      
-      try {
-        const response = await fetch('http://localhost:4000/api/ventas', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(ventaData),
-        });
-    
-        if (!response.ok) {
-          const errorDetails = await response.json();
-          console.log("Detalles del error:", errorDetails);
-          throw new Error('Error en la solicitud de venta');
-        }
-    
-        const data = await response.json();
-        console.log("Venta creada con éxito:", data);
-        
-        // Actualiza el estado local de ventas
-        setVentas(prev => [...prev, data]);
-    
-        // Reiniciar el carrito y los productos
-        setCarrito([]); // Limpia el carrito
-        setProductos([]); // Limpia la lista de productos
-    
-        // Cerrar el modal
-        setIsOpen(false);
-      } catch (error) {
-        console.error("Error al crear la venta:", error.message);
-        setErrorMessage(error.message);
-      }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const total = carrito.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
+    const ventaData = {
+      productos: carrito,
+      fecha: new Date(fechaVenta),
+      estado: 'Completada',
+      total: total
     };
     
+    try {
+      const response = await fetch('http://localhost:4000/api/ventas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ventaData),
+      });
+  
+      if (!response.ok) {
+        const errorDetails = await response.json();
+        console.log("Detalles del error:", errorDetails);
+        throw new Error('Error en la solicitud de venta');
+      }
+  
+      const data = await response.json();
+      console.log("Venta creada con éxito:", data);
+      
+      setVentas(prev => [...prev, data]);
+      setCarrito([]);
+      setProductos([]);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error al crear la venta:", error.message);
+      setErrorMessage(error.message);
+    }
+  };
 
   const handlePreviewVenta = (venta) => {
     setCurrentVenta(venta);
@@ -195,7 +184,6 @@ export default function GestionVentas() {
     });
   };
 
-  // Sorting function
   const sortedVentas = React.useMemo(() => {
     let sortableVentas = [...ventas];
     if (sortConfig.key !== null) {
@@ -212,14 +200,12 @@ export default function GestionVentas() {
     return sortableVentas;
   }, [ventas, sortConfig]);
 
-  // Filtering function
   const filteredVentas = sortedVentas.filter(venta =>
     venta._id.toLowerCase().includes(filterTerm.toLowerCase()) ||
     venta.fecha.toLowerCase().includes(filterTerm.toLowerCase()) ||
     venta.total.toString().includes(filterTerm)
   );
 
-  // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentVentas = filteredVentas.slice(indexOfFirstItem, indexOfLastItem);
@@ -235,20 +221,18 @@ export default function GestionVentas() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold flex items-center">
-          <BarChart2 className="mr-2 h-8 w-8" />
+    <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold flex items-center">
+          <BarChart2 className="mr-2 h-6 w-6 sm:h-8 sm:w-8" />
           Gestión de Ventas
         </h1>
-        <div className="flex items-center space-x-4">
-          <Button onClick={handleNewVenta} className="bg-blue-600 text-white hover:bg-blue-700">
-            <Plus className="mr-2 h-4 w-4" /> Nueva Venta
-          </Button>
-        </div>
+        <Button onClick={handleNewVenta} className="bg-blue-600 text-white hover:bg-blue-700 w-full sm:w-auto">
+          <Plus className="mr-2 h-4 w-4" /> Nueva Venta
+        </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3 mb-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
@@ -285,16 +269,16 @@ export default function GestionVentas() {
         </Card>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden mb-6">
-        <div className="p-4 flex justify-between items-center">
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <Input
             placeholder="Filtrar ventas..."
             value={filterTerm}
             onChange={(e) => setFilterTerm(e.target.value)}
-            className="max-w-sm"
+            className="w-full sm:max-w-xs"
           />
           <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Ventas por página" />
             </SelectTrigger>
             <SelectContent>
@@ -304,52 +288,57 @@ export default function GestionVentas() {
             </SelectContent>
           </Select>
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="cursor-pointer" onClick={() => requestSort('_id')}>
-                ID {sortConfig.key === '_id' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => requestSort('fecha')}>
-                Fecha {sortConfig.key === 'fecha' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => requestSort('total')}>
-                Total {sortConfig.key === 'total' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentVentas.map((venta) => (
-              <TableRow key={venta._id} className="hover:bg-gray-50">
-                <TableCell className="font-medium">{truncateId(venta._id)}</TableCell>
-                <TableCell>{new Date(venta.fecha).toLocaleString('es-CO')}</TableCell>
-                <TableCell>${venta.total.toFixed(2)}</TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handlePreviewVenta(venta)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white mr-2"
-                  >
-                    <Eye className="h-4 w-4 mr-1" /> Vista Previa
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteVenta(venta)}
-                    className="bg-red-500 hover:bg-red-600 text-white"
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" /> Eliminar
-                  </Button>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="cursor-pointer" onClick={() => requestSort('_id')}>
+                  ID {sortConfig.key === '_id' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => requestSort('fecha')}>
+                  Fecha {sortConfig.key === 'fecha' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => requestSort('total')}>
+                  Total {sortConfig.key === 'total' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="flex items-center justify-between p-4">
+            </TableHeader>
+            <TableBody>
+              {currentVentas.map((venta) => (
+                <TableRow key={venta._id} className="hover:bg-gray-50">
+                  <TableCell className="font-medium">{truncateId(venta._id)}</TableCell>
+                  <TableCell>{new Date(venta.fecha).toLocaleString('es-CO')}</TableCell>
+                  <TableCell>${venta.total.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePreviewVenta(venta)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                      >
+                        <Eye className="h-4 w-4 mr-1" /> 
+                      
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteVenta(venta)}
+                        className="bg-red-500 hover:bg-red-600 text-white"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" /> 
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
           <p className="text-sm text-gray-700">
-            Mostrando {indexOfFirstItem + 1} a  {Math.min(indexOfLastItem, filteredVentas.length)} de {filteredVentas.length} ventas
+            Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, filteredVentas.length)} de {filteredVentas.length} ventas
           </p>
           <div className="flex items-center space-x-2">
             <Button
@@ -366,6 +355,7 @@ export default function GestionVentas() {
                 variant={currentPage === index + 1 ? "default" : "outline"}
                 size="sm"
                 onClick={() => paginate(index + 1)}
+                className="hidden sm:inline-flex"
               >
                 {index + 1}
               </Button>
@@ -401,12 +391,12 @@ export default function GestionVentas() {
             <div>
               <h2 className="text-lg font-bold mb-2">Productos:</h2>
               {productos.map((producto) => (
-                <div key={producto.id} className="flex items-center space-x-2 mb-2">
+                <div key={producto.id} className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-2">
                   <Select
                     value={producto.productoId}
                     onValueChange={(value) => handleProductSelect(producto.id, value)}
                   >
-                    <SelectTrigger className="w-[200px]">
+                    <SelectTrigger className="w-full sm:w-[200px]">
                       <SelectValue placeholder="Selecciona un producto" />
                     </SelectTrigger>
                     <SelectContent>
@@ -420,28 +410,28 @@ export default function GestionVentas() {
                     min="1"
                     value={producto.cantidad}
                     onChange={(e) => handleQuantityChange(producto.id, e.target.value)}
-                    className="w-20"
+                    className="w-full sm:w-20"
                   />
-                  <span className="w-24 text-right">{producto.precio.toFixed(2)} €</span>
-                  <Button type="button" variant="destructive" size="sm" onClick={() => handleRemoveProduct(producto.id)}>
+                  <span className="w-full sm:w-24 text-right">{producto.precio.toFixed(2)} €</span>
+                  <Button type="button" variant="destructive" size="sm" onClick={() => handleRemoveProduct(producto.id)} className="w-full sm:w-auto">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-between items-center">
-              <Button type="button" onClick={handleAddProduct} variant="outline">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <Button type="button" onClick={handleAddProduct} variant="outline" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" /> Agregar Producto
               </Button>
               <span className="font-bold">Total: {total.toFixed(2)} €</span>
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="w-full sm:w-auto">
                 Cancelar
               </Button>
-              <Button type="submit">Guardar Venta</Button>
+              <Button type="submit" className="w-full sm:w-auto">Guardar Venta</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -476,7 +466,7 @@ export default function GestionVentas() {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={() => setIsPreviewOpen(false)}>
+            <Button onClick={() => setIsPreviewOpen(false)} className="w-full sm:w-auto">
               Cerrar
             </Button>
           </DialogFooter>
@@ -490,10 +480,10 @@ export default function GestionVentas() {
           </DialogHeader>
           <p>¿Estás seguro de que deseas eliminar esta venta?</p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>
+            <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)} className="w-full sm:w-auto">
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
+            <Button variant="destructive" onClick={confirmDelete} className="w-full sm:w-auto">
               Eliminar
             </Button>
           </DialogFooter>

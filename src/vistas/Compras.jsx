@@ -157,18 +157,18 @@ export default function GestionCompras() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold flex items-center">
-          <DollarSign className="mr-2 h-8 w-8" />
+    <div className="container mx-auto px-4 py-6 space-y-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold flex items-center">
+          <DollarSign className="mr-2 h-6 w-6 sm:h-8 sm:w-8" />
           Gestión de Compras
         </h1>
-        <Button onClick={handleNewCompra} className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button onClick={handleNewCompra} className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" /> Nueva Compra
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Compras Totales</CardTitle>
@@ -203,16 +203,16 @@ export default function GestionCompras() {
       </div>
 
       <div className="bg-background rounded-md border">
-        <div className="p-4 flex items-center justify-between">
+        <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <Input
             type="text"
             placeholder="Filtrar Compras..."
             value={filterTerm}
             onChange={(e) => setFilterTerm(e.target.value)}
-            className="max-w-sm"
+            className="w-full sm:max-w-sm"
           />
           <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Compras por página" />
             </SelectTrigger>
             <SelectContent>
@@ -222,34 +222,38 @@ export default function GestionCompras() {
             </SelectContent>
           </Select>
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="cursor-pointer" onClick={() => requestSort('_id')}>ID</TableHead>
-              <TableHead className="cursor-pointer" onClick={() => requestSort('fecha')}>Fecha</TableHead>
-              <TableHead className="cursor-pointer" onClick={() => requestSort('total')}>Total</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentCompras.map(compra => (
-              <TableRow key={compra._id}>
-                <TableCell className="font-medium">{compra._id}</TableCell>
-                <TableCell>{new Date(compra.fecha).toLocaleDateString()}</TableCell>
-                <TableCell>${compra.total.toFixed(2)}</TableCell>
-                <TableCell>
-                  <Button onClick={() => handleEditCompra(compra)} variant="ghost" size="sm" className="mr-2">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button onClick={() => handleDeleteCompra(compra)} variant="ghost" size="sm">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="cursor-pointer" onClick={() => requestSort('_id')}>ID</TableHead>
+                <TableHead className="cursor-pointer" onClick={() => requestSort('fecha')}>Fecha</TableHead>
+                <TableHead className="cursor-pointer" onClick={() => requestSort('total')}>Total</TableHead>
+                <TableHead>Acciones</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="flex items-center justify-between p-4">
+            </TableHeader>
+            <TableBody>
+              {currentCompras.map(compra => (
+                <TableRow key={compra._id}>
+                  <TableCell className="font-medium">{compra._id}</TableCell>
+                  <TableCell>{new Date(compra.fecha).toLocaleDateString()}</TableCell>
+                  <TableCell>${compra.total.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button onClick={() => handleEditCompra(compra)} variant="ghost" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button onClick={() => handleDeleteCompra(compra)} variant="ghost" size="sm">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
           <p className="text-sm text-muted-foreground">
             Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, filteredCompras.length)} de {filteredCompras.length} compras
           </p>
@@ -268,6 +272,7 @@ export default function GestionCompras() {
                 variant={currentPage === index + 1 ? "default" : "outline"}
                 size="sm"
                 onClick={() => paginate(index + 1)}
+                className="hidden sm:inline-flex"
               >
                 {index + 1}
               </Button>
@@ -317,13 +322,12 @@ export default function GestionCompras() {
             <div className="space-y-2">
               <Label>Productos</Label>
               {productos.map(producto => (
-                <div key={producto.id} className="flex items-center space-x-2 mb-2">
-                  <Select value={producto.productoId} onValueChange={(value) => handleProductSelect(producto.id, value)}>
-                    <SelectTrigger className="w-[200px]">
+                <div key={producto.id} className="flex flex-col sm:flex-row items-start  sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-2">
+                  <Select value={producto.productoId} onValueChange={(value) => handleProductSelect(producto.id, value)} className="w-full sm:w-[200px]">
+                    <SelectTrigger>
                       <SelectValue placeholder="Seleccione un producto" />
                     </SelectTrigger>
                     <SelectContent>
-                      
                       {productosInventario.map(prod => (
                         <SelectItem key={prod._id} value={prod._id}>{prod.name}</SelectItem>
                       ))}
@@ -334,15 +338,15 @@ export default function GestionCompras() {
                     value={producto.cantidad}
                     onChange={(e) => handleQuantityChange(producto.id, e.target.value)}
                     min="1"
-                    className="w-20"
+                    className="w-full sm:w-20"
                   />
-                  <span className="w-24 text-right">${(producto.cantidad * producto.precio).toFixed(2)}</span>
-                  <Button type="button" variant="destructive" size="sm" onClick={() => handleRemoveProduct(producto.id)}>
+                  <span className="w-full sm:w-24 text-right">${(producto.cantidad * producto.precio).toFixed(2)}</span>
+                  <Button type="button" variant="destructive" size="sm" onClick={() => handleRemoveProduct(producto.id)} className="w-full sm:w-auto">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
-              <Button type="button" onClick={handleAddProduct} variant="outline" size="sm">
+              <Button type="button" onClick={handleAddProduct} variant="outline" size="sm" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" /> Agregar Producto
               </Button>
             </div>
@@ -355,10 +359,10 @@ export default function GestionCompras() {
             {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="w-full sm:w-auto">
                 Cancelar
               </Button>
-              <Button type="submit">Guardar</Button>
+              <Button type="submit" className="w-full sm:w-auto">Guardar</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -371,8 +375,8 @@ export default function GestionCompras() {
           </DialogHeader>
           <p>¿Estás seguro de que deseas eliminar esta compra?</p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>Cancelar</Button>
-            <Button variant="destructive" onClick={confirmDelete}>Eliminar</Button>
+            <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)} className="w-full sm:w-auto">Cancelar</Button>
+            <Button variant="destructive" onClick={confirmDelete} className="w-full sm:w-auto">Eliminar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

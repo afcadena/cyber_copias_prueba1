@@ -60,13 +60,22 @@ export default function Inventory() {
     setEditingProduct({ ...product });
   };
 
-  const handleStatusToggle = (id) => {
-    const product = products.find(product => product.id === id);
+  const handleStatusToggle = (_id) => {
+    const product = products.find((product) => product._id === _id);
+    
     if (product) {
-      const updatedProduct = { ...product, status: product.status === "active" ? "low" : "active" };
+      const updatedProduct = { 
+        ...product, 
+        status: product.status === "active" ? "low" : "active" 
+      };
+      
+      // Llama a `updateData` con el producto actualizado
       updateData(updatedProduct);
+    } else {
+      console.error("Producto no encontrado, no se puede actualizar");
     }
   };
+  
 
   const handleImageUpload = useCallback(async (file) => {
     if (!file) return;
@@ -200,15 +209,15 @@ export default function Inventory() {
 
   return (
     <div className="space-y-4 p-4 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
         <h2 className="text-2xl font-bold">Inventario</h2>
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto">
               <PlusIcon className="w-4 h-4 mr-2" /> Agregar Producto
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-background">
+          <DialogContent className="bg-background sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Agregar Nuevo Producto</DialogTitle>
             </DialogHeader>
@@ -283,7 +292,7 @@ export default function Inventory() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleAddProduct}>
+              <Button onClick={handleAddProduct} className="w-full sm:w-auto">
                 Agregar Producto
               </Button>
             </DialogFooter>
@@ -297,13 +306,13 @@ export default function Inventory() {
             placeholder="Buscar productos..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
+            className="w-full sm:max-w-xs"
           />
           <SearchIcon className="w-5 h-5 -ml-8 text-muted-foreground" />
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Categoría" />
             </SelectTrigger>
             <SelectContent>
@@ -316,7 +325,7 @@ export default function Inventory() {
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -333,15 +342,15 @@ export default function Inventory() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[200px] cursor-pointer" onClick={() => requestSort('name')}>
-                Nombre {sortConfig.key === 'name'   && (sortConfig.direction === 'ascending' ? <ChevronUpIcon className="inline" /> : <ChevronDownIcon className="inline" />)}
+                Nombre {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? <ChevronUpIcon className="inline" /> : <ChevronDownIcon className="inline" />)}
               </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => requestSort('category')}>
+              <TableHead className="cursor-pointer hidden sm:table-cell" onClick={() => requestSort('category')}>
                 Categoría {sortConfig.key === 'category' && (sortConfig.direction === 'ascending' ? <ChevronUpIcon className="inline" /> : <ChevronDownIcon className="inline" />)}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => requestSort('price')}>
                 Precio {sortConfig.key === 'price' && (sortConfig.direction === 'ascending' ? <ChevronUpIcon className="inline" /> : <ChevronDownIcon className="inline" />)}
               </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => requestSort('stock')}>
+              <TableHead className="cursor-pointer hidden sm:table-cell" onClick={() => requestSort('stock')}>
                 Stock {sortConfig.key === 'stock' && (sortConfig.direction === 'ascending' ? <ChevronUpIcon className="inline" /> : <ChevronDownIcon className="inline" />)}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => requestSort('status')}>
@@ -352,11 +361,11 @@ export default function Inventory() {
           </TableHeader>
           <TableBody>
             {paginatedProducts?.map((product) => (
-              <TableRow key={product.id}>
+              <TableRow key={product._id}>
                 <TableCell>{product.name}</TableCell>
-                <TableCell>{product.category}</TableCell>
+                <TableCell className="hidden sm:table-cell">{product.category}</TableCell>
                 <TableCell>${Number(product.price).toFixed(2)}</TableCell>
-                <TableCell>{product.stock}</TableCell>
+                <TableCell className="hidden sm:table-cell">{product.stock}</TableCell>
                 <TableCell>
                   <Badge 
                     variant={product.status === "active" ? "success" : "warning"}
@@ -371,17 +380,18 @@ export default function Inventory() {
                       onClick={() => handleEdit(product)}
                       variant="outline"
                       size="sm"
-                      disabled={product.status === "low"}  
+                      disabled={product.status === "low"}
+                      className="hidden sm:inline-flex"
                     >
                       <PencilIcon className="w-4 h-4 mr-2" />
                       Editar
                     </Button>
                     <Button 
-                      onClick={() => handleStatusToggle(product.id)}
+                      onClick={() => handleStatusToggle(product._id)}
                       variant={product.status === "active" ? "destructive" : "default"}
                       size="sm"
                     >
-                      {product.status === "active" ? "Marcar Bajo stock" : "Marcar Activo"}
+                      {product.status === "active" ? "Bajo stock" : "Activo"}
                     </Button>
                   </div>
                 </TableCell>
@@ -391,11 +401,11 @@ export default function Inventory() {
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
         <p className="text-sm text-muted-foreground">
           Mostrando {Math.min((currentPage - 1) * itemsPerPage + 1, filteredProducts?.length || 0)} a {Math.min(currentPage * itemsPerPage, filteredProducts?.length || 0)} de {filteredProducts?.length || 0} productos
         </p>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 overflow-x-auto">
           <Button
             variant="outline"
             size="sm"
@@ -410,6 +420,7 @@ export default function Inventory() {
               variant={currentPage === page ? "default" : "outline"}
               size="sm"
               onClick={() => setCurrentPage(page)}
+              className="hidden sm:inline-flex"
             >
               {page}
             </Button>
@@ -426,7 +437,7 @@ export default function Inventory() {
       </div>
 
       <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
-        <DialogContent className="bg-background">
+        <DialogContent className="bg-background sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Editar Producto</DialogTitle>
           </DialogHeader>
@@ -506,7 +517,7 @@ export default function Inventory() {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={handleSaveEdit}>
+            <Button onClick={handleSaveEdit} className="w-full sm:w-auto">
               Guardar Cambios
             </Button>
           </DialogFooter>

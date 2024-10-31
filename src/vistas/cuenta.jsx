@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, createContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { User, MapPin, Package, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import Footer from "./footer";
 import { useCrudContextForms } from '../context/CrudContextForms';
 import HeaderCli from './headercli';
 import axios from 'axios';
 import { useProducts } from "../context/CrudContextInventario";
 
-const CuentaContext = createContext();
+const CuentaContext = React.createContext();
 
 const CuentaProvider = ({ children }) => {
   const { currentUser, updateUser, refreshUser } = useCrudContextForms();
@@ -57,19 +63,19 @@ const CuentaProvider = ({ children }) => {
 const UpdateProfileModal = ({ onClose }) => {
   const { userData, updateUserData } = useContext(CuentaContext);
   const [newEmail, setNewEmail] = useState(userData.email || '');
-  const [newTelefono, setNewTelefono] = useState(userData.telefono || '');
+  const [newTelefono, setNewTelefono] = useState(userData.telefono?.slice(2) || '');
   const [phoneError, setPhoneError] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
   const validatePhone = (phone) => {
-    const regex = /^57\d{10}$/;
+    const regex = /^\d{10}$/;
     return regex.test(phone);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validatePhone(newTelefono)) {
-      setPhoneError("El teléfono debe comenzar con '57' y tener exactamente 12 dígitos.");
+      setPhoneError("El teléfono debe tener exactamente 11 dígitos.");
       return;
     }
 
@@ -77,12 +83,11 @@ const UpdateProfileModal = ({ onClose }) => {
     try {
       await updateUserData({
         email: newEmail,
-        telefono: newTelefono,
+        telefono: `57${newTelefono}`,
       });
       onClose();
     } catch (error) {
       console.error("Error updating user:", error);
-      // Mostrar mensaje de error al usuario
     } finally {
       setIsUpdating(false);
     }
@@ -91,8 +96,8 @@ const UpdateProfileModal = ({ onClose }) => {
   const handlePhoneChange = (e) => {
     const value = e.target.value;
     if (/^\d*$/.test(value)) {
-      setNewTelefono(value.startsWith('57') ? value : `57${value}`);
-      setPhoneError(validatePhone(value) ? "" : "El teléfono debe comenzar con '57' y tener exactamente 12 dígitos.");
+      setNewTelefono(value);
+      setPhoneError(validatePhone(value) ? "" : "El teléfono debe tener exactamente 11 dígitos.");
     }
   };
 
@@ -114,19 +119,24 @@ const UpdateProfileModal = ({ onClose }) => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="telefono">Teléfono</Label>
-          <Input
-            id="telefono"
-            type="text"
-            value={newTelefono}
-            onChange={handlePhoneChange}
-            required
-            maxLength={12}
-            placeholder="Ej: 573123456789"
-            className={phoneError ? "input-error" : ""}
-          />
+          <div className="flex">
+            <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md">
+              +57
+            </span>
+            <Input
+              id="telefono"
+              type="text"
+              value={newTelefono}
+              onChange={handlePhoneChange}
+              required
+              maxLength={10}
+              placeholder="1234567890"
+              className={`rounded-l-none ${phoneError ? "border-red-500" : ""}`}
+            />
+          </div>
           {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
         </div>
-        <Button type="submit" disabled={isUpdating || phoneError !== "" || newTelefono.length !== 12}>
+        <Button type="submit" disabled={isUpdating || phoneError !== "" || newTelefono.length !== 10}>
           {isUpdating ? "Actualizando..." : "Guardar cambios"}
         </Button>
       </form>
@@ -147,7 +157,6 @@ const UpdateAddressModal = ({ onClose }) => {
       onClose();
     } catch (error) {
       console.error("Error updating address:", error);
-      // Mostrar mensaje de error al usuario
     } finally {
       setIsUpdating(false);
     }
@@ -185,32 +194,43 @@ const ProfileContent = () => {
   }
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Perfil de Usuario</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label>Nombres</Label>
-          <p>{userData.name}</p>
-        </div>
-        <div className="space-y-2">
-          <Label>Apellidos</Label>
-          <p>{userData.surname}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Nombres</Label>
+            <p className="text-lg">{userData.name}</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Apellidos</Label>
+            <p className="text-lg">{userData.surname}</p>
+          </div>
         </div>
         <div className="space-y-2">
           <Label>Email</Label>
-          <p>{userData.email}</p>
+          <p className="text-lg bg-gray-100 p-2 rounded">{userData.email}</p>
         </div>
         <div className="space-y-2">
           <Label>Teléfono</Label>
-          <p>{userData.telefono || "No disponible"}</p>
+          <p className="text-lg">
+            {userData.telefono ? (
+              <>
+                <span className="text-gray-500">+57 </span>
+                {userData.telefono.slice(2)}
+              </>
+            ) : (
+              "No disponible"
+            )}
+          </p>
         </div>
       </CardContent>
       <CardFooter>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">
+            <Button variant="outline" className="w-full sm:w-auto">
               <Edit2 className="mr-2 h-4 w-4" /> Editar
             </Button>
           </DialogTrigger>
@@ -233,13 +253,13 @@ const AddressesContent = () => {
 
   return (
     <div className="flex flex-col py-5">
-      <Card className="flex-grow">
+      <Card className="flex-grow w-full">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Direcciones de Envío</span>
+          <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+            <span className="mb-2 sm:mb-0">Direcciones de Envío</span>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <Edit2 className="mr-2 h-4 w-4" /> {addresses.length > 0 ? "Editar dirección" : "Agregar dirección"}
                 </Button>
               </DialogTrigger>
@@ -251,11 +271,11 @@ const AddressesContent = () => {
           {addresses.length > 0 ? (
             addresses.map((address, index) => (
               <div key={index} className="mb-4 p-4 border rounded-lg">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                  <div className="flex items-start mb-2 sm:mb-0">
                     <MapPin className="mr-2 h-5 w-5 text-gray-500 mt-1" />
                     <div>
-                      <p className="font-medium">Dirección principal</p>
+                      <p>Dirección principal</p>
                       <p className="text-sm text-gray-600">{address}</p>
                     </div>
                   </div>
@@ -315,51 +335,59 @@ const OrdersContent = () => {
   );
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Pedidos Recientes</CardTitle>
       </CardHeader>
       <CardContent>
         {pedidosFiltrados.length > 0 ? (
-          pedidosFiltrados.map((pedido) => (
-            <Card key={pedido._id} className="mb-4">
-              <CardHeader>
-                <CardTitle>Pedido #{pedido._id}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p><strong>Estado:</strong> {pedido.estado}</p>
-                <p><strong>Fecha:</strong> {new Date(pedido.fecha).toLocaleDateString("es-CO")}</p>
-                <p><strong>Total:</strong> ${pedido.total.toLocaleString('es-CO')}</p>
-                <div className="mt-4">
-                  <strong>Productos:</strong>
-                  <div className="mt-2 space-y-4">
-                    {pedido.products.map((product, index) => (
-                      <div key={index} className="flex items-center space-x-4">
-                        <img 
-                          src={getProductImageByName(product.name)} 
-                          alt={product.name} 
-                          className="w-16 h-16 object-cover rounded-md border"
-                          loading="lazy"
-                        />
-                        <div>
-                          <p className="font-medium">{product.name}</p>
-                          <p className="text-sm text-gray-500">Cantidad: {product.quantity}</p>
-                          <p className="text-sm text-gray-500">Precio: ${parseFloat(product.price).toLocaleString('es-CO')}</p>
-                        </div>
-                      </div>
-                    ))}
+          <Accordion type="single" collapsible className="w-full">
+            {pedidosFiltrados.map((pedido) => (
+              <AccordionItem value={pedido._id} key={pedido._id}>
+                <AccordionTrigger className="flex justify-between items-center w-full px-4 py-2 text-left">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
+                    <span>Pedido #{pedido._id}</span>
+                    <span className="text-sm text-gray-500">{new Date(pedido.fecha).toLocaleDateString("es-CO")}</span>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <strong>Detalles de Envío:</strong>
-                  <p><strong>Dirección:</strong> {pedido.shippingDetails?.direccion || "No disponible"}</p>
-                  <p><strong>Casa/Apartamento:</strong> {pedido.shippingDetails?.casa || "No disponible"}</p>
-                  <p><strong>Teléfono:</strong> {pedido.shippingDetails?.telefono || "No disponible"}</p>
-                  <p><strong>Estado de Envío:</strong> {pedido.shippingDetails?.state || "No disponible"}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </AccordionTrigger>
+                <AccordionContent className="px-4 py-2">
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row justify-between">
+                      <span>Estado: {pedido.estado}</span>
+                      <span>Total: ${pedido.total.toLocaleString('es-CO')}</span>
+                    </div>
+                    <div>
+                      <p>Productos:</p>
+                      <div className="mt-2 space-y-4">
+                        {pedido.products.map((product, productIndex) => (
+                          <div key={productIndex} className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                            <img 
+                              src={getProductImageByName(product.name)} 
+                              alt={product.name} 
+                              className="w-16 h-16 object-cover rounded-md border"
+                              loading="lazy"
+                            />
+                            <div>
+                              <p>{product.name}</p>
+                              <p className="text-sm text-gray-500">Cantidad: {product.quantity}</p>
+                              <p className="text-sm text-gray-500">Precio: ${parseFloat(product.price).toLocaleString('es-CO')}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p>Detalles de Envío:</p>
+                      <p>Dirección:  {pedido.shippingDetails?.direccion || "No disponible"}</p>
+                      <p>Casa/Apartamento: {pedido.shippingDetails?.casa || "No disponible"}</p>
+                      <p>Teléfono: {pedido.shippingDetails?.telefono || "No disponible"}</p>
+                      <p>Estado de Envío: {pedido.shippingDetails?.state || "No disponible"}</p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         ) : (
           <p>No hay pedidos para mostrar.</p>
         )}
@@ -387,43 +415,44 @@ const CuentaContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <HeaderCli />
-      <main className="container mx-auto py-6 px-4 flex flex-col md:flex-row">
-        
-        <div className="md:w-1/3 mb-6 md:mb-0">
-          <h1 className="text-3xl font-bold mb-6">¡Hola, {userData.name}!</h1>
-          <nav className="space-y-2">
-            <Button
-              variant={activeSection === 'perfil' ? "default" : "ghost"}
-              className="w-full justify-start text-lg"
-              onClick={() => setActiveSection('perfil')}
-            >
-              <User className="mr-2 h-5 w-5" />
-              Perfil
-            </Button>
-            <Button
-              variant={activeSection === 'direcciones' ? "default" : "ghost"}
-              className="w-full justify-start text-lg"
-              onClick={() => setActiveSection('direcciones')}
-            >
-              <MapPin className="mr-2 h-5 w-5" />
-              Direcciones
-            </Button>
-            <Button
-              variant={activeSection === 'pedidos' ? "default" : "ghost"}
-              className="w-full justify-start text-lg"
-              onClick={() => setActiveSection('pedidos')}
-            >
-              <Package className="mr-2 h-5 w-5" />
-              Pedidos
-            </Button>
-          </nav>
-        </div>
-        <div className="md:w-2/3 md:pl-6">
-          {activeSection === 'perfil' && <ProfileContent />}
-          {activeSection === 'direcciones' && <AddressesContent />}
-          {activeSection === 'pedidos' && <OrdersContent />}
+      <main className="flex-grow container mx-auto py-6 px-4">
+        <div className="flex flex-col md:flex-row md:space-x-6">
+          <div className="md:w-1/3 mb-6 md:mb-0">
+            <h1 className="text-3xl mb-6">¡Hola, {userData.name}!</h1>
+            <nav className="space-y-2">
+              <Button
+                variant={activeSection === 'perfil' ? "default" : "ghost"}
+                className="w-full justify-start text-lg"
+                onClick={() => setActiveSection('perfil')}
+              >
+                <User className="mr-2 h-5 w-5" />
+                Perfil
+              </Button>
+              <Button
+                variant={activeSection === 'direcciones' ? "default" : "ghost"}
+                className="w-full justify-start text-lg"
+                onClick={() => setActiveSection('direcciones')}
+              >
+                <MapPin className="mr-2 h-5 w-5" />
+                Direcciones
+              </Button>
+              <Button
+                variant={activeSection === 'pedidos' ? "default" : "ghost"}
+                className="w-full justify-start text-lg"
+                onClick={() => setActiveSection('pedidos')}
+              >
+                <Package className="mr-2 h-5 w-5" />
+                Pedidos
+              </Button>
+            </nav>
+          </div>
+          <div className="md:w-2/3">
+            {activeSection === 'perfil' && <ProfileContent />}
+            {activeSection === 'direcciones' && <AddressesContent />}
+            {activeSection === 'pedidos' && <OrdersContent />}
+          </div>
         </div>
       </main>
       <Footer />
