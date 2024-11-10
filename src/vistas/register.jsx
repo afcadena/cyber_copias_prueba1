@@ -8,6 +8,8 @@ import { useCrudContextForms } from "../context/CrudContextForms";
 import { useNavigate } from 'react-router-dom';
 import Header from './header';
 import Footer from './footer';
+import { Checkbox } from "@/components/ui/checkbox";
+import Link from 'next/link';
 
 export default function Register() {
   const { registerUser, error } = useCrudContextForms();
@@ -21,6 +23,7 @@ export default function Register() {
   const [formError, setFormError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [justRegistered, setJustRegistered] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const navigate = useNavigate();
 
   const validatePassword = (password) => {
@@ -50,6 +53,11 @@ export default function Register() {
     const passwordValidation = validatePassword(password);
     if (!Object.values(passwordValidation).every(Boolean)) {
       setFormError("La contraseña no cumple con todos los requisitos.");
+      return;
+    }
+  
+    if (!acceptTerms) {
+      setFormError("Debes aceptar los términos y condiciones para registrarte.");
       return;
     }
   
@@ -174,8 +182,24 @@ export default function Register() {
                     ))}
                   </ul>
                 </div>
+                <div className="md:col-span-2 flex items-center space-x-2">
+                  <Checkbox 
+                    id="terms" 
+                    checked={acceptTerms}
+                    onCheckedChange={(checked) => setAcceptTerms(checked)}
+                  />
+                  <label
+                    htmlFor="terms"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Acepto los{' '}
+                    <Link href="/terms" className="text-primary hover:underline">
+                      términos y condiciones
+                    </Link>
+                  </label>
+                </div>
               </div>
-              <Button type="submit" className="w-full">Registrarse</Button>
+              <Button type="submit" className="w-full" disabled={!acceptTerms}>Registrarse</Button>
             </form>
           </CardContent>
           <CardFooter className="flex justify-center">
