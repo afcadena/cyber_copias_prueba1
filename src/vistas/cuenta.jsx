@@ -1,10 +1,8 @@
-// src/components/Cuenta.jsx
-
-import React, { useState, useEffect, useContext, createContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { User, MapPin, Package, Edit2, Plus } from "lucide-react";
+import { User, MapPin, Package, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,102 +12,92 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import Footer from "./footer";
 import { useCrudContextForms } from '../context/CrudContextForms';
-import HeaderCli from './headercli'; // Asegúrate de que la ruta sea correcta
-import axios from 'axios'; // Asegúrate de tener axios instalado
+import HeaderCli from './headercli';
+import axios from 'axios';
 import { useProducts } from "../context/CrudContextInventario";
 
-// Crear el contexto para la cuenta
-const CuentaContext = createContext();
+const CuentaContext = React.createContext();
 
-// Proveedor del contexto de la cuenta
 const CuentaProvider = ({ children }) => {
-  const { currentUser, updateUser } = useCrudContextForms(); // Asegúrate de que `updateUser` está disponible
-  const [userData, setUserData] = useState({}); // Inicializar userData con un objeto vacío
+  const { currentUser, updateUser, refreshUser } = useCrudContextForms();
+  const [userData, setUserData] = useState({});
 
-  // Actualizar userData cuando currentUser cambia
   useEffect(() => {
     if (currentUser) {
-      console.log("Current User:", currentUser); // Depuración
       setUserData({
         ...currentUser,
         name: currentUser.name ? currentUser.name.trim() : "",
         surname: currentUser.surname ? currentUser.surname.trim() : "",
-        // email and telefono are spread via ...currentUser
       });
     }
   }, [currentUser]);
 
+  const updateUserData = async (newData) => {
+    try {
+      const updatedUser = await updateUser(currentUser._id, newData);
+      if (updatedUser) {
+        setUserData(prevData => ({ ...prevData, ...newData }));
+        await refreshUser();
+      }
+    } catch (error) {
+      console.error("Error updating user data:", error);
+      throw error;
+    }
+  };
+
   return (
-    <CuentaContext.Provider value={{ userData, setUserData, updateUser }}>
+    <CuentaContext.Provider value={{ userData, setUserData, updateUserData }}>
       {children}
     </CuentaContext.Provider>
   );
 };
 
-// Modal para actualizar el perfil del usuario
-const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) => {
-  const { updateUser, currentUser } = useCrudContextForms(); // Obtener currentUser aquí
-
-  // Inicializar newTelefono sin el prefijo '57' si está presente
-  const initialTelefono = (telefono && typeof telefono === 'string' && telefono.startsWith('57')) 
-    ? telefono.slice(2) 
-    : (telefono || '');
-
-  const [newEmail, setNewEmail] = useState(email);
-  const [newTelefono, setNewTelefono] = useState(initialTelefono);
+const UpdateProfileModal = ({ onClose }) => {
+  const { userData, updateUserData } = useContext(CuentaContext);
+  const [newEmail, setNewEmail] = useState(userData.email || '');
+  const [newTelefono, setNewTelefono] = useState(userData.telefono?.slice(2) || '');
   const [phoneError, setPhoneError] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  // Función para validar el número de teléfono
   const validatePhone = (phone) => {
-    const regex = /^3\d{10}$/; // Debe comenzar con '3' y tener 11 dígitos
+    const regex = /^\d{10}$/;
     return regex.test(phone);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Verificar que currentUser esté definido y tenga un _id
-    if (!currentUser || !currentUser._id) {
-      console.error("No hay un usuario actual definido o no tiene un ID.");
-      return; // Salir si no hay usuario o no tiene ID
-    }
-  
-    // Validar el teléfono antes de enviar
     if (!validatePhone(newTelefono)) {
-        setPhoneError("El teléfono debe comenzar con '3' y tener exactamente 11 dígitos.");
-        return;
-    } else {
-        setPhoneError("");
+      setPhoneError("El teléfono debe tener exactamente 11 dígitos.");
+      return;
     }
-  
+
+    setIsUpdating(true);
     try {
-      const result = await updateUser(currentUser._id, {  // Usa _id en lugar de id
-          email: newEmail,
-          telefono: `57${newTelefono}`, // Almacenar con el prefijo '57'
+      await updateUserData({
+        email: newEmail,
+        telefono: `57${newTelefono}`,
       });
-  
-      if (result) {
-          onUpdate({ email: newEmail, telefono: `57${newTelefono}` });
-          onClose();
-      }
+      onClose();
     } catch (error) {
-      console.error("Error actualizando usuario:", error);
+      console.error("Error updating user:", error);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handlePhoneChange = (e) => {
     const value = e.target.value;
-    // Permitir solo números
     if (/^\d*$/.test(value)) {
       setNewTelefono(value);
-      // Validar en tiempo real
-      if (validatePhone(value)) {
-        setPhoneError("");
-      } else {
-        setPhoneError("El teléfono debe comenzar con '3' y tener exactamente 11 dígitos.");
-      }
+      setPhoneError(validatePhone(value) ? "" : "El teléfono debe tener exactamente 11 dígitos.");
     }
   };
 
@@ -119,7 +107,6 @@ const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) =>
         <DialogTitle>Actualizar perfil</DialogTitle>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Campo de Email */}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -130,54 +117,48 @@ const UpdateProfileModal = ({ email = '', telefono = '', onUpdate, onClose }) =>
             required
           />
         </div>
-
-        {/* Campo de Teléfono con Prefijo +57 */}
         <div className="space-y-2">
           <Label htmlFor="telefono">Teléfono</Label>
-          <div className="flex items-center">
-            <span className="mr-2 text-gray-700">+57</span>
+          <div className="flex">
+            <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md">
+              +57
+            </span>
             <Input
               id="telefono"
               type="text"
               value={newTelefono}
               onChange={handlePhoneChange}
               required
-              maxLength={11} // Limitar a 11 dígitos
-              placeholder="Ej: 31234567890" // Placeholder más informativo
-              className={phoneError ? "input-error" : ""}
+              maxLength={10}
+              placeholder="1234567890"
+              className={`rounded-l-none ${phoneError ? "border-red-500" : ""}`}
             />
           </div>
           {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
         </div>
-
-        {/* Botón de Envío */}
-        <Button type="submit" disabled={phoneError !== "" || newTelefono.length !== 11}>
-          Guardar cambios
+        <Button type="submit" disabled={isUpdating || phoneError !== "" || newTelefono.length !== 10}>
+          {isUpdating ? "Actualizando..." : "Guardar cambios"}
         </Button>
       </form>
     </DialogContent>
   );
 };
 
-const UpdateAddressModal = ({ address, onUpdate, onClose, currentUser }) => {  // Asegúrate de recibir currentUser
-  const { updateUser } = useCrudContextForms();
-  const [newAddress, setNewAddress] = useState(address);
+const UpdateAddressModal = ({ onClose }) => {
+  const { userData, updateUserData } = useContext(CuentaContext);
+  const [newAddress, setNewAddress] = useState(userData.direccion || '');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!currentUser || !currentUser._id) {
-      console.error("No hay un usuario actual definido o no tiene un ID.");
-      return;
-    }
-
-    const result = await updateUser(currentUser._id, {  // Asegúrate de pasar el ID del usuario aquí
-      direccion: newAddress
-    });
-
-    if (result) {
-      onUpdate({ direccion: newAddress });
+    setIsUpdating(true);
+    try {
+      await updateUserData({ direccion: newAddress });
       onClose();
+    } catch (error) {
+      console.error("Error updating address:", error);
+    } finally {
+      setIsUpdating(false);
     }
   };
   
@@ -196,63 +177,64 @@ const UpdateAddressModal = ({ address, onUpdate, onClose, currentUser }) => {  /
             required
           />
         </div>
-        <Button type="submit">Guardar cambios</Button>
+        <Button type="submit" disabled={isUpdating}>
+          {isUpdating ? "Actualizando..." : "Guardar cambios"}
+        </Button>
       </form>
     </DialogContent>
   );
 };
 
 const ProfileContent = () => {
-  const { userData, setUserData } = useContext(CuentaContext);
+  const { userData } = useContext(CuentaContext);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   if (!userData || !userData.email) {
     return <div>Cargando...</div>;
   }
 
-  const handleUpdate = (newData) => {
-    setUserData((prevUserData) => ({
-      ...prevUserData,
-      ...newData,
-    }));
-  };
-
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Perfil de Usuario</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label>Nombres</Label>
-          <p>{userData.name}</p>
-        </div>
-        <div className="space-y-2">
-          <Label>Apellidos</Label>
-          <p>{userData.surname}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Nombres</Label>
+            <p className="text-lg">{userData.name}</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Apellidos</Label>
+            <p className="text-lg">{userData.surname}</p>
+          </div>
         </div>
         <div className="space-y-2">
           <Label>Email</Label>
-          <p>{userData.email}</p>
+          <p className="text-lg bg-gray-100 p-2 rounded">{userData.email}</p>
         </div>
         <div className="space-y-2">
           <Label>Teléfono</Label>
-          <p>+57 {userData.telefono ? userData.telefono.slice(2) : ""}</p>
+          <p className="text-lg">
+            {userData.telefono ? (
+              <>
+                <span className="text-gray-500">+57 </span>
+                {userData.telefono.slice(2)}
+              </>
+            ) : (
+              "No disponible"
+            )}
+          </p>
         </div>
       </CardContent>
       <CardFooter>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">
+            <Button variant="outline" className="w-full sm:w-auto">
               <Edit2 className="mr-2 h-4 w-4" /> Editar
             </Button>
           </DialogTrigger>
-          <UpdateProfileModal
-            email={userData.email}
-            telefono={userData.telefono}
-            onUpdate={handleUpdate}
-            onClose={() => setIsDialogOpen(false)}
-          />
+          <UpdateProfileModal onClose={() => setIsDialogOpen(false)} />
         </Dialog>
       </CardFooter>
     </Card>
@@ -260,37 +242,28 @@ const ProfileContent = () => {
 };
 
 const AddressesContent = () => {
-  const { userData, setUserData } = useContext(CuentaContext); // Supongo que userData contiene el currentUser
+  const { userData } = useContext(CuentaContext);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   if (!userData) {
     return <div>Cargando...</div>;
   }
 
-  const handleUpdate = (newData) => {
-    setUserData((prevUserData) => ({
-      ...prevUserData,
-      ...newData, // Combina el objeto anterior con el nuevo
-    }));
-  };
-
   const addresses = userData.direccion ? [userData.direccion] : [];
 
   return (
     <div className="flex flex-col py-5">
-      <Card className="flex-grow">
+      <Card className="flex-grow w-full">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Direcciones de Envío</span>
+          <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+            <span className="mb-2 sm:mb-0">Direcciones de Envío</span>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Edit2 className="mr-2 h-4 w-4" /> {addresses.length > 0 ? "Editar dirección" : "Agregar dirección"}
+                </Button>
               </DialogTrigger>
-              <UpdateAddressModal
-                address=""
-                onUpdate={handleUpdate}
-                onClose={() => setIsDialogOpen(false)}
-                currentUser={userData} // Pasa el usuario actual aquí
-              />
+              <UpdateAddressModal onClose={() => setIsDialogOpen(false)} />
             </Dialog>
           </CardTitle>
         </CardHeader>
@@ -298,27 +271,14 @@ const AddressesContent = () => {
           {addresses.length > 0 ? (
             addresses.map((address, index) => (
               <div key={index} className="mb-4 p-4 border rounded-lg">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                  <div className="flex items-start mb-2 sm:mb-0">
                     <MapPin className="mr-2 h-5 w-5 text-gray-500 mt-1" />
                     <div>
-                      <p className="font-medium">Dirección principal</p>
+                      <p>Dirección principal</p>
                       <p className="text-sm text-gray-600">{address}</p>
                     </div>
                   </div>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <UpdateAddressModal
-                      address={address}
-                      onUpdate={handleUpdate}
-                      onClose={() => setIsDialogOpen(false)}
-                      currentUser={userData} // Pasa el usuario actual aquí también
-                    />
-                  </Dialog>
                 </div>
               </div>
             ))
@@ -337,84 +297,97 @@ const OrdersContent = () => {
   const { userData } = useContext(CuentaContext);
   const [pedidos, setPedidos] = useState([]);
   const { db: products } = useProducts();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchPedidos = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get('http://localhost:4000/api/pedidos');
-        console.log("Pedidos obtenidos:", response.data);
         setPedidos(response.data);
       } catch (error) {
         console.error("Error al obtener los pedidos:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchPedidos();
-  }, []);
+    if (userData && userData.email) {
+      fetchPedidos();
+    }
+  }, [userData]);
 
-  if (!userData) {
-    return <div>Cargando...</div>;
+  if (isLoading) {
+    return <div>Cargando pedidos...</div>;
   }
 
-  // Función para obtener la URL de la imagen del producto
+  if (!userData) {
+    return <div>Cargando información del usuario...</div>;
+  }
+
   const getProductImageByName = (productName) => {
     const product = products.find(p => p.name === productName);
-    return product?.imageUrl?.[0] || "https://via.placeholder.com/64"; // URL por defecto si no se encuentra la imagen
+    return product?.imageUrl?.[0] || "https://via.placeholder.com/64";
   };
 
-  const nombreCompleto = `${userData.name} ${userData.surname}`.replace(/\s+/g, ' ').trim();
-  
-  // Filtrar pedidos basados en el cliente
   const pedidosFiltrados = pedidos.filter(pedido => 
-    pedido.cliente.replace(/\s+/g, ' ').trim() === userData.email // Cambia a userData.email si quieres filtrar por email
+    pedido.cliente === userData.email
   );
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Pedidos Recientes</CardTitle>
       </CardHeader>
       <CardContent>
         {pedidosFiltrados.length > 0 ? (
-          pedidosFiltrados.map((pedido) => (
-            <Card key={pedido._id} className="mb-4">
-              <CardHeader>
-                <CardTitle>Pedido #{pedido._id}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p><strong>Estado:</strong> {pedido.estado}</p>
-                <p><strong>Fecha:</strong> {new Date(pedido.fecha).toLocaleDateString("es-CO")}</p> {/* Formato de fecha */}
-                <p><strong>Total:</strong> ${pedido.total.toLocaleString('es-CO')}</p>
-                <div className="mt-4">
-                  <strong>Productos:</strong>
-                  <div className="mt-2 space-y-4">
-                    {pedido.products.map((product, index) => (
-                      <div key={index} className="flex items-center space-x-4">
-                        <img 
-                          src={getProductImageByName(product.name)} 
-                          alt={product.name} 
-                          className="w-16 h-16 object-cover rounded-md border"
-                          loading="lazy"
-                        />
-                        <div>
-                          <p className="font-medium">{product.name}</p>
-                          <p className="text-sm text-gray-500">Cantidad: {product.quantity}</p>
-                          <p className="text-sm text-gray-500">Precio: ${parseFloat(product.price).toLocaleString('es-CO')}</p>
-                        </div>
-                      </div>
-                    ))}
+          <Accordion type="single" collapsible className="w-full">
+            {pedidosFiltrados.map((pedido) => (
+              <AccordionItem value={pedido._id} key={pedido._id}>
+                <AccordionTrigger className="flex justify-between items-center w-full px-4 py-2 text-left">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
+                    <span>Pedido #{pedido._id}</span>
+                    <span className="text-sm text-gray-500">{new Date(pedido.fecha).toLocaleDateString("es-CO")}</span>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <strong>Detalles de Envío:</strong>
-                  <p><strong>Dirección:</strong> {pedido.shippingDetails?.direccion || "No disponible"}</p>
-                  <p><strong>Casa/Apartamento:</strong> {pedido.shippingDetails?.casa || "No disponible"}</p>
-                  <p><strong>Teléfono:</strong> {pedido.shippingDetails?.telefono || "No disponible"}</p>
-                  <p><strong>Estado de Envío:</strong> {pedido.shippingDetails?.state || "No disponible"}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </AccordionTrigger>
+                <AccordionContent className="px-4 py-2">
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row justify-between">
+                      <span>Estado: {pedido.estado}</span>
+                      <span>Total: ${pedido.total.toLocaleString('es-CO')}</span>
+                    </div>
+                    <div>
+                      <p>Productos:</p>
+                      <div className="mt-2 space-y-4">
+                        {pedido.products.map((product, productIndex) => (
+                          <div key={productIndex} className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                            <img 
+                              src={getProductImageByName(product.name)} 
+                              alt={product.name} 
+                              className="w-16 h-16 object-cover rounded-md border"
+                              loading="lazy"
+                            />
+                            <div>
+                              <p>{product.name}</p>
+                              <p className="text-sm text-gray-500">Cantidad: {product.quantity}</p>
+                              <p className="text-sm text-gray-500">Precio: ${parseFloat(product.price).toLocaleString('es-CO')}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p>Detalles de Envío:</p>
+                      <p>Dirección:  {pedido.shippingDetails?.direccion || "No disponible"}</p>
+                      <p>Casa/Apartamento: {pedido.shippingDetails?.casa || "No disponible"}</p>
+                      <p>Teléfono: {pedido.shippingDetails?.telefono || "No disponible"}</p>
+                      <p>Estado de Envío: {pedido.shippingDetails?.state || "No disponible"}</p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         ) : (
           <p>No hay pedidos para mostrar.</p>
         )}
@@ -423,81 +396,75 @@ const OrdersContent = () => {
   );
 };
 
-
-// Componente principal de la cuenta
-export default function Cuenta() {
-  return (
-    <CuentaProvider>
-      <CuentaContent />
-    </CuentaProvider>
-  );
-}
-
 const CuentaContent = () => {
-  const { userData } = useContext(CuentaContext); // Obtener userData desde el contexto
+  const { userData } = useContext(CuentaContext);
   const [activeSection, setActiveSection] = useState('perfil');
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const location = useLocation(); // Para manejar parámetros de consulta
-  const navigate = useNavigate(); // Para redirecciones
-
-  // Actualiza activeSection según el parámetro de consulta 'section'
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const section = queryParams.get("section"); // Obtiene el valor del parámetro `section`
+    const section = queryParams.get("section");
     if (section) {
-      setActiveSection(section); // Actualiza la sección activa
+      setActiveSection(section);
     }
-  }, [location.search]); // Vuelve a ejecutar el efecto si cambia el query string
+  }, [location.search]);
 
   if (!userData || !userData.email) {
     return <div>Cargando...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <HeaderCli /> {/* Reemplazamos el header antiguo con el nuevo HeaderCli */}
-
-      <main className="container mx-auto py-6 px-4 flex flex-col md:flex-row">
-        <div className="md:w-1/3 mb-6 md:mb-0">
-          <h1 className="text-3xl font-bold mb-6">¡Hola, {userData.name}!</h1>
-
-          <nav className="space-y-2">
-            <Button
-              variant={activeSection === 'perfil' ? "default" : "ghost"}
-              className="w-full justify-start text-lg"
-              onClick={() => setActiveSection('perfil')}
-            >
-              <User className="mr-2 h-5 w-5" />
-              Perfil
-            </Button>
-            <Button
-              variant={activeSection === 'direcciones' ? "default" : "ghost"}
-              className="w-full justify-start text-lg"
-              onClick={() => setActiveSection('direcciones')}
-            >
-              <MapPin className="mr-2 h-5 w-5" />
-              Direcciones
-            </Button>
-            <Button
-              variant={activeSection === 'pedidos' ? "default" : "ghost"}
-              className="w-full justify-start text-lg"
-              onClick={() => setActiveSection('pedidos')}
-            >
-              <Package className="mr-2 h-5 w-5" />
-              Pedidos
-            </Button>
-          </nav>
-        </div>
-
-        <div className="md:w-2/3 md:pl-6">
-          {activeSection === 'perfil' && <ProfileContent />}
-          {activeSection === 'direcciones' && <AddressesContent />}
-          {activeSection === 'pedidos' && <OrdersContent />}
+    <div className="flex flex-col min-h-screen bg-background">
+      <HeaderCli />
+      <main className="flex-grow container mx-auto py-6 px-4">
+        <div className="flex flex-col md:flex-row md:space-x-6">
+          <div className="md:w-1/3 mb-6 md:mb-0">
+            <h1 className="text-3xl mb-6">¡Hola, {userData.name}!</h1>
+            <nav className="space-y-2">
+              <Button
+                variant={activeSection === 'perfil' ? "default" : "ghost"}
+                className="w-full justify-start text-lg"
+                onClick={() => setActiveSection('perfil')}
+              >
+                <User className="mr-2 h-5 w-5" />
+                Perfil
+              </Button>
+              <Button
+                variant={activeSection === 'direcciones' ? "default" : "ghost"}
+                className="w-full justify-start text-lg"
+                onClick={() => setActiveSection('direcciones')}
+              >
+                <MapPin className="mr-2 h-5 w-5" />
+                Direcciones
+              </Button>
+              <Button
+                variant={activeSection === 'pedidos' ? "default" : "ghost"}
+                className="w-full justify-start text-lg"
+                onClick={() => setActiveSection('pedidos')}
+              >
+                <Package className="mr-2 h-5 w-5" />
+                Pedidos
+              </Button>
+            </nav>
+          </div>
+          <div className="md:w-2/3">
+            {activeSection === 'perfil' && <ProfileContent />}
+            {activeSection === 'direcciones' && <AddressesContent />}
+            {activeSection === 'pedidos' && <OrdersContent />}
+          </div>
         </div>
       </main>
-
-      <Footer /> {/* Usa el componente Footer importado aquí */}
+      <Footer />
     </div>
+  );
+};
+
+export default function Cuenta() {
+  return (
+    <CuentaProvider>
+      <CuentaContent />
+    </CuentaProvider>
   );
 }
 

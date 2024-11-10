@@ -7,15 +7,15 @@ import { Input } from "@/components/ui/input";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useCrudContextForms } from "../context/CrudContextForms";
-import { useCrudContextPedidos } from "../context/CrudContextPedidos"; // Importa el contexto de pedidos
-import { useProducts } from '../context/CrudContextInventario'; // Importa el hook del contexto de productos
-import axios from 'axios'; // Asegúrate de tener axios instalado
+import { useCrudContextPedidos } from "../context/CrudContextPedidos";
+import { useProducts } from '../context/CrudContextInventario';
+import axios from 'axios';
 
 export default function CarritoDeCompras() {
   const { cart, clearCart } = useCart();
-  const { currentUser, updateUser } = useCrudContextForms(); // Asegúrate de que `updateUser` está disponible
-  const { createData: createPedido } = useCrudContextPedidos(); // Desestructura la función para crear pedidos
-  const { getData } = useProducts(); // Obtener la función getData del contexto de productos
+  const { currentUser, updateUser } = useCrudContextForms();
+  const { createData: createPedido } = useCrudContextPedidos();
+  const { getData } = useProducts();
   const [isOpen, setIsOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
@@ -23,27 +23,26 @@ export default function CarritoDeCompras() {
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
-    direccion: "",      // Cambiado de address a direccion
-    casa: "",           // Cambiado de apartment a casa
+    direccion: "",
+    casa: "",
     state: "Bogotá",
-    telefono: "",       // Cambiado de phone a telefono
+    telefono: "",
   });
   const [formErrors, setFormErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false); // Para manejar el estado de envío
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (currentUser && currentUser.role === "cliente") {
-      // Cargar valores de currentUser si están presentes
       setFormData((prevState) => ({
         ...prevState,
         name: currentUser?.name || "", 
         surname: currentUser?.surname || "",
-        direccion: currentUser?.direccion || "",    // Cargar direccion
-        casa: currentUser?.casa || "",              // Cargar casa
-        telefono: currentUser?.telefono || "",      // Cargar telefono
+        direccion: currentUser?.direccion || "",
+        casa: currentUser?.casa || "",
+        telefono: currentUser?.telefono || "",
       }));
     }
-  }, [currentUser]); // Eliminado 'cart' de las dependencias, ya que no afecta la autenticación
+  }, [currentUser]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -67,7 +66,7 @@ export default function CarritoDeCompras() {
         break;
       case "telefono":
         errors.telefono = value
-          ? /^3\d{10}$/.test(value)
+          ? /^3\d{9}$/.test(value)
             ? ""
             : "Teléfono inválido (11 dígitos, comenzando con 3)"
           : "Teléfono es requerido";
@@ -89,20 +88,17 @@ export default function CarritoDeCompras() {
   const total = subtotal;
 
   const handleFinalizarCompra = () => {
-    // Validar los campos del formulario
     const isFormValid = Object.values(formErrors).every((x) => x === "") &&
                         Object.values(formData).every((x) => x !== "");
 
     if (!currentUser || currentUser.role !== "cliente") {
-      // Redirigir al usuario a la página de inicio de sesión si no está autenticado
-      navigate("/login"); // Asegúrate de que esta ruta sea correcta en tu aplicación
+      navigate("/login");
       return;
     }
 
     if (isFormValid) {
       setIsOpen(true);
     } else {
-      // Validar todos los campos nuevamente para mostrar errores
       Object.keys(formData).forEach((field) => {
         validateField(field, formData[field]);
       });
@@ -121,7 +117,6 @@ export default function CarritoDeCompras() {
     }));
 
     try {
-        // Actualizar el stock de cada producto en la API
         const updateStockPromises = cart.map(async (product) => {
             const newStock = product.stock - product.quantity;
             if (newStock < 0) {
@@ -138,28 +133,25 @@ export default function CarritoDeCompras() {
             throw new Error("No se pudo obtener el ID del usuario.");
         }
 
-        // Actualizar la información del usuario
         await updateUser(currentUser._id, {
             direccion: formData.direccion,
             casa: formData.casa,
             telefono: formData.telefono,
         });
 
-        // Crear el pedido
         const pedidoData = {
             userId: currentUser._id,
-            email: currentUser.email, // Asegúrate de que el email esté disponible
+            email: currentUser.email,
             total: total,
-            products: products, // Aquí estás pasando el array de productos
+            products: products,
             direccion: formData.direccion,
             casa: formData.casa,
             telefono: formData.telefono,
-            state: "pendiente", // O el estado que prefieras
+            state: "pendiente",
         };
 
-        await createPedido(pedidoData); // Asegúrate de que `createPedido` esté correctamente implementado
+        await createPedido(pedidoData);
 
-        // Mostrar el modal de éxito después de confirmar la compra
         setShowSuccessModal(true);
     } catch (error) {
         console.error("Error al procesar la compra o actualizar los datos del usuario:", error);
@@ -167,33 +159,29 @@ export default function CarritoDeCompras() {
     } finally {
         setIsSubmitting(false);
     }
-};
-
+  };
 
   const handleCloseSuccessModal = () => {
     clearCart();
     setShowSuccessModal(false);
-    navigate("/cuenta?section=pedidos"); // Redirigir al usuario después de cerrar el modal de éxito
+    navigate("/cuenta?section=pedidos");
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <HeaderCliente />
-      <main className="flex-1 container py-6 px-4 md:px-0">
-        <h1 className="text-4xl font-bold mb-8 text-center text-primary">Tu Pedido</h1>
-        <div className="grid gap-8 lg:grid-cols-2">
+      <main className="flex-1 container mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center text-primary">Tu Pedido</h1>
+        <div className="grid gap-6 lg:gap-8 lg:grid-cols-2">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl">Información de Entrega</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl">Información de Entrega</CardTitle>
             </CardHeader>
             <CardContent>
-              <form className="space-y-6" noValidate>
-                <div className="grid grid-cols-2 gap-4">
+              <form className="space-y-4 sm:space-y-6" noValidate>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                       Nombre
                     </label>
                     <Input
@@ -210,10 +198,7 @@ export default function CarritoDeCompras() {
                     )}
                   </div>
                   <div>
-                    <label
-                      htmlFor="surname"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
+                    <label htmlFor="surname" className="block text-sm font-medium text-gray-700 mb-1">
                       Apellidos
                     </label>
                     <Input
@@ -279,23 +264,22 @@ export default function CarritoDeCompras() {
           </Card>
           <Card className="bg-[#1a2b4a] text-white shadow-lg flex flex-col">
             <CardHeader>
-              <CardTitle className="text-2xl">Resumen del Pedido</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl">Resumen del Pedido</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto">
               <div className="space-y-4">
                 {cart.map((producto) => (
                   <div key={producto.id} className="flex justify-between items-center border-b border-gray-600 pb-4">
                     <div className="flex items-center space-x-4">
-                      {/* Asegurarse de que imageUrl es un arreglo */}
                       {producto.imageUrl && producto.imageUrl.length > 0 && (
-                        <img src={producto.imageUrl[0]} alt={producto.name} className="w-16 h-16 object-cover rounded" />
+                        <img src={producto.imageUrl[0]} alt={producto.name} className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded" />
                       )}
                       <div>
-                        <p className="font-semibold">{producto.name}</p>
-                        <p className="font-semibold">Cantidad: {producto.quantity}</p>
+                        <p className="font-semibold text-sm sm:text-base">{producto.name}</p>
+                        <p className="font-semibold text-sm">Cantidad: {producto.quantity}</p>
                       </div>
                     </div>
-                    <p className="font-semibold">$ {parseFloat(producto.price).toLocaleString('es-CO')}</p>
+                    <p className="font-semibold text-sm sm:text-base">$ {parseFloat(producto.price).toLocaleString('es-CO')}</p>
                   </div>
                 ))}
               </div>
@@ -311,12 +295,11 @@ export default function CarritoDeCompras() {
             </div>
           </Card>
         </div>
-        {/* Modal de Confirmación de Compra */}
         {isOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Confirmar Compra</h2>
-              <p className="mb-4">¿Estás seguro de que deseas finalizar la compra?</p>
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
+              <h2 className="text-xl font-semibold mb-4">Confirmar Pedido</h2>
+              <p className="mb-4">¿Estás seguro de que deseas finalizar el pedido?</p>
               <div className="flex justify-end space-x-4">
                 <Button onClick={() => setIsOpen(false)} variant="outline">Cancelar</Button>
                 <Button onClick={handleConfirmPurchase} disabled={isSubmitting}>
@@ -326,10 +309,9 @@ export default function CarritoDeCompras() {
             </div>
           </div>
         )}
-        {/* Modal de Éxito */}
         {showSuccessModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
               <h2 className="text-xl font-semibold mb-4">¡Éxito!</h2>
               <p className="mb-4">Tu pedido se ha realizado con éxito.</p>
               <div className="flex justify-end">

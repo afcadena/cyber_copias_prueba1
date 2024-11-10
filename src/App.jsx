@@ -21,6 +21,7 @@ import GestionVentas from './vistas/Ventas';
 import GestionCompras from './vistas/Compras';
 import CartPreview from './vistas/previa_compra';
 import GestionUsuarios from './vistas/gestion_usuarios';
+import TermsAndConditions from './vistas/Terminosycondiciones';
 
 import { CrudProviderProveedores } from './context/CrudContextProveedores';
 import { CrudProviderPedidos } from './context/CrudContextPedidos';
@@ -48,6 +49,7 @@ function App() {
                       <Route path="/carrito" element={<CarritoDeCompras />} />
                       <Route path="/previa" element={<CartPreview />} />
                       <Route path="/producto/:id" element={<ProductDetail />} />
+                      <Route path="/Terminosycondiciones" element={<TermsAndConditions />} />
 
                       {/* Rutas protegidas del cliente */}
                       <Route path="/homecli" element={

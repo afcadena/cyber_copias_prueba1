@@ -9,7 +9,7 @@ export function CrudProviderCompras({ children }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const url = '/compras'; // Ruta relativa, ya que la baseURL está configurada en API
+  const url = '/compras'; 
 
   useEffect(() => {
     setLoading(true);

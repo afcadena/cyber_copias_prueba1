@@ -78,10 +78,10 @@ export default function GestionProveedores() {
   );
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-        <h1 className="text-3xl font-bold">Gestión de Proveedores</h1>
-        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+    <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+        <h1 className="text-2xl sm:text-3xl font-bold">Gestión de Proveedores</h1>
+        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input 
@@ -97,7 +97,7 @@ export default function GestionProveedores() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProveedores?.map((proveedor) => (
           <Card key={proveedor.id} className="overflow-hidden">
             <CardHeader className="pb-2">
@@ -141,7 +141,7 @@ export default function GestionProveedores() {
       </div>
 
       <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Confirmar Eliminación</DialogTitle>
             <DialogDescription>
@@ -175,7 +175,7 @@ export default function GestionProveedores() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="nombre">Nombre</Label>
                 <Input id="nombre" name="nombre" defaultValue={currentProveedor?.nombre || ''} />
@@ -198,7 +198,7 @@ export default function GestionProveedores() {
               <Input id="direccion" name="direccion" defaultValue={currentProveedor?.direccion || ''} />
             </div>
             <DialogFooter>
-              <Button type="submit">
+              <Button type="submit" className="w-full sm:w-auto">
                 {currentProveedor ? 'Guardar Cambios' : 'Agregar Proveedor'}
               </Button>
             </DialogFooter>

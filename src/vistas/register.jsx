@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from './header';
 import Footer from './footer';
 import { Checkbox } from "@/components/ui/checkbox";
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
 export default function Register() {
   const { registerUser, error } = useCrudContextForms();
@@ -78,40 +78,42 @@ export default function Register() {
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Header />
 
-      <main className="flex-grow flex items-center justify-center py-12 px-4">
-        <Card className="w-full max-w-4xl">
+      <main className="flex-grow flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-4xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Crear Cuenta</CardTitle>
-            <CardDescription>Regístrate a CyberCopias</CardDescription>
+            <CardTitle className="text-xl sm:text-2xl font-bold">Crear Cuenta</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Regístrate a CyberCopias</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {(formError || error) && (
-                <p className="text-red-500 text-center">
+                <p className="text-red-500 text-center text-sm sm:text-base">
                   {formError || error.message || error.response?.data?.message || 'Ocurrió un error inesperado.'}
                 </p>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nombre</Label>
+                  <Label htmlFor="name" className="text-sm sm:text-base">Nombre</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
+                    className="text-sm sm:text-base"
                   />  
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="surname">Apellidos</Label>
+                  <Label htmlFor="surname" className="text-sm sm:text-base">Apellidos</Label>
                   <Input
                     id="surname"
                     value={surname}
                     onChange={(e) => setSurname(e.target.value)}
                     required
+                    className="text-sm sm:text-base"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Correo Electrónico</Label>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="email" className="text-sm sm:text-base">Correo Electrónico</Label>
                   <Input
                     id="email"
                     type="email"
@@ -119,10 +121,11 @@ export default function Register() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="text-sm sm:text-base"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Contraseña</Label>
+                  <Label htmlFor="password" className="text-sm sm:text-base">Contraseña</Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -130,6 +133,7 @@ export default function Register() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      className="text-sm sm:text-base pr-10"
                     />
                     <Button
                       type="button"
@@ -143,7 +147,7 @@ export default function Register() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                  <Label htmlFor="confirmPassword" className="text-sm sm:text-base">Confirmar Contraseña</Label>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
@@ -151,6 +155,7 @@ export default function Register() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
+                      className="text-sm sm:text-base pr-10"
                     />
                     <Button
                       type="button"
@@ -163,15 +168,15 @@ export default function Register() {
                     </Button>
                   </div>
                 </div>
-                <div className="md:col-span-2">
-                  <p className="text-sm font-medium mb-2">Requisitos de la contraseña:</p>
-                  <ul className="grid grid-cols-2 gap-2 text-sm">
+                <div className="sm:col-span-2">
+                  <p className="text-xs sm:text-sm font-medium mb-2">Requisitos de la contraseña:</p>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
                     {Object.entries(passwordValidation).map(([key, value]) => (
                       <li key={key} className="flex items-center">
                         {value ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />
+                          <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 mr-2" />
                         ) : (
-                          <XCircle className="h-4 w-4 text-red-500 mr-2" />
+                          <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 mr-2" />
                         )}
                         {key === 'length' ? 'Al menos 8 caracteres' :
                          key === 'upperCase' ? 'Una letra mayúscula' :
@@ -193,33 +198,33 @@ export default function Register() {
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
                     Acepto los{' '}
-                    <Link href="/terms" className="text-primary hover:underline">
+                    <Link to="/Terminosycondiciones" className="text-primary hover:underline">
                       términos y condiciones
                     </Link>
-                  </label>
+                  </label> 
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={!acceptTerms}>Registrarse</Button>
+              <Button type="submit" className="w-full">Registrarse</Button>
             </form>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               ¿Ya tienes una cuenta? <a href="/login" className="text-primary hover:underline">Inicia Sesión</a>
             </p>
           </CardFooter>
         </Card>
 
         {showSuccess && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <Card className="w-96">
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 px-4 sm:px-0">
+            <Card className="w-full max-w-xs sm:max-w-sm">
               <CardHeader>
-                <CardTitle>¡Registro Exitoso!</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">¡Registro Exitoso!</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>El usuario ha sido registrado con éxito.</p>
+                <p className="text-sm sm:text-base">El usuario ha sido registrado con éxito.</p>
               </CardContent>
               <CardFooter>
-                <Button onClick={() => setShowSuccess(false)} className="w-full">Cerrar</Button>
+                <Button onClick={() => setShowSuccess(false)} className="w-full text-sm sm:text-base">Cerrar</Button>
               </CardFooter>
             </Card>
           </div>

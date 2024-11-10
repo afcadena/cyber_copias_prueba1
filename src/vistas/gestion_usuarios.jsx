@@ -94,54 +94,56 @@ export default function GestionUsuarios() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto px-4 py-6 space-y-6">
       <Card className="shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-gray-50">
-          <CardTitle className="text-2xl font-bold text-gray-800">Gestión de Usuarios</CardTitle>
+        <CardHeader className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0 pb-2 bg-gray-50">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-gray-800">Gestión de Usuarios</CardTitle>
           <UserCog className="h-6 w-6 text-gray-600" />
         </CardHeader>
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 mb-6">
-            <div className="flex items-center space-x-2 w-full md:w-auto">
+          <div className="flex flex-col space-y-2 mb-6">
+            <div className="flex items-center space-x-2 w-full">
               <Search className="h-5 w-5 text-gray-400" />
               <Input
                 placeholder="Buscar usuarios..."
                 value={searchTerm}
                 onChange={handleSearch}
-                className="max-w-sm border-gray-300 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                className="w-full border-gray-300 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
               />
             </div>
-            <Select onValueChange={handleRoleFilter} defaultValue="all">
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Filtrar por rol" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los roles</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="cliente">Cliente</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select onValueChange={handleStatusFilter} defaultValue="all">
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Filtrar por estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="Active">Activo</SelectItem>
-                <SelectItem value="Blocked">Bloqueado</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <Select onValueChange={handleRoleFilter} defaultValue="all">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Filtrar por rol" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los roles</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="cliente">Cliente</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select onValueChange={handleStatusFilter} defaultValue="all">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="Active">Activo</SelectItem>
+                  <SelectItem value="Blocked">Bloqueado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           {currentUsers.length > 0 ? (
-            <ScrollArea className="h-[600px] rounded-md border">
+            <ScrollArea className="h-[400px] sm:h-[600px] rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">
                     <TableHead className="font-semibold text-gray-600">Usuario</TableHead>
-                    <TableHead className="font-semibold text-gray-600">Email</TableHead>
+                    <TableHead className="font-semibold text-gray-600 hidden sm:table-cell">Email</TableHead>
                     <TableHead className="font-semibold text-gray-600">Rol</TableHead>
                     <TableHead className="font-semibold text-gray-600">Estado</TableHead>
-                    <TableHead className="font-semibold text-gray-600">Última Conexión</TableHead>
+                    <TableHead className="font-semibold text-gray-600 hidden md:table-cell">Última Conexión</TableHead>
                     <TableHead className="font-semibold text-gray-600">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -154,10 +156,10 @@ export default function GestionUsuarios() {
                             <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${user.name}`} />
                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                           </Avatar>
-                          <span>{user.name}</span>
+                          <span className="hidden sm:inline">{user.name}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{user.email}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{user.email}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="capitalize">
                           {user.role}
@@ -168,7 +170,7 @@ export default function GestionUsuarios() {
                           {user.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{new Date().toLocaleDateString()}</TableCell>
+                      <TableCell className="hidden md:table-cell">{new Date().toLocaleDateString()}</TableCell>
                       <TableCell>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
@@ -178,9 +180,9 @@ export default function GestionUsuarios() {
                               onClick={() => setUserToBlock(user)}
                             >
                               {user.status === 'Active' ? (
-                                <><Lock className="h-4 w-4 mr-1" /> Bloquear</>
+                                <><Lock className="h-4 w-4 sm:mr-1" /> <span className="hidden sm:inline">Inhabilitar</span></>
                               ) : (
-                                <><Unlock className="h-4 w-4 mr-1" /> Desbloquear</>
+                                <><Unlock className="h-4 w-4 sm:mr-1" /> <span className="hidden sm:inline">Habilitar</span></>
                               )}
                             </Button>
                           </AlertDialogTrigger>
@@ -212,7 +214,7 @@ export default function GestionUsuarios() {
           ) : (
             <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-md">No hay usuarios para mostrar.</div>
           )}
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-2 sm:space-y-0">
             <p className="text-sm text-gray-600">
               Mostrando {indexOfFirstUser + 1}-{Math.min(indexOfLastUser, filteredUsers.length)} de {filteredUsers.length} usuarios
             </p>
