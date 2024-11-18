@@ -18,7 +18,7 @@ import {
 import { useCrudContextForms } from "../context/CrudContextForms";
 import { useCart } from "../context/CartContext";
 
-export default function HeaderCliente() {
+export default function headercliente() {
   const [searchTerm, setSearchTerm] = useState("");
   const [allProducts, setAllProducts] = useState([]);
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);

@@ -11,7 +11,7 @@ import { SearchIcon, ShoppingCartIcon, StarIcon, FilterIcon } from 'lucide-react
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import Header from "./header";
-import HeaderCliente from "./headercli";
+import headercliente from "./headercli";
 import Footer from "./footer";
 
 import { useCrudContextForms } from "../context/CrudContextForms";
@@ -124,7 +124,7 @@ export default function Catalog() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {currentUser ? <HeaderCliente /> : <Header />}
+      {currentUser ? <headercliente /> : <Header />}
       
       <div className="flex-1 flex flex-col md:flex-row bg-gray-100">
         <aside className="hidden md:block md:w-64 md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:overflow-y-auto bg-white p-6">
