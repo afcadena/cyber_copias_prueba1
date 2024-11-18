@@ -19,7 +19,7 @@ app.use(express.json());
 
 // Configurar CORS
 app.use(cors({
-  origin: 'http://localhost:5173', // Asegúrate de que este sea el origen de tu frontend
+  origin: 'https://cybercopias.vercel.app/', // Asegúrate de que este sea el origen de tu frontend
   credentials: true, // Si necesitas enviar cookies o credenciales
 }));
 
