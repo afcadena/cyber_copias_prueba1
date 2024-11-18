@@ -6,7 +6,7 @@ import { PORT, MONGODB_URI } from './config.js';
 import cors from "cors";
 app.use(
   cors({
-    origin: "https://cybercopias.vercel.app/", // Cambia por la URL de tu frontend
+    origin: "https://cybercopias-afcadenas-projects.vercel.app", // Cambia por la URL de tu frontend
   })
 );
 
