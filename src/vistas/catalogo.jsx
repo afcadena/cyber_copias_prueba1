@@ -11,7 +11,7 @@ import { SearchIcon, ShoppingCartIcon, StarIcon, FilterIcon } from 'lucide-react
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import Header from "./header";
-import HeaderCliente from "./headerCli";
+import HeaderCliente from "./headercli";
 import Footer from "./footer";
 
 import { useCrudContextForms } from "../context/CrudContextForms";
