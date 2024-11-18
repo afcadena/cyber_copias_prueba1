@@ -20,7 +20,7 @@ import heroImage3 from '../assets/images/hero3.jpg';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
-const API_URL = "http://localhost:4000/api";
+const API_URL = "https://cyber-copias-final.onrender.com/api";
 
 const HomePage = () => {
   const categories = [

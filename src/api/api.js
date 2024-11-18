@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:4000/api', // URL base de tu backend
+  baseURL: 'https://cyber-copias-final.onrender.com/api', // URL base de tu backend
 });
 
 // Agregar un interceptor para incluir el token en todas las peticiones

@@ -76,7 +76,7 @@ const CrudProvider = ({ children }) => {
       }
 
       const response = await axios.patch(
-        `http://localhost:4000/api/auth/users/${userId}`,
+        `https://cyber-copias-final.onrender.com/api/auth/users/${userId}`,
         userData,
         {
           headers: {

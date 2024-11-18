@@ -84,7 +84,7 @@ export default function Inventory() {
     formData.append('image', file);
   
     try {
-      const response = await fetch('http://localhost:4000/api/products/upload', {
+      const response = await fetch('https://cyber-copias-final.onrender.com/api/products/upload', {
         method: 'POST',
         body: formData,
       });
@@ -124,7 +124,7 @@ export default function Inventory() {
         status: parseInt(newProduct.stock) < 5 ? "low" : "active"
       };
   
-      const response = await fetch('http://localhost:4000/api/products', {
+      const response = await fetch('https://cyber-copias-final.onrender.com/api/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

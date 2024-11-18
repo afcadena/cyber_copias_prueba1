@@ -31,7 +31,7 @@ export default function GestionVentas() {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/ventas')
+    fetch('https://cyber-copias-final.onrender.com/api/ventas')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -135,7 +135,7 @@ export default function GestionVentas() {
     };
     
     try {
-      const response = await fetch('http://localhost:4000/api/ventas', {
+      const response = await fetch('https://cyber-copias-final.onrender.com/api/ventas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -303,7 +303,7 @@ const OrdersContent = () => {
     const fetchPedidos = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get('http://localhost:4000/api/pedidos');
+        const response = await axios.get('https://cyber-copias-final.onrender.com/api/pedidos');
         setPedidos(response.data);
       } catch (error) {
         console.error("Error al obtener los pedidos:", error);
