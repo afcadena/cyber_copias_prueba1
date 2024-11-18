@@ -3,6 +3,13 @@ import app from './app.js';
 import mongoose from 'mongoose';
 import { PORT, MONGODB_URI } from './config.js';
 
+import cors from "cors";
+app.use(
+  cors({
+    origin: "https://cybercopias.vercel.app/", // Cambia por la URL de tu frontend
+  })
+);
+
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('MongoDB is connected');
