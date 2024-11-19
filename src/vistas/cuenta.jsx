@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/accordion";
 import Footer from "./footer";
 import { useCrudContextForms } from '../context/CrudContextForms';
-import headercli from './headercli';
+import HeaderCli from './headercli';
 import axios from 'axios';
 import { useProducts } from "../context/CrudContextInventario";
 
@@ -416,7 +416,7 @@ const CuentaContent = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <headercli />
+      <HeaderCli />
       <main className="flex-grow container mx-auto py-6 px-4">
         <div className="flex flex-col md:flex-row md:space-x-6">
           <div className="md:w-1/3 mb-6 md:mb-0">

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StarIcon, ShoppingCartIcon, ImageIcon } from 'lucide-react';
 import Header from "./header";
-import headercliente from "./headercli";
+import HeaderCliente from "./headercli";
 import Footer from "./footer";
 import { useCart } from '../context/CartContext';
 import { useCrudContextForms } from "../context/CrudContextForms";
@@ -74,7 +74,7 @@ export default function ProductDetail() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {currentUser ? <headercliente /> : <Header />}
+      {currentUser ? <HeaderCliente /> : <Header />}
       <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {error ? (
           <div className="rounded-lg bg-red-50 p-4 text-red-500">{error}</div>
