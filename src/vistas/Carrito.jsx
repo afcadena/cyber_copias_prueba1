@@ -285,7 +285,7 @@ export default function CarritoDeCompras() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-between items-center">
-              <p className="font-semibold">Total</p>
+              <p className="font-semibold">Total </p>
               <p className="font-semibold">$ {total.toLocaleString('es-CO')}</p>
             </CardFooter>
             <div className="p-4">
