@@ -19,7 +19,7 @@ app.use(express.json());
 
 // Configurar CORS
 app.use(cors({
-  origin: 'https://cybercopias-afcadenas-projects.vercel.app', // Asegúrate de que este sea el origen de tu frontend
+  origin: 'https://cyber-copias-prueba1-afcadenas-projects.vercel.app', // Asegúrate de que este sea el origen de tu frontend
   credentials: true, // Si necesitas enviar cookies o credenciales
 }));
 
