@@ -31,7 +31,7 @@ export default function GestionVentas() {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
   useEffect(() => {
-    fetch('https://cyber-copias-final.onrender.com/api/ventas')
+    fetch('https://cyber-copias-prueba1.onrender.com//api/ventas')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -135,7 +135,7 @@ export default function GestionVentas() {
     };
     
     try {
-      const response = await fetch('https://cyber-copias-final.onrender.com/api/ventas', {
+      const response = await fetch('https://cyber-copias-prueba1.onrender.com//api/ventas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

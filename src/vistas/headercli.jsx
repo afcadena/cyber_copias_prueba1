@@ -38,7 +38,7 @@ export default function HeaderCliente() {
   const isHomeCli = location.pathname === "/homecli";
 
   useEffect(() => {
-    fetch("https://cyber-copias-final.onrender.com/api/products")
+    fetch("https://cyber-copias-prueba1.onrender.com//api/products")
       .then(response => response.json())
       .then(data => {
         setAllProducts(data);

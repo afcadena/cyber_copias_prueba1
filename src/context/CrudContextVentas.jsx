@@ -52,7 +52,7 @@ export function CrudProviderVentas({ children }) {
 
   const deleteData = async (id) => {
     try {
-      const response = await fetch(`https://cyber-copias-final.onrender.com/api/ventas/${id}`, {
+      const response = await fetch(`https://cyber-copias-prueba1.onrender.com//api/ventas/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

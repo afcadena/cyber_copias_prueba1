@@ -122,7 +122,7 @@ export default function CarritoDeCompras() {
             if (newStock < 0) {
                 throw new Error(`Stock insuficiente para el producto: ${product.name}`);
             }
-            return axios.put(`https://cyber-copias-final.onrender.com/api/products/${product._id}`, {
+            return axios.put(`https://cyber-copias-prueba1.onrender.com//api/products/${product._id}`, {
                 stock: newStock,
             });
         });
